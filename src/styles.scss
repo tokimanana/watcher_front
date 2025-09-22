@@ -1,4 +1,172 @@
-/* You can add global styles to this file, and also import other style files */
+// ====================================
+// CLAUDE BROWN THEME - DOCUMENTATION COMPLÈTE
+// ====================================
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+// 🎨 PALETTE DE COULEURS PRINCIPALE
+$claude-brown: #8B4513;        // Brun principal (boutons primary)
+$claude-brown-dark: #654321;   // Brun foncé (gradients, hover)
+$claude-accent: #CD853F;       // Accent doré (boutons secondary)
+$claude-bg: #FDF5E6;           // Background principal
+$claude-text: #2F1B14;         // Texte principal
+
+// 🌍 STYLES GLOBAUX (s'appliquent partout)
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  // Gradient subtil pour donner de la profondeur
+  background: linear-gradient(135deg, #FDF5E6 0%, #F5E6D3 100%);
+  color: $claude-text;
+}
+
+// 🔘 BOUTONS MATERIAL ANGULAR
+// Utilise: <button mat-raised-button color="primary">Mon bouton</button>
+button[mat-raised-button] {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important; // Animation smooth
+
+  // BOUTON PRIMARY (marron principal)
+  // Usage: color="primary"
+  &[color="primary"] {
+    background: linear-gradient(145deg, $claude-brown, $claude-brown-dark) !important;
+    color: white !important;
+    border: none !important;
+    // 👇 OMBRAGE QUI MANQUAIT - Profondeur réaliste
+    box-shadow: 0 4px 8px rgba(139, 69, 19, 0.25),
+                0 2px 4px rgba(139, 69, 19, 0.15) !important;
+
+    &:hover {
+      background: linear-gradient(145deg, #A0522D, $claude-brown) !important;
+      transform: translateY(-2px) !important;
+      // 👇 OMBRAGE HOVER - Plus prononcé
+      box-shadow: 0 8px 16px rgba(139, 69, 19, 0.3),
+                  0 4px 8px rgba(139, 69, 19, 0.2) !important;
+    }
+  }
+
+  // BOUTON ACCENT (doré)
+  // Usage: color="accent"
+  &[color="accent"] {
+    background: linear-gradient(145deg, $claude-accent, #B8860B) !important;
+    color: white !important;
+    border: none !important;
+    // 👇 OMBRAGE DORÉ
+    box-shadow: 0 4px 8px rgba(205, 133, 63, 0.25),
+                0 2px 4px rgba(205, 133, 63, 0.15) !important;
+
+    &:hover {
+      background: linear-gradient(145deg, #DAA520, $claude-accent) !important;
+      transform: translateY(-2px) !important;
+      // 👇 OMBRAGE HOVER DORÉ
+      box-shadow: 0 8px 16px rgba(205, 133, 63, 0.3),
+                  0 4px 8px rgba(205, 133, 63, 0.2) !important;
+    }
+  }
+}
+
+// 🏷️ BADGES DE DIFFICULTÉ
+// Usage: <span class="difficulty-badge beginner">Beginner</span>
+.difficulty-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  color: white !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 2px;
+
+  // BEGINNER - Vert sage (apaisant)
+  &.beginner {
+    background: linear-gradient(145deg, #8FBC8F, #6B8E6B) !important;
+    box-shadow: 0 2px 6px rgba(143, 188, 143, 0.25) !important;
+  }
+
+  // INTERMEDIATE - Marron chocolat (harmonie)
+  &.intermediate {
+    background: linear-gradient(145deg, #D2691E, #A0522D) !important;
+    box-shadow: 0 2px 6px rgba(210, 105, 30, 0.25) !important;
+  }
+
+  // ADVANCED - Marron foncé (cohérence avec primary)
+  &.advanced {
+    background: linear-gradient(145deg, $claude-brown, $claude-brown-dark) !important;
+    box-shadow: 0 2px 6px rgba(139, 69, 19, 0.25) !important;
+  }
+}
+
+// 🏢 BADGES DE PLATEFORME
+// Usage: <span class="platform-badge udemy">Udemy</span>
+.platform-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.udemy {
+    background: linear-gradient(145deg, #A0522D, $claude-brown) !important;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(160, 82, 45, 0.2) !important;
+  }
+  &.youtube {
+    background: linear-gradient(145deg, $claude-accent, #B8860B) !important;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(205, 133, 63, 0.2) !important;
+  }
+  &.freecodecamp {
+    background: linear-gradient(145deg, #708090, #556B2F) !important;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(112, 128, 144, 0.2) !important;
+  }
+  &.coursera {
+    background: linear-gradient(145deg, #8FBC8F, #6B8E6B) !important;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(143, 188, 143, 0.2) !important;
+  }
+}
+
+// 🃏 CARDS MATERIAL
+// Usage: <mat-card>Contenu</mat-card>
+.mat-mdc-card {
+  background: white !important;
+  border-radius: 12px !important;
+  // 👇 OMBRAGE CARD - Élévation subtile
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.08),
+              0 2px 8px rgba(139, 69, 19, 0.05) !important;
+  border: 1px solid rgba(139, 69, 19, 0.1) !important;
+  transition: all 0.3s ease !important;
+
+  &:hover {
+    // 👇 OMBRAGE HOVER CARD
+    box-shadow: 0 8px 24px rgba(139, 69, 19, 0.12),
+                0 4px 16px rgba(139, 69, 19, 0.08) !important;
+    transform: translateY(-1px) !important;
+  }
+}
+
+// ⭐ ÉTOILES DE NOTATION
+// Usage: <span class="star-rating"><span class="star filled"></span></span>
+.star-rating .star {
+  &.filled {
+    color: #DAA520 !important; // Or antique - doux pour les yeux
+    filter: drop-shadow(0 1px 2px rgba(218, 165, 32, 0.3));
+  }
+  &.empty {
+    color: rgba(139, 69, 19, 0.2) !important;
+  }
+}
+
+// 🔧 CLASSES UTILITAIRES
+// Usage: <div class="primary-bg">Fond marron</div>
+.primary-bg { background: linear-gradient(145deg, $claude-brown, $claude-brown-dark) !important; }
+.accent-bg { background: linear-gradient(145deg, $claude-accent, #B8860B) !important; }
+.text-brown { color: $claude-brown !important; }
+.text-muted { color: #8B7355 !important; }
