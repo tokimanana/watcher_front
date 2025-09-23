@@ -44,4 +44,6 @@ export class AppComponent implements OnInit {
       },
     });
   }
+
+  Math = Math; 
 }
