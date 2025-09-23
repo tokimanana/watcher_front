@@ -1,2 +1,32 @@
 <app-theme-showcase></app-theme-showcase>
+
+<!-- Test for MockDataService -->
+<div class="mock-data-test">
+  <h2>Testing Mock Data Service</h2>
+
+  <div *ngIf="isLoading">Loading courses...</div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && courses.length > 0" class="courses-grid">
+    <mat-card *ngFor="let course of courses" class="course-card">
+      <mat-card-header>
+        <mat-card-title>{{ course.title }}</mat-card-title>
+        <mat-card-subtitle>{{ course.instructor }} | {{ course.platform }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p><strong>Rating:</strong> {{ course.rating }}/5 ({{ course.reviewCount }} reviews)</p>
+        <p><strong>Price:</strong> {{ course.price === 0 ? 'Free' : (course.price | currency:course.currency) }}</p>
+        <p><strong>Technologies:</strong> {{ course.technologies.join(', ') }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="!isLoading && courses.length === 0" class="no-courses">
+    No courses found.
+  </div>
+</div>
+
 <router-outlet></router-outlet>
