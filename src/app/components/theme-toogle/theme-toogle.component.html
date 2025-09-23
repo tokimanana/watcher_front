@@ -1,0 +1,11 @@
+<button
+  mat-icon-button
+  [matTooltip]="tooltipText"
+  (click)="toggleTheme()"
+  class="theme-toggle"
+  [attr.aria-label]="ariaLabel"
+>
+  <mat-icon>{{
+    currentTheme === "light" ? "dark_mode" : "light_mode"
+  }}</mat-icon>
+</button>
