@@ -15,31 +15,8 @@ import { ThemeService, Theme } from '../../services/theme.service';
     MatIconModule,
     MatTooltipModule
   ],
-  template: `
-    <button 
-      mat-icon-button 
-      [matTooltip]="tooltipText"
-      (click)="toggleTheme()"
-      class="theme-toggle"
-      [attr.aria-label]="ariaLabel">
-      <mat-icon>{{ currentTheme === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
-    </button>
-  `,
-  styles: [`
-    .theme-toggle {
-      transition: all var(--transition-normal);
-      
-      &:hover {
-        background-color: rgba(139, 69, 19, 0.1);
-        transform: scale(1.1);
-      }
-      
-      mat-icon {
-        color: var(--color-primary);
-        transition: color var(--transition-fast);
-      }
-    }
-  `]
+  templateUrl: './theme-toogle.component.html',
+  styleUrl: './theme-toogle.component.scss'
 })
 export class ThemeToggleComponent implements OnInit, OnDestroy {
   currentTheme: Theme = 'light';

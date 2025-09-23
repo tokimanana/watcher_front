@@ -1,0 +1,13 @@
+.theme-toggle {
+  transition: all var(--transition-normal);
+
+  &:hover {
+    background-color: rgba(139, 69, 19, 0.1);
+    transform: scale(1.1);
+  }
+
+  mat-icon {
+    color: var(--color-primary);
+    transition: color var(--transition-fast);
+  }
+}
