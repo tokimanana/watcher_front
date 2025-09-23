@@ -1,0 +1,354 @@
+// ====================================
+// COMPONENT STYLES
+// ====================================
+
+// Angular Material Button Overrides
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button {
+  @include button-base;
+  
+  &.mat-primary {
+    @include button-primary;
+  }
+  
+  &.mat-accent {
+    @include button-secondary;
+  }
+  
+  &.mat-warn {
+    background: linear-gradient(145deg, var(--color-error), var(--color-error-dark));
+    color: var(--color-text-inverse);
+    box-shadow: var(--shadow-md);
+    
+    &:hover:not(:disabled) {
+      background: linear-gradient(145deg, #DC143C, var(--color-error));
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+  }
+  
+  // Disabled state for all buttons
+  &:disabled,
+  &[disabled] {
+    background: var(--color-surface-variant) !important;
+    color: var(--color-text-muted) !important;
+    box-shadow: var(--shadow-sm) !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+    transform: none !important;
+    border: 1px solid rgba(139, 69, 19, 0.2) !important;
+    
+    // Override any gradient backgrounds
+    background-image: none !important;
+  }
+}
+
+// Specific overrides for raised buttons
+.mat-mdc-raised-button {
+  &:disabled,
+  &[disabled] {
+    background: var(--color-surface-variant) !important;
+    color: var(--color-text-muted) !important;
+    box-shadow: var(--shadow-sm) !important;
+    border: 1px solid rgba(139, 69, 19, 0.2) !important;
+    opacity: 0.7 !important;
+  }
+}
+
+.mat-mdc-outlined-button {
+  &.mat-primary {
+    @include button-outline;
+  }
+}
+
+// Angular Material Card Overrides
+.mat-mdc-card {
+  @include card-base;
+  
+  &.interactive {
+    @include card-hover;
+    cursor: pointer;
+  }
+  
+  .mat-mdc-card-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid rgba(139, 69, 19, 0.1);
+    
+    .mat-mdc-card-title {
+      @include heading-3;
+      margin: 0;
+    }
+    
+    .mat-mdc-card-subtitle {
+      @include small-text;
+      margin: var(--spacing-xs) 0 0 0;
+    }
+  }
+  
+  .mat-mdc-card-content {
+    padding: var(--spacing-lg);
+    
+    &:first-child {
+      padding-top: var(--spacing-lg);
+    }
+    
+    &:last-child {
+      padding-bottom: var(--spacing-lg);
+    }
+  }
+  
+  .mat-mdc-card-actions {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid rgba(139, 69, 19, 0.1);
+    
+    .mat-mdc-button,
+    .mat-mdc-raised-button {
+      margin-right: var(--spacing-sm);
+      
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+}
+
+// Custom Badge Components
+.badge {
+  @include badge-base;
+  
+  &.badge-primary {
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+  }
+  
+  &.badge-secondary {
+    background: var(--color-secondary);
+    color: var(--color-text-inverse);
+  }
+  
+  &.badge-success {
+    background: var(--color-success);
+    color: var(--color-text-inverse);
+  }
+  
+  &.badge-warning {
+    background: var(--color-warning);
+    color: var(--color-text-inverse);
+  }
+  
+  &.badge-error {
+    background: var(--color-error);
+    color: var(--color-text-inverse);
+  }
+  
+  &.badge-info {
+    background: var(--color-info);
+    color: var(--color-text-inverse);
+  }
+}
+
+// Difficulty Badges
+.difficulty-badge {
+  @include badge-base;
+  
+  &.beginner {
+    @include badge-difficulty(var(--color-success), var(--color-success-dark));
+  }
+  
+  &.intermediate {
+    @include badge-difficulty(var(--color-warning), var(--color-warning-dark));
+  }
+  
+  &.advanced {
+    @include badge-difficulty(var(--color-primary), var(--color-primary-dark));
+  }
+  
+  &.expert {
+    @include badge-difficulty(var(--color-error), var(--color-error-dark));
+  }
+}
+
+// Platform Badges
+.platform-badge {
+  @include badge-base;
+  
+  &.udemy {
+    @include badge-difficulty(var(--color-primary-light), var(--color-primary));
+  }
+  
+  &.youtube {
+    @include badge-difficulty(var(--color-secondary), var(--color-secondary-dark));
+  }
+  
+  &.freecodecamp {
+    @include badge-difficulty(var(--color-info), var(--color-info-dark));
+  }
+  
+  &.coursera {
+    @include badge-difficulty(var(--color-success), var(--color-success-dark));
+  }
+  
+  &.edx {
+    @include badge-difficulty(var(--color-error), var(--color-error-dark));
+  }
+}
+
+// Star Rating Component
+.star-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  
+  .star {
+    font-size: var(--font-size-lg);
+    transition: color var(--transition-fast);
+    
+    &.filled {
+      color: var(--color-secondary-light);
+      filter: drop-shadow(0 1px 2px rgba(218, 165, 32, 0.3));
+    }
+    
+    &.empty {
+      color: var(--color-text-muted);
+    }
+    
+    &.half {
+      background: linear-gradient(90deg, var(--color-secondary-light) 50%, var(--color-text-muted) 50%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  }
+  
+  .rating-text {
+    @include small-text;
+    margin-left: var(--spacing-sm);
+  }
+}
+
+// Loading Spinner
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-text-muted);
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  animation: spin 1s ease-in-out infinite;
+  
+  &.spinner-lg {
+    width: 40px;
+    height: 40px;
+    border-width: 4px;
+  }
+  
+  &.spinner-sm {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Alert Component
+.alert {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  margin-bottom: var(--spacing-md);
+  
+  &.alert-success {
+    background-color: rgba(143, 188, 143, 0.1);
+    border-color: var(--color-success);
+    color: var(--color-success-dark);
+  }
+  
+  &.alert-warning {
+    background-color: rgba(210, 105, 30, 0.1);
+    border-color: var(--color-warning);
+    color: var(--color-warning-dark);
+  }
+  
+  &.alert-error {
+    background-color: rgba(205, 92, 92, 0.1);
+    border-color: var(--color-error);
+    color: var(--color-error-dark);
+  }
+  
+  &.alert-info {
+    background-color: rgba(112, 128, 144, 0.1);
+    border-color: var(--color-info);
+    color: var(--color-info-dark);
+  }
+}
+
+// Progress Bar
+.progress {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-surface-variant);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-full);
+    transition: width var(--transition-normal);
+  }
+  
+  &.progress-sm {
+    height: 4px;
+  }
+  
+  &.progress-lg {
+    height: 12px;
+  }
+}
+
+// Tooltip
+.tooltip {
+  position: relative;
+  display: inline-block;
+  
+  .tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    max-width: 200px;
+    background-color: var(--color-text-primary);
+    color: var(--color-text-inverse);
+    text-align: center;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    
+    &::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: var(--color-text-primary) transparent transparent transparent;
+    }
+  }
+  
+  &:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+  }
+}

@@ -1,172 +1,119 @@
 // ====================================
-// CLAUDE BROWN THEME - DOCUMENTATION COMPLÈTE
+// MAIN STYLES - WATCHER FRONT
 // ====================================
 
-// 🎨 PALETTE DE COULEURS PRINCIPALE
-$claude-brown: #8B4513;        // Brun principal (boutons primary)
-$claude-brown-dark: #654321;   // Brun foncé (gradients, hover)
-$claude-accent: #CD853F;       // Accent doré (boutons secondary)
-$claude-bg: #FDF5E6;           // Background principal
-$claude-text: #2F1B14;         // Texte principal
+// Import theme files in correct order
+@import 'styles/variables';
+@import 'styles/mixins';
+@import 'styles/base';
+@import 'styles/components';
+@import 'styles/utilities';
 
-// 🌍 STYLES GLOBAUX (s'appliquent partout)
-html, body {
-  height: 100%;
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-}
+// ====================================
+// THEME DOCUMENTATION
+// ====================================
 
-body {
-  // Gradient subtil pour donner de la profondeur
-  background: linear-gradient(135deg, #FDF5E6 0%, #F5E6D3 100%);
-  color: $claude-text;
-}
+/*
+THEME STRUCTURE:
 
-// 🔘 BOUTONS MATERIAL ANGULAR
-// Utilise: <button mat-raised-button color="primary">Mon bouton</button>
-button[mat-raised-button] {
-  border-radius: 8px !important;
-  font-weight: 600 !important;
-  text-transform: none !important;
-  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important; // Animation smooth
+1. _variables.scss - CSS custom properties and SCSS variables
+   - Color palette with CSS custom properties
+   - Dark theme support
+   - Typography, spacing, shadows, transitions
+   - Backward compatibility with SCSS variables
 
-  // BOUTON PRIMARY (marron principal)
-  // Usage: color="primary"
-  &[color="primary"] {
-    background: linear-gradient(145deg, $claude-brown, $claude-brown-dark) !important;
-    color: white !important;
-    border: none !important;
-    // 👇 OMBRAGE QUI MANQUAIT - Profondeur réaliste
-    box-shadow: 0 4px 8px rgba(139, 69, 19, 0.25),
-                0 2px 4px rgba(139, 69, 19, 0.15) !important;
+2. _mixins.scss - Reusable SCSS mixins
+   - Button mixins (primary, secondary, outline)
+   - Card mixins (base, hover, interactive)
+   - Badge mixins
+   - Typography mixins
+   - Layout mixins (container, flex utilities)
+   - Responsive mixins
+   - Animation mixins
 
-    &:hover {
-      background: linear-gradient(145deg, #A0522D, $claude-brown) !important;
-      transform: translateY(-2px) !important;
-      // 👇 OMBRAGE HOVER - Plus prononcé
-      box-shadow: 0 8px 16px rgba(139, 69, 19, 0.3),
-                  0 4px 8px rgba(139, 69, 19, 0.2) !important;
-    }
-  }
+3. _base.scss - Base styles and resets
+   - CSS reset and normalization
+   - Typography base styles
+   - Form elements
+   - Global utilities
 
-  // BOUTON ACCENT (doré)
-  // Usage: color="accent"
-  &[color="accent"] {
-    background: linear-gradient(145deg, $claude-accent, #B8860B) !important;
-    color: white !important;
-    border: none !important;
-    // 👇 OMBRAGE DORÉ
-    box-shadow: 0 4px 8px rgba(205, 133, 63, 0.25),
-                0 2px 4px rgba(205, 133, 63, 0.15) !important;
+4. _components.scss - Component-specific styles
+   - Angular Material overrides
+   - Custom components (badges, star rating, spinner, etc.)
+   - Alert, progress bar, tooltip components
 
-    &:hover {
-      background: linear-gradient(145deg, #DAA520, $claude-accent) !important;
-      transform: translateY(-2px) !important;
-      // 👇 OMBRAGE HOVER DORÉ
-      box-shadow: 0 8px 16px rgba(205, 133, 63, 0.3),
-                  0 4px 8px rgba(205, 133, 63, 0.2) !important;
-    }
-  }
-}
+5. _utilities.scss - Utility classes
+   - Color utilities
+   - Spacing utilities (margin, padding)
+   - Typography utilities
+   - Flexbox and grid utilities
+   - Layout utilities
 
-// 🏷️ BADGES DE DIFFICULTÉ
-// Usage: <span class="difficulty-badge beginner">Beginner</span>
-.difficulty-badge {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 11px;
-  font-weight: 500;
-  color: white !important;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 2px;
+USAGE EXAMPLES:
 
-  // BEGINNER - Vert sage (apaisant)
-  &.beginner {
-    background: linear-gradient(145deg, #8FBC8F, #6B8E6B) !important;
-    box-shadow: 0 2px 6px rgba(143, 188, 143, 0.25) !important;
-  }
+Buttons:
+<button mat-raised-button color="primary">Primary Button</button>
+<button mat-raised-button color="accent">Secondary Button</button>
+<button mat-outlined-button color="primary">Outline Button</button>
 
-  // INTERMEDIATE - Marron chocolat (harmonie)
-  &.intermediate {
-    background: linear-gradient(145deg, #D2691E, #A0522D) !important;
-    box-shadow: 0 2px 6px rgba(210, 105, 30, 0.25) !important;
-  }
+Cards:
+<mat-card class="interactive">
+  <mat-card-header>
+    <mat-card-title>Card Title</mat-card-title>
+    <mat-card-subtitle>Card Subtitle</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>Card content</mat-card-content>
+  <mat-card-actions>
+    <button mat-button>Action</button>
+  </mat-card-actions>
+</mat-card>
 
-  // ADVANCED - Marron foncé (cohérence avec primary)
-  &.advanced {
-    background: linear-gradient(145deg, $claude-brown, $claude-brown-dark) !important;
-    box-shadow: 0 2px 6px rgba(139, 69, 19, 0.25) !important;
-  }
-}
+Badges:
+<span class="difficulty-badge beginner">Beginner</span>
+<span class="platform-badge udemy">Udemy</span>
+<span class="badge badge-primary">Primary</span>
 
-// 🏢 BADGES DE PLATEFORME
-// Usage: <span class="platform-badge udemy">Udemy</span>
-.platform-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+Star Rating:
+<div class="star-rating">
+  <span class="star filled">★</span>
+  <span class="star filled">★</span>
+  <span class="star empty">★</span>
+  <span class="rating-text">4.5 (123 reviews)</span>
+</div>
 
-  &.udemy {
-    background: linear-gradient(145deg, #A0522D, $claude-brown) !important;
-    color: white !important;
-    box-shadow: 0 2px 4px rgba(160, 82, 45, 0.2) !important;
-  }
-  &.youtube {
-    background: linear-gradient(145deg, $claude-accent, #B8860B) !important;
-    color: white !important;
-    box-shadow: 0 2px 4px rgba(205, 133, 63, 0.2) !important;
-  }
-  &.freecodecamp {
-    background: linear-gradient(145deg, #708090, #556B2F) !important;
-    color: white !important;
-    box-shadow: 0 2px 4px rgba(112, 128, 144, 0.2) !important;
-  }
-  &.coursera {
-    background: linear-gradient(145deg, #8FBC8F, #6B8E6B) !important;
-    color: white !important;
-    box-shadow: 0 2px 4px rgba(143, 188, 143, 0.2) !important;
-  }
-}
+Utility Classes:
+<div class="p-lg mb-md bg-surface rounded-lg shadow-md">
+  <h2 class="text-primary font-semibold mb-sm">Title</h2>
+  <p class="text-secondary">Content</p>
+</div>
 
-// 🃏 CARDS MATERIAL
-// Usage: <mat-card>Contenu</mat-card>
-.mat-mdc-card {
-  background: white !important;
-  border-radius: 12px !important;
-  // 👇 OMBRAGE CARD - Élévation subtile
-  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.08),
-              0 2px 8px rgba(139, 69, 19, 0.05) !important;
-  border: 1px solid rgba(139, 69, 19, 0.1) !important;
-  transition: all 0.3s ease !important;
+Dark Theme:
+Add data-theme="dark" to html element to enable dark theme
 
-  &:hover {
-    // 👇 OMBRAGE HOVER CARD
-    box-shadow: 0 8px 24px rgba(139, 69, 19, 0.12),
-                0 4px 16px rgba(139, 69, 19, 0.08) !important;
-    transform: translateY(-1px) !important;
-  }
-}
+Responsive:
+Use mixins: @include mobile { ... }, @include tablet { ... }, @include desktop { ... }
+Or utility classes: .d-mobile-none, .d-tablet-none, .d-desktop-none
 
-// ⭐ ÉTOILES DE NOTATION
-// Usage: <span class="star-rating"><span class="star filled"></span></span>
-.star-rating .star {
-  &.filled {
-    color: #DAA520 !important; // Or antique - doux pour les yeux
-    filter: drop-shadow(0 1px 2px rgba(218, 165, 32, 0.3));
-  }
-  &.empty {
-    color: rgba(139, 69, 19, 0.2) !important;
-  }
-}
+BEST PRACTICES:
 
-// 🔧 CLASSES UTILITAIRES
-// Usage: <div class="primary-bg">Fond marron</div>
-.primary-bg { background: linear-gradient(145deg, $claude-brown, $claude-brown-dark) !important; }
-.accent-bg { background: linear-gradient(145deg, $claude-accent, #B8860B) !important; }
-.text-brown { color: $claude-brown !important; }
-.text-muted { color: #8B7355 !important; }
+1. Use CSS custom properties for dynamic theming
+2. Use mixins for reusable component styles
+3. Use utility classes for quick styling
+4. Follow BEM methodology for custom components
+5. Use semantic color names (primary, secondary, success, etc.)
+6. Maintain consistent spacing using the spacing scale
+7. Use the provided shadow system for depth
+8. Follow accessibility guidelines (focus states, contrast ratios)
+9. Use the transition system for smooth animations
+10. Test both light and dark themes
+
+CUSTOMIZATION:
+
+To customize the theme:
+1. Modify variables in _variables.scss
+2. Add new mixins in _mixins.scss
+3. Create new components in _components.scss
+4. Add utility classes in _utilities.scss
+
+The theme is designed to be maintainable, scalable, and accessible.
+*/
