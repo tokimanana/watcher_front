@@ -6,7 +6,7 @@ import { Review } from '../models/review.model';
 
 /**
  * Mock Data Service - Provides comprehensive seed data for development
- * 
+ *
  * Features:
  * - 80+ realistic courses from major platforms
  * - Diverse technology stacks and difficulty levels
@@ -615,18 +615,18 @@ export class MockDataService {
       if (filters.platform) {
         filtered = filtered.filter(course => course.platform === filters.platform);
       }
-      
+
       if (filters.difficulty) {
         filtered = filtered.filter(course => course.difficulty === filters.difficulty);
       }
-      
+
       if (filters.priceRange) {
-        filtered = filtered.filter(course => 
-          course.price >= filters.priceRange!.min && 
+        filtered = filtered.filter(course =>
+          course.price >= filters.priceRange!.min &&
           course.price <= filters.priceRange!.max
         );
       }
-      
+
       if (filters.technologies && filters.technologies.length > 0) {
         filtered = filtered.filter(course =>
           filters.technologies!.some(tech =>
@@ -639,6 +639,11 @@ export class MockDataService {
     return of(filtered).pipe(delay(this.API_DELAY.medium));
   }
 
+  getUsers(): Observable<User[]> {
+    // Simule un délai réseau pour plus de réalisme
+    return of(this.users).pipe(delay(this.API_DELAY.fast));
+  }
+
   getReviewsForCourse(courseId: string): Observable<Review[]> {
     const courseReviews = this.reviews
       .filter(r => r.courseId === courseId)
@@ -646,7 +651,7 @@ export class MockDataService {
         ...review,
         user: this.users.find(u => u.id === review.userId)
       }));
-    
+
     return of(courseReviews).pipe(delay(this.API_DELAY.fast));
   }
 
@@ -680,9 +685,9 @@ export class MockDataService {
 
     // Simple recommendation based on user interests
     const recommended = this.courses
-      .filter(course => 
-        course.technologies.some(tech => 
-          user.techInterests.some(interest => 
+      .filter(course =>
+        course.technologies.some(tech =>
+          user.techInterests.some(interest =>
             tech.toLowerCase().includes(interest.toLowerCase()) ||
             interest.toLowerCase().includes(tech.toLowerCase())
           )
@@ -698,7 +703,7 @@ export class MockDataService {
     const popular = [...this.courses]
       .sort((a, b) => b.clickCount - a.clickCount)
       .slice(0, limit);
-    
+
     return of(popular).pipe(delay(this.API_DELAY.medium));
   }
 
@@ -730,7 +735,7 @@ export class MockDataService {
     this.courses.forEach(course => {
       course.technologies.forEach(tech => allTechs.add(tech));
     });
-    
+
     return of(Array.from(allTechs).sort()).pipe(delay(this.API_DELAY.fast));
   }
 
@@ -742,7 +747,7 @@ export class MockDataService {
       createdAt: new Date(),
       updatedAt: new Date()
     };
-    
+
     this.reviews.push(newReview);
     return of(newReview).pipe(delay(this.API_DELAY.medium));
   }
