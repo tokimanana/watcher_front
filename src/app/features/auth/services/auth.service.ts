@@ -10,14 +10,14 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { User } from '../../core/models/user.model';
+import { User } from '../../../core/models/user.model';
 import {
   JwtPayload,
   LoginCredentials,
   RegisterData,
-} from '../../core/models/auth.model';
-import { MockDataService } from '../../core/services/mock-data.service';
-import { AuthResponse } from '../../core/models/auth-response.model';
+} from '../../../core/models/auth.model';
+import { MockDataService } from '../../../core/services/mock-data.service';
+import { AuthResponse } from '../../../core/models/auth-response.model';
 
 @Injectable({
   providedIn: 'root',

@@ -8,7 +8,7 @@ import {
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, filter, take, switchMap, finalize } from 'rxjs/operators';
 import { inject } from '@angular/core';
-import { AuthService } from '../../features/services/auth.service';
+import { AuthService } from '../../features/auth/services/auth.service';
 
 let isRefreshing = false;
 const refreshTokenSubject = new BehaviorSubject<string | null>(null);
@@ -44,7 +44,10 @@ export const authInterceptor: HttpInterceptorFn = (
   );
 };
 
-function addTokenToRequest( request: HttpRequest<unknown>, token: string ): HttpRequest<unknown> {
+function addTokenToRequest(
+  request: HttpRequest<unknown>,
+  token: string
+): HttpRequest<unknown> {
   return request.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`,
@@ -52,7 +55,11 @@ function addTokenToRequest( request: HttpRequest<unknown>, token: string ): Http
   });
 }
 
-function handle401Error( request: HttpRequest<unknown>, next: HttpHandlerFn, authService: AuthService ): Observable<HttpEvent<unknown>> {
+function handle401Error(
+  request: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+  authService: AuthService
+): Observable<HttpEvent<unknown>> {
   if (!isRefreshing) {
     isRefreshing = true;
     refreshTokenSubject.next(null);
