@@ -150,7 +150,7 @@ export class AuthService {
     return decoded.exp < now;
   }
 
-  private getToken(): string | null {
+  getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
@@ -166,7 +166,7 @@ export class AuthService {
     }
   }
 
-  private refreshToken(): Observable<string> {
+  refreshToken(): Observable<string> {
     const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
     if (!refreshToken) {
       return throwError(() => new Error('No refresh token available'));
