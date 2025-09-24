@@ -11,7 +11,7 @@
   cursor: pointer;
   border: none;
   outline: none;
-  
+
   &:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
@@ -23,18 +23,18 @@
   background: linear-gradient(145deg, var(--color-primary), var(--color-primary-dark)) !important;
   color: var(--color-text-inverse) !important;
   box-shadow: var(--shadow-md);
-  
+
   &:hover:not(:disabled) {
     background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary)) !important;
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
   }
-  
+
   &:active:not(:disabled) {
     transform: translateY(0);
     box-shadow: var(--shadow-sm);
   }
-  
+
   &:disabled,
   &[disabled] {
     background: var(--color-surface-variant) !important;
@@ -53,18 +53,18 @@
   background: linear-gradient(145deg, var(--color-secondary), var(--color-secondary-dark)) !important;
   color: var(--color-text-inverse) !important;
   box-shadow: var(--shadow-md);
-  
+
   &:hover:not(:disabled) {
     background: linear-gradient(145deg, var(--color-secondary-light), var(--color-secondary)) !important;
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
   }
-  
+
   &:active:not(:disabled) {
     transform: translateY(0);
     box-shadow: var(--shadow-sm);
   }
-  
+
   &:disabled,
   &[disabled] {
     background: var(--color-surface-variant) !important;
@@ -83,18 +83,18 @@
   background: transparent;
   color: var(--color-primary);
   border: 2px solid var(--color-primary);
-  
+
   &:hover:not(:disabled) {
     background: var(--color-primary);
     color: var(--color-text-inverse);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -103,7 +103,8 @@
 
 // Card Mixins
 @mixin card-base {
-  background: var(--color-surface);
+  background: var(--color-surface) !important;
+  color: var(--color-text-primary);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   border: 1px solid rgba(139, 69, 19, 0.1);

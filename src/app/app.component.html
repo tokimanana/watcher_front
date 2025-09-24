@@ -1,2 +1,89 @@
 <app-theme-showcase></app-theme-showcase>
+
+<!-- Test for MockDataService -->
+<div class="p-xl">
+  <h2 class="text-primary mb-lg font-semibold">Testing Mock Data Service</h2>
+
+  <div *ngIf="isLoading" class="flex justify-center p-xl">
+    <div class="spinner spinner-lg"></div>
+    <span class="text-muted ml-md">Loading courses...</span>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-error mb-lg">
+    <strong>Error!</strong> {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!isLoading && courses.length > 0" class="grid grid-cols-3 gap-lg">
+    <mat-card *ngFor="let course of courses" class="interactive">
+      <mat-card-header>
+        <mat-card-title>{{ course.title }}</mat-card-title>
+        <mat-card-subtitle>
+          <div class="flex items-center gap-sm">
+            <span>{{ course.instructor }}</span>
+            <span class="platform-badge {{ course.platform }}">{{
+              course.platform
+            }}</span>
+          </div>
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <!-- Star Rating -->
+        <div class="star-rating mb-sm">
+          <span
+            class="star"
+            [class.filled]="i < Math.floor(course.rating)"
+            [class.empty]="i >= course.rating"
+            *ngFor="let i of [0, 1, 2, 3, 4]"
+            >★</span
+          >
+          <span class="rating-text"
+            >{{ course.rating }} ({{ course.reviewCount }} reviews)</span
+          >
+        </div>
+
+        <!-- Price -->
+        <p class="mb-sm">
+          <span
+            class="badge"
+            [class.badge-success]="course.price === 0"
+            [class.badge-secondary]="course.price > 0"
+          >
+            {{
+              course.price === 0
+                ? "Free"
+                : (course.price | currency : course.currency)
+            }}
+          </span>
+        </p>
+
+        <!-- Duration and Difficulty -->
+        <div class="flex justify-between mb-sm">
+          <span class="text-secondary">{{ course.duration }}</span>
+          <span class="difficulty-badge {{ course.difficulty }}">{{
+            course.difficulty | titlecase
+          }}</span>
+        </div>
+
+        <!-- Technologies -->
+        <p class="mb-sm text-sm text-secondary">Technologies:</p>
+        <div class="flex flex-wrap gap-xs">
+          <span
+            class="badge badge-primary"
+            *ngFor="let tech of course.technologies"
+            >{{ tech }}</span
+          >
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button color="primary" outlined class="mr-md">View Course</button>
+        <button mat-button color="secondary" outlined>Save</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div *ngIf="!isLoading && courses.length === 0" class="alert alert-info">
+    No courses found. Try adjusting your search criteria.
+  </div>
+</div>
+
 <router-outlet></router-outlet>
