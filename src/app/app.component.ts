@@ -15,13 +15,15 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  private readonly themeService = inject(ThemeService);
+  // private readonly themeService = inject(ThemeService);
   private readonly mockDataService = inject(MockDataService);
 
   title = 'watcher_front';
   courses: Course[] = [];
   isLoading = false;
   errorMessage: string | null = null;
+
+  readonly Math = Math;
 
   constructor() {}
 
@@ -30,12 +32,12 @@ export class AppComponent implements OnInit {
 
     // Test the MockDataService
     this.isLoading = true;
-    this.mockDataService.getCourses(1, 5).subscribe({
+    this.mockDataService.getCourses(1, 12).subscribe({
       next: (response) => {
         this.courses = response.courses;
         this.isLoading = false;
         console.log('Total courses:', response.total);
-        console.log('First 5 courses:', this.courses);
+        console.log('First 12 courses:', this.courses);
       },
       error: (error) => {
         this.errorMessage = 'Error loading courses: ' + error.message;
@@ -45,5 +47,4 @@ export class AppComponent implements OnInit {
     });
   }
 
-  Math = Math; 
 }
