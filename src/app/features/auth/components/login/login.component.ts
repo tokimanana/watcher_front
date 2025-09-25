@@ -11,8 +11,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -20,6 +22,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterLink,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -33,16 +36,19 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly snackBar = inject(MatSnackBar);
 
   hidePassword = signal(true);
   isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
 
   loginForm: FormGroup;
 
   constructor() {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      email: ['john.doe@example.com', [Validators.required, Validators.email]],
+      password: ['password', [Validators.required, Validators.minLength(6)]],
     });
   }
 
@@ -51,24 +57,37 @@ export class LoginComponent {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.loginForm.invalid) return;
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
 
     this.isLoading.set(true);
+    this.errorMessage.set(null);
 
     try {
-      const { email, password } = this.loginForm.value;
-      // Implement your login logic here
-      console.log('Login attempt:', { email });
+      const credentials = this.loginForm.value;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Navigate on success
-      this.router.navigate(['/home']);
+      this.authService.login(credentials).subscribe({
+        next: (user) => {
+          this.snackBar.open(`Welcome back, ${user.name}!`, 'Close', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top'
+          });
+          this.router.navigate(['/home']);
+        },
+        error: (error) => {
+          this.errorMessage.set(error.message || 'Login failed. Please try again.');
+          this.isLoading.set(false);
+        },
+        complete: () => {
+          this.isLoading.set(false);
+        }
+      });
     } catch (error) {
       console.error('Login error:', error);
-      // Handle error (show toast, etc.)
-    } finally {
+      this.errorMessage.set('An unexpected error occurred. Please try again.');
       this.isLoading.set(false);
     }
   }
