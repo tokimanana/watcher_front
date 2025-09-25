@@ -1,22 +1,91 @@
+<!-- app.component.html -->
 <div class="app-container">
   <header>
-    <nav>
-      <div class="nav-left">
-        <a routerLink="/home">Home</a>
-        <a routerLink="/auth/login">Login</a>
-        <a routerLink="/auth/register">Register</a>
+    <nav class="main-nav">
+      <div class="nav-brand">
+        <a routerLink="/home" class="brand-link">
+          <mat-icon class="brand-icon">school</mat-icon>
+          <span class="brand-text">Course Watcher</span>
+        </a>
       </div>
-      <div class="nav-right">
+
+      <div class="nav-links">
+        <a
+          routerLink="/home"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: true}"
+          class="nav-link"
+        >
+          <mat-icon>home</mat-icon>
+          <span>Home</span>
+        </a>
+
+        <a
+          routerLink="/courses"
+          routerLinkActive="active"
+          class="nav-link"
+        >
+          <mat-icon>library_books</mat-icon>
+          <span>Courses</span>
+        </a>
+
+        <a
+          routerLink="/reviews"
+          routerLinkActive="active"
+          class="nav-link"
+        >
+          <mat-icon>rate_review</mat-icon>
+          <span>Reviews</span>
+        </a>
+      </div>
+
+      <div class="nav-actions">
         <app-theme-toggle></app-theme-toggle>
+
+        <div class="auth-buttons">
+          <a
+            routerLink="/auth/login"
+            routerLinkActive="active"
+            class="nav-link login-link"
+          >
+            <mat-icon>login</mat-icon>
+            <span>Login</span>
+          </a>
+
+          <a
+            routerLink="/auth/register"
+            routerLinkActive="active"
+            class="nav-link register-link"
+          >
+            <mat-icon>person_add</mat-icon>
+            <span>Register</span>
+          </a>
+        </div>
       </div>
     </nav>
   </header>
 
-  <main>
+  <main class="main-content">
     <router-outlet></router-outlet>
   </main>
 
-  <footer>
-    <p>© 2025 Course Watcher - All rights reserved</p>
+  <footer class="main-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <mat-icon class="footer-icon">school</mat-icon>
+        <span>Course Watcher</span>
+      </div>
+
+      <div class="footer-links">
+        <a routerLink="/about">About</a>
+        <a routerLink="/privacy">Privacy</a>
+        <a routerLink="/terms">Terms</a>
+        <a routerLink="/contact">Contact</a>
+      </div>
+
+      <div class="footer-copy">
+        <p>&copy; 2025 Course Watcher - All rights reserved</p>
+      </div>
+    </div>
   </footer>
 </div>
