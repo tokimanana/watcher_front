@@ -1,0 +1,54 @@
+.mat-mdc-form-field {
+  .mat-mdc-floating-label {
+    top: 28px;
+  }
+
+  .mat-mdc-form-field-focus-overlay {
+    opacity: 0.05;
+  }
+
+  &.mat-mdc-form-field-has-icon-prefix .mat-mdc-text-field-wrapper {
+    padding-left: 12px;
+  }
+
+  .mat-mdc-form-field-icon-prefix > .mat-icon {
+    padding: 12px;
+    margin-right: 4px;
+  }
+}
+
+// Make inputs match the simpler style
+.mat-mdc-form-field-appearance-outline {
+  .mat-mdc-text-field-wrapper {
+    background-color: var(--color-surface-variant);
+    border-radius: var(--radius-md);
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__trailing,
+  .mdc-notched-outline__notch {
+    border-color: transparent !important;
+  }
+
+  &.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__trailing,
+    .mdc-notched-outline__notch {
+      border-color: var(--color-primary) !important;
+      border-width: 2px;
+    }
+  }
+}
+
+// Gradient buttons
+.mat-primary {
+  &.mat-mdc-raised-button {
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+
+    &:not(:disabled) {
+      &:hover {
+        background: linear-gradient(90deg, var(--color-primary-dark), var(--color-primary));
+      }
+    }
+  }
+}

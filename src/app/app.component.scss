@@ -26,3 +26,58 @@
     height: 100%;
   }
 }
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+
+  .nav-left {
+    display: flex;
+    gap: 1rem;
+  }
+
+  a {
+    color: var(--color-text-primary);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: var(--color-surface-variant);
+    }
+  }
+}
+
+main {
+  flex: 1;
+  padding: 1rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+footer {
+  background-color: var(--color-surface);
+  padding: 1rem;
+  text-align: center;
+  margin-top: auto;
+}

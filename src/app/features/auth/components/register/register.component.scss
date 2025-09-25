@@ -1,36 +1,79 @@
-.container {
-  max-width: 400px;
-  margin: 2rem auto;
-  padding: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+/* src/app/features/auth/components/register/register.component.scss */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 64px);
+  padding: var(--spacing-lg);
 }
-.form-group {
-  margin-bottom: 1rem;
-}
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-}
-input {
+
+.auth-card {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  max-width: 400px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
-.error {
-  color: red;
-  font-size: 0.8rem;
-  margin-top: 0.3rem;
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
-button {
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+
+mat-card-title {
+  color: var(--color-primary);
+  margin: 0;
 }
-button:disabled {
-  background-color: #cccccc;
+
+.full-width {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-lg);
+}
+
+button[mat-raised-button] {
+  padding: var(--spacing-sm) var(--spacing-lg);
+}
+
+.signup-link {
+  margin-top: var(--spacing-xl);
+  text-align: center;
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.gradient-button {
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-primary-light)
+  );
+  transition: all 0.3s ease;
+
+  &:hover:not([disabled]) {
+    background: linear-gradient(
+      90deg,
+      var(--color-primary-dark),
+      var(--color-primary)
+    );
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.cancel-button {
+  margin-right: var(--spacing-md);
 }
