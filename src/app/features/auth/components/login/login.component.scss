@@ -1,3 +1,4 @@
+// Styles de base pour la page d'authentification
 .auth-page {
   min-height: 100vh;
   background: linear-gradient(
@@ -19,6 +20,7 @@
   width: 100%;
 }
 
+// Section de la marque
 .auth-brand {
   flex: 1;
   text-align: center;
@@ -47,6 +49,11 @@
 .logo-icon {
   font-size: 2.5rem;
   color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  width: 2.5rem;
 }
 
 .brand-title {
@@ -63,12 +70,19 @@
   line-height: 1.5;
 }
 
+// Carte d'authentification
 .auth-card {
   flex: 0 0 400px;
   max-width: 400px;
   padding: var(--spacing-lg);
   box-shadow: var(--shadow-xl);
   border: 1px solid rgba(139, 69, 19, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-2xl);
+    transform: translateY(-2px);
+  }
 
   @media (max-width: 768px) {
     flex: 1;
@@ -77,6 +91,7 @@
   }
 }
 
+// En-tête de la carte d'authentification
 .auth-header {
   text-align: center;
   margin-bottom: var(--spacing-xl);
@@ -95,6 +110,7 @@
   margin: 0;
 }
 
+// Bannière d'erreur
 .error-banner {
   display: flex;
   align-items: center;
@@ -108,28 +124,145 @@
   font-size: var(--font-size-sm);
 }
 
+// Formulaire d'authentification
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
 }
 
-.form-field {
-  width: 100%;
+// Champ de formulaire personnalisé (solution pour éviter le chevauchement)
+.custom-form-field {
+  margin-bottom: var(--spacing-md);
+
+  label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    transition: color 0.2s ease;
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    padding: 0 var(--spacing-sm);
+    height: 48px;
+    transition: all 0.2s ease;
+
+    &:focus-within {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.1);
+
+      .field-icon {
+        color: var(--color-primary);
+      }
+    }
+
+    .field-icon {
+      color: var(--color-text-secondary);
+      margin-right: var(--spacing-xs);
+      transition: color 0.2s ease;
+    }
+
+    input {
+      flex: 1;
+      height: 100%;
+      border: none;
+      background: transparent;
+      padding: 0 var(--spacing-xs);
+      font-size: var(--font-size-base);
+      color: var(--color-text-primary);
+      width: 100%;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        color: var(--color-text-muted);
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+      }
+
+      &:focus::placeholder {
+        opacity: 0.4;
+      }
+    }
+
+    .visibility-toggle {
+      background: none;
+      border: none;
+      color: var(--color-text-secondary);
+      padding: var(--spacing-xs);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+
+      &:hover {
+        color: var(--color-primary);
+        background-color: rgba(139, 69, 19, 0.08);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+  }
+
+  .field-error {
+    color: var(--color-error);
+    font-size: var(--font-size-xs);
+    margin-top: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+    animation: fadeIn 0.2s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
+// Bouton de soumission
 .auth-submit-btn {
   width: 100%;
   height: 48px;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   margin-top: var(--spacing-md);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+
+  &:not(:disabled):active {
+    transform: translateY(0);
+  }
 
   .spinner {
     margin-right: var(--spacing-sm);
   }
 }
 
+// Liens d'authentification
 .auth-links {
   display: flex;
   justify-content: center;
@@ -141,12 +274,38 @@
   text-decoration: none;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+  position: relative;
+  transition: all 0.2s ease;
+  padding: var(--spacing-xs) var(--spacing-xs);
+  border-radius: var(--radius-sm);
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: 0;
+    left: 50%;
+    background-color: var(--color-primary);
+    transition: all 0.3s ease;
+  }
 
   &:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    background-color: rgba(139, 69, 19, 0.05);
+
+    &::after {
+      width: 80%;
+      left: 10%;
+    }
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 }
 
+// Actions d'authentification (inscription)
 .auth-actions {
   padding: var(--spacing-lg) 0 0 0;
   justify-content: center;
@@ -172,7 +331,7 @@
   }
 }
 
-// Mobile responsiveness
+// Responsivité mobile
 @media (max-width: 768px) {
   .auth-page {
     padding: var(--spacing-md);
@@ -184,84 +343,5 @@
 
   .auth-card {
     box-shadow: var(--shadow-md);
-  }
-}
-.custom-form-field {
-  margin-bottom: var(--spacing-lg);
-
-  label {
-    display: block;
-    margin-bottom: var(--spacing-xs);
-    font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-sm);
-    color: var(--color-text-primary);
-  }
-
-  .input-wrapper {
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: var(--color-surface);
-    padding: 0 var(--spacing-sm);
-    height: 48px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-
-    &:focus-within {
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 1px rgba(var(--color-primary-rgb), 0.2);
-    }
-
-    .field-icon {
-      color: var(--color-text-secondary);
-      margin-right: var(--spacing-xs);
-    }
-
-    input {
-      flex: 1;
-      height: 100%;
-      border: none;
-      background: transparent;
-      padding: 0 var(--spacing-xs);
-      font-size: var(--font-size-base);
-      color: var(--color-text-primary);
-      width: 100%;
-
-      &:focus {
-        outline: none;
-      }
-
-      &::placeholder {
-        color: var(--color-text-hint);
-      }
-    }
-
-    .visibility-toggle {
-      background: none;
-      border: none;
-      color: var(--color-text-secondary);
-      padding: var(--spacing-xs);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      &:hover {
-        color: var(--color-primary);
-      }
-    }
-  }
-
-  .field-error {
-    color: var(--color-error);
-    font-size: var(--font-size-xs);
-    margin-top: var(--spacing-xs);
-  }
-}
-
-// Pour maintenir l'esthétique cohérente avec le reste de l'interface
-.auth-form {
-  .custom-form-field {
-    width: 100%;
   }
 }
