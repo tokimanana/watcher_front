@@ -1,11 +1,19 @@
+// ====================================
+// ANGULAR MATERIAL OVERRIDES
+// ====================================
+
+// Form Field Overrides
 .mat-mdc-form-field {
+  width: 100%;
+
   // Adjust floating label position for better visual balance
   .mat-mdc-floating-label {
-    top: 28px;
+    top: 20px;
     color: var(--color-text-secondary);
     font-weight: var(--font-weight-medium);
 
     &.mdc-floating-label--float-above {
+      top: 24px;
       color: var(--color-primary);
       font-size: var(--font-size-sm);
     }
@@ -47,6 +55,8 @@
 // Outline Form Field Styling
 .mat-mdc-form-field-appearance-outline {
   .mat-mdc-text-field-wrapper {
+    padding-top: 8px;
+    padding-bottom: 8px;
     background-color: var(--color-surface-variant);
     border-radius: var(--radius-md);
     transition: background-color var(--transition-fast);
@@ -60,7 +70,7 @@
   .mdc-notched-outline__leading,
   .mdc-notched-outline__trailing,
   .mdc-notched-outline__notch {
-    border: none !important;
+    border: none;
   }
 
   // Custom focus state with brown theme
@@ -278,3 +288,5 @@
     background: rgba(139, 69, 19, 0.12);
   }
 }
+
+

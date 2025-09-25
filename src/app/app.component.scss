@@ -1,4 +1,3 @@
-// app.component.scss
 .app-container {
   min-height: 100vh;
   display: flex;
@@ -91,7 +90,6 @@ header {
     font-weight: var(--font-weight-semibold);
 
     &::after {
-      content: "";
       position: absolute;
       bottom: -2px;
       left: 50%;
@@ -144,15 +142,17 @@ header {
   }
 
   .register-link {
-    background-color: var(--color-primary);
-    color: var(--color-text-inverse);
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
 
     &:hover {
       background-color: var(--color-primary-dark);
+      color: var(--color-text-inverse);
     }
 
     &.active {
-      background-color: var(--color-primary-dark);
+      background-color: var(--color-primary);
+      color: var(--color-text-inverse);
     }
   }
 }
