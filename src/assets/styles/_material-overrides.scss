@@ -1,107 +1,65 @@
-// ====================================
-// ANGULAR MATERIAL OVERRIDES
-// ====================================
-
-// Form Field Overrides
+// Simple form field styling without complex overrides
 .mat-mdc-form-field {
   width: 100%;
 
-  // Adjust floating label position for better visual balance
-  .mat-mdc-floating-label {
-    top: 20px;
-    color: var(--color-text-secondary);
-    font-weight: var(--font-weight-medium);
+  // Clean outline appearance
+  &.mat-mdc-form-field-appearance-outline {
+    .mat-mdc-text-field-wrapper {
+      background-color: var(--color-surface-variant);
+      border-radius: var(--radius-md);
+      transition: background-color var(--transition-fast);
 
-    &.mdc-floating-label--float-above {
-      top: 24px;
-      color: var(--color-primary);
-      font-size: var(--font-size-sm);
+      &:hover {
+        background-color: var(--color-surface);
+      }
+    }
+
+    // Remove default Material outline
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__trailing,
+    .mdc-notched-outline__notch {
+      border: none;
+    }
+
+    // Focus state
+    &.mat-focused {
+      .mat-mdc-text-field-wrapper {
+        background-color: var(--color-surface);
+        box-shadow: 0 0 0 2px var(--color-primary);
+      }
+    }
+
+    // Error state
+    &.mat-mdc-form-field-invalid {
+      .mat-mdc-text-field-wrapper {
+        background-color: rgba(205, 92, 92, 0.05);
+
+        &.mat-focused {
+          box-shadow: 0 0 0 2px var(--color-error);
+        }
+      }
     }
   }
 
-  // Subtle focus overlay
-  .mat-mdc-form-field-focus-overlay {
-    opacity: 0.05;
-    background-color: var(--color-primary);
-  }
-
-  // Icon prefix spacing
-  &.mat-mdc-form-field-has-icon-prefix .mat-mdc-text-field-wrapper {
-    padding-left: var(--spacing-sm);
-  }
-
+  // Icon styling
   .mat-mdc-form-field-icon-prefix > .mat-icon {
-    padding: var(--spacing-sm);
-    margin-right: var(--spacing-xs);
     color: var(--color-text-secondary);
+    margin-right: var(--spacing-sm);
 
     .mat-mdc-form-field.mat-focused & {
       color: var(--color-primary);
     }
   }
 
-  // Error state styling
+  // Error state icon
   &.mat-mdc-form-field-invalid {
-    .mat-mdc-floating-label {
-      color: var(--color-error);
-    }
-
     .mat-mdc-form-field-icon-prefix > .mat-icon {
       color: var(--color-error);
     }
   }
 }
 
-// Outline Form Field Styling
-.mat-mdc-form-field-appearance-outline {
-  .mat-mdc-text-field-wrapper {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    background-color: var(--color-surface-variant);
-    border-radius: var(--radius-md);
-    transition: background-color var(--transition-fast);
-
-    &:hover {
-      background-color: var(--color-surface);
-    }
-  }
-
-  // Remove default Material outline
-  .mdc-notched-outline__leading,
-  .mdc-notched-outline__trailing,
-  .mdc-notched-outline__notch {
-    border: none;
-  }
-
-  // Custom focus state with brown theme
-  &.mat-focused {
-    .mat-mdc-text-field-wrapper {
-      background-color: var(--color-surface);
-      box-shadow: 0 0 0 2px var(--color-primary);
-    }
-  }
-
-  // Error state
-  &.mat-mdc-form-field-invalid {
-    .mat-mdc-text-field-wrapper {
-      background-color: rgba(205, 92, 92, 0.05);
-
-      &.mat-focused {
-        box-shadow: 0 0 0 2px var(--color-error);
-      }
-    }
-  }
-
-  // Disabled state
-  &.mat-mdc-form-field-disabled {
-    .mat-mdc-text-field-wrapper {
-      background-color: var(--color-surface-variant);
-      opacity: 0.6;
-    }
-  }
-}
-
-// Input Field Styling
+// Input styling
 .mat-mdc-input-element {
   color: var(--color-text-primary);
   font-size: var(--font-size-base);
@@ -110,183 +68,40 @@
     color: var(--color-text-muted);
     opacity: 1;
   }
-
-  &:disabled {
-    color: var(--color-text-muted);
-  }
 }
 
-// Form Field Hint and Error Messages
-.mat-mdc-form-field-hint,
+// Error messages
 .mat-mdc-form-field-error {
+  color: var(--color-error);
   font-size: var(--font-size-sm);
   margin-top: var(--spacing-xs);
 }
 
-.mat-mdc-form-field-hint {
-  color: var(--color-text-secondary);
-}
+// Button overrides
+.mat-mdc-raised-button {
+  &.mat-primary {
+    background-color: var(--color-primary);
+    color: var(--color-text-inverse);
 
-.mat-mdc-form-field-error {
-  color: var(--color-error);
-}
-
-// Select Field Overrides
-.mat-mdc-select {
-  .mat-mdc-select-value {
-    color: var(--color-text-primary);
-  }
-
-  .mat-mdc-select-placeholder {
-    color: var(--color-text-muted);
-  }
-
-  .mat-mdc-select-arrow {
-    color: var(--color-text-secondary);
-  }
-}
-
-// Select Panel Styling
-.mat-mdc-select-panel {
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid rgba(139, 69, 19, 0.1);
-
-  .mat-mdc-option {
-    color: var(--color-text-primary);
-
-    &:hover:not(.mdc-list-item--disabled) {
-      background: rgba(139, 69, 19, 0.08);
+    &:hover {
+      background-color: var(--color-primary-hover);
     }
 
-    &.mdc-list-item--selected:not(.mat-mdc-option-multiple) {
-      background: rgba(139, 69, 19, 0.12);
-      color: var(--color-primary);
+    &:disabled {
+      background-color: var(--color-surface-variant);
+      color: var(--color-text-muted);
     }
   }
 }
 
-// Checkbox Overrides
-.mat-mdc-checkbox {
-  .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate):not(
-      [data-indeterminate="true"]
-    )
-    ~ .mdc-checkbox__background {
-    border-color: var(--color-text-secondary);
-  }
-
-  .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background,
-  .mdc-checkbox__native-control:enabled:indeterminate
-    ~ .mdc-checkbox__background {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
-  }
-}
-
-// Radio Button Overrides
-.mat-mdc-radio-button {
-  .mdc-radio__native-control:enabled:not(:checked)
-    + .mdc-radio__background
-    .mdc-radio__outer-circle {
-    border-color: var(--color-text-secondary);
-  }
-
-  .mdc-radio__native-control:enabled:checked
-    + .mdc-radio__background
-    .mdc-radio__outer-circle,
-  .mdc-radio__native-control:enabled:checked
-    + .mdc-radio__background
-    .mdc-radio__inner-circle {
-    border-color: var(--color-primary);
-  }
-
-  .mdc-radio__native-control:enabled:checked
-    + .mdc-radio__background
-    .mdc-radio__inner-circle {
-    background-color: var(--color-primary);
-  }
-}
-
-// Slider Overrides
-.mat-mdc-slider {
-  --mdc-slider-handle-color: var(--color-primary);
-  --mdc-slider-focus-handle-color: var(--color-primary);
-  --mdc-slider-hover-handle-color: var(--color-primary);
-  --mdc-slider-active-track-color: var(--color-primary);
-  --mdc-slider-inactive-track-color: var(--color-surface-variant);
-}
-
-// Progress Bar/Spinner Overrides
-.mat-mdc-progress-bar {
-  --mdc-linear-progress-active-indicator-color: var(--color-primary);
-}
-
-.mat-mdc-progress-spinner {
-  --mdc-circular-progress-active-indicator-color: var(--color-primary);
-}
-
-// Snackbar Overrides
-.mat-mdc-snack-bar-container {
-  --mdc-snackbar-container-color: var(--color-surface);
-  --mdc-snackbar-supporting-text-color: var(--color-text-primary);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-
-  &.mat-mdc-snack-bar-container-error {
-    --mdc-snackbar-container-color: var(--color-error);
-    --mdc-snackbar-supporting-text-color: var(--color-text-inverse);
-  }
-
-  &.mat-mdc-snack-bar-container-success {
-    --mdc-snackbar-container-color: var(--color-success);
-    --mdc-snackbar-supporting-text-color: var(--color-text-inverse);
-  }
-}
-
-// Dialog Overrides
-.mat-mdc-dialog-container {
-  --mdc-dialog-container-color: var(--color-surface);
+// Card overrides
+.mat-mdc-card {
+  background-color: var(--color-surface);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-md);
 }
 
-.mat-mdc-dialog-title {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
+// Spinner overrides
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: currentColor;
 }
-
-.mat-mdc-dialog-content {
-  color: var(--color-text-primary);
-}
-
-// Tooltip Overrides
-.mat-mdc-tooltip {
-  --mdc-plain-tooltip-container-color: var(--color-text-primary);
-  --mdc-plain-tooltip-supporting-text-color: var(--color-text-inverse);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-}
-
-// Menu Overrides
-.mat-mdc-menu-panel {
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid rgba(139, 69, 19, 0.1);
-}
-
-.mat-mdc-menu-item {
-  color: var(--color-text-primary);
-
-  &:hover:not([disabled]) {
-    background: rgba(139, 69, 19, 0.08);
-  }
-
-  &.mat-mdc-menu-item-highlighted:not([disabled]) {
-    background: rgba(139, 69, 19, 0.12);
-  }
-}
-
-

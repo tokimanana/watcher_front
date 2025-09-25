@@ -186,3 +186,82 @@
     box-shadow: var(--shadow-md);
   }
 }
+.custom-form-field {
+  margin-bottom: var(--spacing-lg);
+
+  label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    padding: 0 var(--spacing-sm);
+    height: 48px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus-within {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 1px rgba(var(--color-primary-rgb), 0.2);
+    }
+
+    .field-icon {
+      color: var(--color-text-secondary);
+      margin-right: var(--spacing-xs);
+    }
+
+    input {
+      flex: 1;
+      height: 100%;
+      border: none;
+      background: transparent;
+      padding: 0 var(--spacing-xs);
+      font-size: var(--font-size-base);
+      color: var(--color-text-primary);
+      width: 100%;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        color: var(--color-text-hint);
+      }
+    }
+
+    .visibility-toggle {
+      background: none;
+      border: none;
+      color: var(--color-text-secondary);
+      padding: var(--spacing-xs);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        color: var(--color-primary);
+      }
+    }
+  }
+
+  .field-error {
+    color: var(--color-error);
+    font-size: var(--font-size-xs);
+    margin-top: var(--spacing-xs);
+  }
+}
+
+// Pour maintenir l'esthétique cohérente avec le reste de l'interface
+.auth-form {
+  .custom-form-field {
+    width: 100%;
+  }
+}

@@ -27,59 +27,62 @@
         }
 
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Email Address</mat-label>
-            <input
-              matInput
-              type="email"
-              formControlName="email"
-              placeholder="your@email.com"
-              autocomplete="email"
-            />
-            <mat-icon matPrefix>email</mat-icon>
+          <!-- Email field with custom styling to avoid overlap -->
+          <div class="custom-form-field">
+            <label for="email">Email Address</label>
+            <div class="input-wrapper">
+              <mat-icon class="field-icon">email</mat-icon>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="your@email.com"
+                autocomplete="email"
+              />
+            </div>
             @if (loginForm.get('email')?.invalid &&
             loginForm.get('email')?.touched) {
-            <mat-error>
+            <div class="field-error">
               @if (loginForm.get('email')?.errors?.['required']) { Email is
               required } @else if (loginForm.get('email')?.errors?.['email']) {
               Please enter a valid email address }
-            </mat-error>
+            </div>
             }
-          </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Password</mat-label>
-            <input
-              matInput
-              [type]="hidePassword() ? 'password' : 'text'"
-              formControlName="password"
-              placeholder="Enter your password"
-              autocomplete="current-password"
-            />
-            <mat-icon matPrefix>lock</mat-icon>
-            <button
-              mat-icon-button
-              matSuffix
-              type="button"
-              (click)="togglePasswordVisibility()"
-              [attr.aria-label]="
-                hidePassword() ? 'Show password' : 'Hide password'
-              "
-            >
-              <mat-icon>{{
-                hidePassword() ? "visibility" : "visibility_off"
-              }}</mat-icon>
-            </button>
+          <!-- Password field with custom styling to avoid overlap -->
+          <div class="custom-form-field">
+            <label for="password">Password</label>
+            <div class="input-wrapper">
+              <mat-icon class="field-icon">lock_outline</mat-icon>
+              <input
+                id="password"
+                [type]="hidePassword() ? 'password' : 'text'"
+                formControlName="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="visibility-toggle"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="
+                  hidePassword() ? 'Show password' : 'Hide password'
+                "
+              >
+                <mat-icon>{{
+                  hidePassword() ? "visibility" : "visibility_off"
+                }}</mat-icon>
+              </button>
+            </div>
             @if (loginForm.get('password')?.invalid &&
             loginForm.get('password')?.touched) {
-            <mat-error>
+            <div class="field-error">
               @if (loginForm.get('password')?.errors?.['required']) { Password
-              is required } @else if
-              (loginForm.get('password')?.errors?.['minlength']) { Password must
-              be at least 6 characters }
-            </mat-error>
+              is required }
+            </div>
             }
-          </mat-form-field>
+          </div>
 
           <button
             mat-raised-button
