@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
+import { Observable, of, delay, map } from 'rxjs';
 import { Course } from '../models/course.model';
 import { User } from '../models/user.model';
 import { Review } from '../models/review.model';
@@ -751,4 +751,22 @@ export class MockDataService {
     this.reviews.push(newReview);
     return of(newReview).pipe(delay(this.API_DELAY.medium));
   }
+
+  forgotPassword(email: string): Observable<boolean> {
+  return of(true).pipe(
+    delay(300),
+    map(() => {
+      const userExists = this.users.some(user => user.email === email);
+
+      if (userExists) {
+        // Simulate successful email sending
+        console.log(`Mock: Password reset email sent to ${email}`);
+        return true;
+      }
+
+      // Still return true for security (don't reveal if email exists)
+      return true;
+    })
+  );
+}
 }

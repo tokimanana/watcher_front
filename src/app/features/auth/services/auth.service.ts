@@ -10,14 +10,14 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { User } from '../../core/models/user.model';
+import { User } from '../../../core/models/user.model';
 import {
   JwtPayload,
   LoginCredentials,
   RegisterData,
-} from '../../core/models/auth.model';
-import { MockDataService } from '../../core/services/mock-data.service';
-import { AuthResponse } from '../../core/models/auth-response.model';
+} from '../../../core/models/auth.model';
+import { MockDataService } from '../../../core/services/mock-data.service';
+import { AuthResponse } from '../../../core/models/auth-response.model';
 
 @Injectable({
   providedIn: 'root',
@@ -227,4 +227,18 @@ export class AuthService {
     this.currentUserSubject.next(response.user);
     this.isAuthenticatedSubject.next(true);
   }
+
+  forgotPassword(email: string): Observable<{ message: string }> {
+  return this.mockDataService.forgotPassword(email).pipe(
+    map(() => ({
+      message: 'If an account with that email exists, a password reset link has been sent.'
+    })),
+    catchError(error => {
+      console.error('Error in forgotPassword:', error);
+      return of({
+        message: 'If an account with that email exists, a password reset link has been sent.'
+      });
+    })
+  );
+}
 }

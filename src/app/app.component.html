@@ -1,89 +1,91 @@
-<app-theme-showcase></app-theme-showcase>
+<div class="app-container">
+  <header>
+    <nav class="main-nav">
+      <div class="nav-brand">
+        <a routerLink="/home" class="brand-link">
+          <mat-icon class="brand-icon">school</mat-icon>
+          <span class="brand-text">Course Watcher</span>
+        </a>
+      </div>
 
-<!-- Test for MockDataService -->
-<div class="p-xl">
-  <h2 class="text-primary mb-lg font-semibold">Testing Mock Data Service</h2>
+      <div class="nav-links">
+        <a
+          routerLink="/home"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: true}"
+          class="nav-link"
+        >
+          <mat-icon>home</mat-icon>
+          <span>Home</span>
+        </a>
 
-  <div *ngIf="isLoading" class="flex justify-center p-xl">
-    <div class="spinner spinner-lg"></div>
-    <span class="text-muted ml-md">Loading courses...</span>
-  </div>
+        <a
+          routerLink="/courses"
+          routerLinkActive="active"
+          class="nav-link"
+        >
+          <mat-icon>library_books</mat-icon>
+          <span>Courses</span>
+        </a>
 
-  <div *ngIf="errorMessage" class="alert alert-error mb-lg">
-    <strong>Error!</strong> {{ errorMessage }}
-  </div>
+        <a
+          routerLink="/reviews"
+          routerLinkActive="active"
+          class="nav-link"
+        >
+          <mat-icon>rate_review</mat-icon>
+          <span>Reviews</span>
+        </a>
+      </div>
 
-  <div *ngIf="!isLoading && courses.length > 0" class="grid grid-cols-3 gap-lg">
-    <mat-card *ngFor="let course of courses" class="interactive">
-      <mat-card-header>
-        <mat-card-title>{{ course.title }}</mat-card-title>
-        <mat-card-subtitle>
-          <div class="flex items-center gap-sm">
-            <span>{{ course.instructor }}</span>
-            <span class="platform-badge {{ course.platform }}">{{
-              course.platform
-            }}</span>
-          </div>
-        </mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <!-- Star Rating -->
-        <div class="star-rating mb-sm">
-          <span
-            class="star"
-            [class.filled]="i < Math.floor(course.rating)"
-            [class.empty]="i >= course.rating"
-            *ngFor="let i of [0, 1, 2, 3, 4]"
-            >★</span
+      <div class="nav-actions">
+        <app-theme-toggle></app-theme-toggle>
+
+        <div class="auth-buttons">
+          <a
+            routerLink="/auth/login"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{exact: true}"
+            class="nav-link login-link"
           >
-          <span class="rating-text"
-            >{{ course.rating }} ({{ course.reviewCount }} reviews)</span
+            <mat-icon>login</mat-icon>
+            <span>Login</span>
+          </a>
+
+          <a
+            routerLink="/auth/register"
+            routerLinkActive="active"
+            class="nav-link register-link"
           >
+            <mat-icon>person_add</mat-icon>
+            <span>Register</span>
+          </a>
         </div>
+      </div>
+    </nav>
+  </header>
 
-        <!-- Price -->
-        <p class="mb-sm">
-          <span
-            class="badge"
-            [class.badge-success]="course.price === 0"
-            [class.badge-secondary]="course.price > 0"
-          >
-            {{
-              course.price === 0
-                ? "Free"
-                : (course.price | currency : course.currency)
-            }}
-          </span>
-        </p>
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
 
-        <!-- Duration and Difficulty -->
-        <div class="flex justify-between mb-sm">
-          <span class="text-secondary">{{ course.duration }}</span>
-          <span class="difficulty-badge {{ course.difficulty }}">{{
-            course.difficulty | titlecase
-          }}</span>
-        </div>
+  <footer class="main-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <mat-icon class="footer-icon">school</mat-icon>
+        <span>Course Watcher</span>
+      </div>
 
-        <!-- Technologies -->
-        <p class="mb-sm text-sm text-secondary">Technologies:</p>
-        <div class="flex flex-wrap gap-xs">
-          <span
-            class="badge badge-primary"
-            *ngFor="let tech of course.technologies"
-            >{{ tech }}</span
-          >
-        </div>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-button color="primary" outlined class="mr-md">View Course</button>
-        <button mat-button color="secondary" outlined>Save</button>
-      </mat-card-actions>
-    </mat-card>
-  </div>
+      <div class="footer-links">
+        <a routerLink="/about">About</a>
+        <a routerLink="/privacy">Privacy</a>
+        <a routerLink="/terms">Terms</a>
+        <a routerLink="/contact">Contact</a>
+      </div>
 
-  <div *ngIf="!isLoading && courses.length === 0" class="alert alert-info">
-    No courses found. Try adjusting your search criteria.
-  </div>
+      <div class="footer-copy">
+        <p>&copy; 2025 Course Watcher - All rights reserved</p>
+      </div>
+    </div>
+  </footer>
 </div>
-
-<router-outlet></router-outlet>

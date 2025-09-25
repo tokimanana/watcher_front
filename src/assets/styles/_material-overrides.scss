@@ -1,0 +1,107 @@
+// Simple form field styling without complex overrides
+.mat-mdc-form-field {
+  width: 100%;
+
+  // Clean outline appearance
+  &.mat-mdc-form-field-appearance-outline {
+    .mat-mdc-text-field-wrapper {
+      background-color: var(--color-surface-variant);
+      border-radius: var(--radius-md);
+      transition: background-color var(--transition-fast);
+
+      &:hover {
+        background-color: var(--color-surface);
+      }
+    }
+
+    // Remove default Material outline
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__trailing,
+    .mdc-notched-outline__notch {
+      border: none;
+    }
+
+    // Focus state
+    &.mat-focused {
+      .mat-mdc-text-field-wrapper {
+        background-color: var(--color-surface);
+        box-shadow: 0 0 0 2px var(--color-primary);
+      }
+    }
+
+    // Error state
+    &.mat-mdc-form-field-invalid {
+      .mat-mdc-text-field-wrapper {
+        background-color: rgba(205, 92, 92, 0.05);
+
+        &.mat-focused {
+          box-shadow: 0 0 0 2px var(--color-error);
+        }
+      }
+    }
+  }
+
+  // Icon styling
+  .mat-mdc-form-field-icon-prefix > .mat-icon {
+    color: var(--color-text-secondary);
+    margin-right: var(--spacing-sm);
+
+    .mat-mdc-form-field.mat-focused & {
+      color: var(--color-primary);
+    }
+  }
+
+  // Error state icon
+  &.mat-mdc-form-field-invalid {
+    .mat-mdc-form-field-icon-prefix > .mat-icon {
+      color: var(--color-error);
+    }
+  }
+}
+
+// Input styling
+.mat-mdc-input-element {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+
+  &::placeholder {
+    color: var(--color-text-muted);
+    opacity: 1;
+  }
+}
+
+// Error messages
+.mat-mdc-form-field-error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-xs);
+}
+
+// Button overrides
+.mat-mdc-raised-button {
+  &.mat-primary {
+    background-color: var(--color-primary);
+    color: var(--color-text-inverse);
+
+    &:hover {
+      background-color: var(--color-primary-hover);
+    }
+
+    &:disabled {
+      background-color: var(--color-surface-variant);
+      color: var(--color-text-muted);
+    }
+  }
+}
+
+// Card overrides
+.mat-mdc-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+// Spinner overrides
+.mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: currentColor;
+}
