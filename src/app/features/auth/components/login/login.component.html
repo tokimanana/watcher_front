@@ -1,87 +1,66 @@
 <div class="auth-container">
   <mat-card class="auth-card">
     <mat-card-header>
-      <div class="header-content">
-        <mat-card-title>Sign In</mat-card-title>
-      </div>
+      <mat-card-title>Sign In</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email</mat-label>
-          <input
-            matInput
-            formControlName="email"
-            placeholder="your-email@example.com"
-            type="email"
-          />
-          <mat-icon matPrefix>email</mat-icon>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
-            Email is required
-          </mat-error>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
-            Please enter a valid email address
-          </mat-error>
+          <input matInput type="email" formControlName="email" required />
+          @if (loginForm.get('email')?.invalid &&
+          loginForm.get('email')?.touched) {
+          <mat-error>Please enter a valid email</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Password</mat-label>
           <input
             matInput
+            [type]="hidePassword() ? 'password' : 'text'"
             formControlName="password"
-            [type]="hidePassword ? 'password' : 'text'"
+            required
           />
-          <mat-icon matPrefix>lock</mat-icon>
           <button
             mat-icon-button
             matSuffix
-            (click)="hidePassword = !hidePassword"
             type="button"
-            [attr.aria-label]="'Hide password'"
-            [attr.aria-pressed]="hidePassword"
+            (click)="togglePasswordVisibility()"
           >
             <mat-icon>{{
-              hidePassword ? "visibility_off" : "visibility"
+              hidePassword() ? "visibility_off" : "visibility"
             }}</mat-icon>
           </button>
-          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-            Password is required
-          </mat-error>
+          @if (loginForm.get('password')?.invalid &&
+          loginForm.get('password')?.touched) {
+          <mat-error>Password is required</mat-error>
+          }
         </mat-form-field>
 
-        <div class="form-actions">
-          <a routerLink="/auth/forgot-password" class="forgot-link"
-            >Forgot password?</a
-          >
-        </div>
-
-        <div class="actions">
-          <button
-            mat-stroked-button
-            type="button"
-            (click)="clearForm()"
-            class="cancel-button"
-          >
-            Cancel
-          </button>
-          <button
-            mat-raised-button
-            color="primary"
-            type="submit"
-            class="gradient-button"
-            [disabled]="loginForm.invalid"
-          >
-            Sign In
-          </button>
-        </div>
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="full-width submit-btn"
+          [disabled]="loginForm.invalid || isLoading()"
+        >
+          @if (isLoading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>Signing in...</span>
+          } @else { Sign In }
+        </button>
       </form>
-
-      <div class="signup-link">
-        <p>
-          Don't have an account? <a routerLink="/auth/register">Create one</a>
-        </p>
-      </div>
     </mat-card-content>
+
+    <mat-card-actions class="auth-actions">
+      <button mat-button routerLink="/auth/register">
+        Don't have an account? Sign up
+      </button>
+      <button mat-button routerLink="/auth/forgot-password">
+        Forgot password?
+      </button>
+    </mat-card-actions>
   </mat-card>
 </div>
