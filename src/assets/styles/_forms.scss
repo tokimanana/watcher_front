@@ -1,0 +1,209 @@
+// ====================================
+// FORM STYLES
+// ====================================
+
+// Clean form field styles without overlapping issues
+.custom-form-field {
+  margin-bottom: var(--spacing-md);
+
+  label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    transition: color 0.2s ease;
+  }
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    padding: 0 var(--spacing-sm);
+    height: 48px;
+    transition: all 0.2s ease;
+
+    &:focus-within {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.1);
+
+      .field-icon {
+        color: var(--color-primary);
+      }
+    }
+
+    .field-icon {
+      color: var(--color-text-secondary);
+      margin-right: var(--spacing-xs);
+      transition: color 0.2s ease;
+    }
+
+    input {
+      flex: 1;
+      height: 100%;
+      border: none;
+      background: transparent;
+      padding: 0 var(--spacing-xs);
+      font-size: var(--font-size-base);
+      color: var(--color-text-primary);
+      width: 100%;
+
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        color: var(--color-text-muted);
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+      }
+
+      &:focus::placeholder {
+        opacity: 0.4;
+      }
+    }
+
+    .visibility-toggle {
+      background: none;
+      border: none;
+      color: var(--color-text-secondary);
+      padding: var(--spacing-xs);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+
+      &:hover {
+        color: var(--color-primary);
+        background-color: rgba(139, 69, 19, 0.08);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+  }
+
+  .field-error {
+    color: var(--color-error);
+    font-size: var(--font-size-xs);
+    margin-top: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+
+    &::before {
+      content: "⚠️";
+      font-size: 0.85em;
+      margin-right: var(--spacing-xs);
+    }
+
+    animation: fadeIn 0.2s ease-in-out;
+  }
+}
+
+// Material Form Field Overrides to fix overlapping issues
+.mat-form-field-fix {
+  .mat-mdc-text-field-wrapper {
+    padding: 0 !important;
+    height: auto !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+
+  .mdc-notched-outline {
+    display: none !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    padding: 0 !important;
+  }
+}
+
+// Customized Material Form Field with no overlap
+.no-overlap-field {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+
+  ::ng-deep {
+    // Remove the floating label and notched outline
+    .mdc-floating-label,
+    .mdc-notched-outline {
+      display: none !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding: 0 !important;
+      min-height: auto !important;
+    }
+
+    .mat-mdc-text-field-wrapper {
+      padding: 0 !important;
+      background-color: transparent !important;
+      border: none !important;
+    }
+
+    .mdc-line-ripple {
+      display: none !important;
+    }
+  }
+
+  .field-label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+  }
+
+  .input-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(139, 69, 19, 0.2);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    padding: 0 var(--spacing-sm);
+    height: 48px;
+    transition: all 0.2s ease;
+
+    &:focus-within {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.1);
+    }
+
+    .prefix-icon {
+      margin-right: var(--spacing-xs);
+      color: var(--color-text-secondary);
+    }
+
+    input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      height: 100%;
+      font-size: var(--font-size-base);
+      padding: 0;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    .visibility-toggle {
+      background: none;
+      border: none;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+
+      &:hover {
+        color: var(--color-primary);
+      }
+    }
+  }
+}

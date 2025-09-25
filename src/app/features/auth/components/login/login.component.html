@@ -1,25 +1,24 @@
 <div class="auth-page">
   <div class="auth-container">
-    <!-- Section de marque à gauche -->
     <div class="auth-brand">
       <div class="brand-logo">
         <mat-icon class="logo-icon">school</mat-icon>
       </div>
       <h1 class="brand-title">Course Watcher</h1>
-      <p class="brand-subtitle">Sign in to continue your learning journey</p>
+      <p class="brand-subtitle">
+        Discover the best courses, read authentic reviews
+      </p>
     </div>
 
-    <!-- Carte d'authentification -->
     <mat-card class="auth-card">
       <mat-card-header class="auth-header">
-        <mat-card-title class="auth-title">Sign In</mat-card-title>
-        <mat-card-subtitle class="auth-subtitle"
-          >Welcome back! Please enter your details</mat-card-subtitle
-        >
+        <mat-card-title class="auth-title">Welcome Back</mat-card-title>
+        <mat-card-subtitle class="auth-subtitle">
+          Sign in to your account to continue
+        </mat-card-subtitle>
       </mat-card-header>
 
-      <mat-card-content>
-        <!-- Bannière d'erreur (affichée conditionnellement) -->
+      <mat-card-content class="auth-content">
         @if (errorMessage()) {
         <div class="error-banner">
           <mat-icon>error_outline</mat-icon>
@@ -27,13 +26,12 @@
         </div>
         }
 
-        <!-- Formulaire de connexion -->
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
-          <!-- Champ Email -->
-          <div class="custom-form-field">
-            <label for="email">Email Address</label>
-            <div class="input-wrapper">
-              <mat-icon class="field-icon">email</mat-icon>
+          <!-- Email field with custom styling to prevent overlap -->
+          <div class="custom-input-field">
+            <label class="field-label" for="email">Email Address</label>
+            <div class="input-container">
+              <mat-icon class="prefix-icon">email</mat-icon>
               <input
                 id="email"
                 type="email"
@@ -44,7 +42,7 @@
             </div>
             @if (loginForm.get('email')?.invalid &&
             loginForm.get('email')?.touched) {
-            <div class="field-error">
+            <div class="error-message">
               @if (loginForm.get('email')?.errors?.['required']) { Email is
               required } @else if (loginForm.get('email')?.errors?.['email']) {
               Please enter a valid email address }
@@ -52,11 +50,11 @@
             }
           </div>
 
-          <!-- Champ Mot de passe -->
-          <div class="custom-form-field">
-            <label for="password">Password</label>
-            <div class="input-wrapper">
-              <mat-icon class="field-icon">lock</mat-icon>
+          <!-- Password field with custom styling to prevent overlap -->
+          <div class="custom-input-field">
+            <label class="field-label" for="password">Password</label>
+            <div class="input-container">
+              <mat-icon class="prefix-icon">lock_outline</mat-icon>
               <input
                 id="password"
                 [type]="hidePassword() ? 'password' : 'text'"
@@ -68,42 +66,41 @@
                 type="button"
                 class="visibility-toggle"
                 (click)="togglePasswordVisibility()"
-                aria-label="Toggle password visibility"
               >
                 <mat-icon>{{
-                  hidePassword() ? "visibility_off" : "visibility"
+                  hidePassword() ? "visibility" : "visibility_off"
                 }}</mat-icon>
               </button>
             </div>
             @if (loginForm.get('password')?.invalid &&
             loginForm.get('password')?.touched) {
-            <div class="field-error">Password is required</div>
+            <div class="error-message">
+              @if (loginForm.get('password')?.errors?.['required']) { Password
+              is required }
+            </div>
             }
           </div>
 
-          <!-- Bouton de soumission -->
           <button
             mat-raised-button
             color="primary"
             type="submit"
-            [disabled]="loginForm.invalid || isLoading()"
             class="auth-submit-btn"
+            [disabled]="loginForm.invalid || isLoading()"
           >
             @if (isLoading()) {
             <mat-spinner diameter="20" class="spinner"></mat-spinner>
             Signing in... } @else { Sign In }
           </button>
 
-          <!-- Lien "Mot de passe oublié" -->
           <div class="auth-links">
-            <a routerLink="/auth/forgot-password" class="forgot-link"
-              >Forgot password?</a
-            >
+            <a routerLink="/auth/forgot-password" class="forgot-link">
+              Forgot your password?
+            </a>
           </div>
         </form>
       </mat-card-content>
 
-      <!-- Actions d'authentification (inscription) -->
       <mat-card-actions class="auth-actions">
         <p class="signup-prompt">
           Don't have an account?
