@@ -6,7 +6,6 @@ import {
   ReactiveFormsModule,
   Validators,
   AbstractControl,
-  ValidationErrors,
 } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,72 +14,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { Router, RouterLink } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AuthService } from '../../services/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-function passwordStrengthValidator(
-  control: AbstractControl
-): ValidationErrors | null {
-  const value = control.value;
-
-  // Don't validate empty values
-  if (!value || value.length === 0) {
-    return null;
-  }
-
-  const errors: ValidationErrors = {};
-
-  // Check minimum length
-  if (value.length < 8) {
-    errors['minlength'] = { requiredLength: 8, actualLength: value.length };
-  }
-
-  // Check character requirements
-  const hasUpperCase = /[A-Z]/.test(value);
-  const hasLowerCase = /[a-z]/.test(value);
-  const hasNumeric = /[0-9]/.test(value);
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-
-  if (!hasUpperCase || !hasLowerCase || !hasNumeric || !hasSpecialChar) {
-    errors['pattern'] = true;
-  }
-
-  // Return null if no errors (valid), otherwise return errors object
-  return Object.keys(errors).length > 0 ? errors : null;
-}
-
-// Improved password match validator
-function passwordMatchValidator(
-  form: AbstractControl
-): ValidationErrors | null {
-  if (!(form instanceof FormGroup)) return null;
-
-  const password = form.get('password');
-  const confirmPassword = form.get('confirmPassword');
-
-  if (!password || !confirmPassword) return null;
-
-  // Only validate if both fields have values
-  if (password.value && confirmPassword.value) {
-    if (password.value !== confirmPassword.value) {
-      // Set error on confirmPassword control
-      confirmPassword.setErrors({
-        ...confirmPassword.errors,
-        passwordMismatch: true,
-      });
-      return { passwordMismatch: true };
-    } else {
-      // Clear passwordMismatch error if passwords match
-      if (confirmPassword.errors?.['passwordMismatch']) {
-        const { passwordMismatch, ...otherErrors } = confirmPassword.errors;
-        const hasOtherErrors = Object.keys(otherErrors).length > 0;
-        confirmPassword.setErrors(hasOtherErrors ? otherErrors : null);
-      }
-    }
-  }
-
-  return null;
-}
+import { AuthService } from '../../services/auth.service';
+import { PasswordStrengthService } from '../../services/password-strength.service';
+import { passwordMatchValidator } from '../../../../shared/validators/password-validator';
+import { emailValidator } from '../../../../shared/validators/email-validator';
 
 @Component({
   selector: 'app-register',
@@ -104,6 +43,7 @@ export class RegisterComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly passwordStrengthService = inject(PasswordStrengthService);
 
   hidePassword = signal(true);
   hideConfirmPassword = signal(true);
@@ -116,15 +56,8 @@ export class RegisterComponent implements OnInit {
     this.registerForm = this.fb.group(
       {
         name: ['', [Validators.required, Validators.minLength(2)]],
-        email: ['', [Validators.required, Validators.email]],
-        password: [
-          '',
-          [
-            Validators.required,
-            Validators.minLength(8),
-            passwordStrengthValidator,
-          ],
-        ],
+        email: ['', [Validators.required, emailValidator]],
+        password: ['', [Validators.required, Validators.minLength(8)]],
         confirmPassword: ['', [Validators.required]],
         agreeToTerms: [false, [Validators.requiredTrue]],
       },
@@ -177,38 +110,14 @@ export class RegisterComponent implements OnInit {
     const password = this.registerForm.get('password')?.value;
     if (!password) return 'weak';
 
-    let score = 0;
-
-    // Length checks
-    if (password.length >= 8) score++;
-    if (password.length >= 12) score++;
-
-    // Character variety checks
-    if (/[a-z]/.test(password)) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-
-    if (score <= 3) return 'weak';
-    if (score <= 5) return 'medium';
-    return 'strong';
+    return this.passwordStrengthService.getPasswordStrength(password);
   }
 
   getPasswordStrengthText(): string {
     const strength = this.getPasswordStrength();
-    switch (strength) {
-      case 'weak':
-        return 'Weak password';
-      case 'medium':
-        return 'Good password';
-      case 'strong':
-        return 'Strong password';
-      default:
-        return '';
-    }
+    return this.passwordStrengthService.getPasswordStrengthText(strength);
   }
 
-  // Improved error display methods
   shouldShowPasswordError(): boolean {
     const passwordControl = this.registerForm.get('password');
     return !!(passwordControl?.invalid && passwordControl?.touched);
@@ -225,10 +134,8 @@ export class RegisterComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    // Mark all fields as touched to show validation errors
     this.registerForm.markAllAsTouched();
 
-    // Update validity for all controls
     Object.keys(this.registerForm.controls).forEach((key) => {
       const control = this.registerForm.get(key);
       control?.updateValueAndValidity({ onlySelf: false });
@@ -239,7 +146,6 @@ export class RegisterComponent implements OnInit {
     if (this.registerForm.invalid) {
       console.log('Form invalid, errors:', this.registerForm.errors);
 
-      // Find first invalid field and focus it
       const firstInvalidField = Object.keys(this.registerForm.controls).find(
         (key) => this.registerForm.get(key)?.invalid
       );
