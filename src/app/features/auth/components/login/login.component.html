@@ -20,15 +20,15 @@
 
       <mat-card-content class="auth-content">
         @if (errorMessage()) {
-        <div class="error-banner">
+        <div class="auth-error-banner">
           <mat-icon>error_outline</mat-icon>
           <span>{{ errorMessage() }}</span>
         </div>
         }
 
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
-          <!-- Email field with custom styling to prevent overlap -->
-          <div class="custom-input-field">
+          <!-- Email field -->
+          <div class="auth-form-field" [class.has-error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
             <label class="field-label" for="email">Email Address</label>
             <div class="input-container">
               <mat-icon class="prefix-icon">email</mat-icon>
@@ -40,18 +40,22 @@
                 autocomplete="email"
               />
             </div>
-            @if (loginForm.get('email')?.invalid &&
-            loginForm.get('email')?.touched) {
-            <div class="error-message">
-              @if (loginForm.get('email')?.errors?.['required']) { Email is
-              required } @else if (loginForm.get('email')?.errors?.['email']) {
-              Please enter a valid email address }
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+            <div class="field-error">
+              <mat-icon class="error-icon">error</mat-icon>
+              <span>
+                @if (loginForm.get('email')?.errors?.['required']) {
+                  Email is required
+                } @else if (loginForm.get('email')?.errors?.['email']) {
+                  Please enter a valid email address
+                }
+              </span>
             </div>
             }
           </div>
 
-          <!-- Password field with custom styling to prevent overlap -->
-          <div class="custom-input-field">
+          <!-- Password field -->
+          <div class="auth-form-field" [class.has-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
             <label class="field-label" for="password">Password</label>
             <div class="input-container">
               <mat-icon class="prefix-icon">lock_outline</mat-icon>
@@ -66,17 +70,21 @@
                 type="button"
                 class="visibility-toggle"
                 (click)="togglePasswordVisibility()"
+                [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
               >
                 <mat-icon>{{
                   hidePassword() ? "visibility" : "visibility_off"
                 }}</mat-icon>
               </button>
             </div>
-            @if (loginForm.get('password')?.invalid &&
-            loginForm.get('password')?.touched) {
-            <div class="error-message">
-              @if (loginForm.get('password')?.errors?.['required']) { Password
-              is required }
+            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+            <div class="field-error">
+              <mat-icon class="error-icon">error</mat-icon>
+              <span>
+                @if (loginForm.get('password')?.errors?.['required']) {
+                  Password is required
+                }
+              </span>
             </div>
             }
           </div>
@@ -86,15 +94,19 @@
             color="primary"
             type="submit"
             class="auth-submit-btn"
+            [class.loading]="isLoading()"
             [disabled]="loginForm.invalid || isLoading()"
           >
             @if (isLoading()) {
             <mat-spinner diameter="20" class="spinner"></mat-spinner>
-            Signing in... } @else { Sign In }
+            Signing in...
+            } @else {
+            Sign In
+            }
           </button>
 
           <div class="auth-links">
-            <a routerLink="/auth/forgot-password" class="forgot-link">
+            <a routerLink="/auth/forgot-password" class="auth-link">
               Forgot your password?
             </a>
           </div>
@@ -102,9 +114,9 @@
       </mat-card-content>
 
       <mat-card-actions class="auth-actions">
-        <p class="signup-prompt">
+        <p class="auth-prompt">
           Don't have an account?
-          <a routerLink="/auth/register" class="signup-link">Sign up here</a>
+          <a routerLink="/auth/register" class="auth-prompt-link">Sign up here</a>
         </p>
       </mat-card-actions>
     </mat-card>
