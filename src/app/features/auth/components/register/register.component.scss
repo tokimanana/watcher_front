@@ -1,195 +1,283 @@
-.auth-page {
-  min-height: 100vh;
-  background: linear-gradient(
-    135deg,
-    var(--color-background) 0%,
-    var(--color-background-secondary) 100%
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-lg);
-}
-
-.auth-container {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2xl);
-  max-width: 1000px;
-  width: 100%;
-}
-
-.auth-brand {
-  flex: 1;
-  text-align: center;
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-}
-
-.brand-logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(
-    145deg,
-    var(--color-primary),
-    var(--color-primary-dark)
-  );
-  border-radius: var(--radius-full);
-  margin-bottom: var(--spacing-lg);
-  box-shadow: var(--shadow-lg);
-}
-
-.logo-icon {
-  font-size: 2.5rem;
-  color: var(--color-text-inverse);
-}
-
-.brand-title {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
-  margin: 0 0 var(--spacing-sm) 0;
-}
-
-.brand-subtitle {
-  font-size: var(--font-size-lg);
-  color: var(--color-text-secondary);
-  margin: 0;
-  line-height: 1.5;
-}
+// Utilise tous les styles de base d'_auth-forms.scss
+@import "../../../../../styles.scss";
 
 .auth-card {
-  flex: 0 0 400px;
-  max-width: 400px;
-  padding: var(--spacing-lg);
-  box-shadow: var(--shadow-xl);
-  border: 1px solid rgba(139, 69, 19, 0.1);
+  // Utilise déjà auth-card-large dans le HTML pour plus d'espace
+  &.auth-card-large {
+    flex: 0 0 480px;
+    max-width: 480px;
 
-  @media (max-width: 768px) {
-    flex: 1;
-    max-width: 100%;
-    padding: var(--spacing-md);
+    @include tablet {
+      max-width: 520px;
+    }
+
+    @include mobile {
+      flex: 1;
+      max-width: 100%;
+    }
   }
 }
 
-.auth-header {
-  text-align: center;
-  margin-bottom: var(--spacing-xl);
-}
-
-.auth-title {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-xs) 0;
-}
-
-.auth-subtitle {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-base);
-  margin: 0;
-}
-
-.error-banner {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: rgba(205, 92, 92, 0.1);
-  border: 1px solid var(--color-error);
-  border-radius: var(--radius-md);
-  color: var(--color-error);
-  margin-bottom: var(--spacing-lg);
-  font-size: var(--font-size-sm);
-}
-
+// Espacement réduit pour les formulaires plus longs
 .auth-form {
+  gap: var(--spacing-sm);
+
+  .auth-form-field {
+    margin-bottom: var(--spacing-sm);
+
+    // Espacement supplémentaire pour les champs avec indicateurs
+    &:has(.password-strength) {
+      margin-bottom: var(--spacing-md);
+    }
+  }
+}
+
+// Override pour le header avec moins d'espacement
+.auth-header {
+  margin-bottom: var(--spacing-lg);
+
+  @include mobile {
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+// Styles spécifiques pour l'indicateur de force du mot de passe
+.password-strength {
+  margin-top: var(--spacing-sm);
+
+  .strength-meter {
+    height: 3px;
+    background: var(--color-surface-variant);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--spacing-xs);
+
+    .strength-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width var(--transition-normal), background-color var(--transition-normal);
+
+      &.weak {
+        background: linear-gradient(90deg, var(--color-error), var(--color-error-light));
+        width: 33%;
+      }
+
+      &.medium {
+        background: linear-gradient(90deg, var(--color-warning), var(--color-warning-light));
+        width: 66%;
+      }
+
+      &.strong {
+        background: linear-gradient(90deg, var(--color-success), var(--color-success-light));
+        width: 100%;
+      }
+    }
+  }
+
+  .strength-text {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &.weak {
+      color: var(--color-error);
+    }
+    &.medium {
+      color: var(--color-warning-dark);
+    }
+    &.strong {
+      color: var(--color-success-dark);
+    }
+  }
+}
+
+// Styles pour la checkbox des termes et conditions
+.auth-checkbox {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
+  align-items: flex-start;
+  margin: var(--spacing-md) 0;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  position: relative;
 
-.form-field {
-  width: 100%;
-}
+  &:hover {
+    opacity: 0.8;
+  }
 
-.auth-submit-btn {
-  width: 100%;
-  height: 48px;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  margin-top: var(--spacing-md);
+  input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 18px;
+    width: 18px;
+    margin: 0;
+    z-index: 1;
 
-  .spinner {
+    &:checked ~ .checkmark {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+
+      &::after {
+        display: block;
+      }
+    }
+
+    &:focus ~ .checkmark {
+      box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2);
+    }
+
+    &:focus-visible ~ .checkmark {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  .checkmark {
+    height: 18px;
+    width: 18px;
+    background-color: var(--color-surface);
+    border: 2px solid rgba(139, 69, 19, 0.3);
+    border-radius: var(--radius-sm);
+    position: relative;
     margin-right: var(--spacing-sm);
+    margin-top: 2px;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+
+    &::after {
+      content: "";
+      position: absolute;
+      display: none;
+      left: 5px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid var(--color-text-inverse);
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+
+  .checkbox-text {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: var(--font-weight-medium);
+      transition: all var(--transition-fast);
+
+      &:hover {
+        text-decoration: underline;
+        color: var(--color-primary-light);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 1px;
+        border-radius: var(--radius-sm);
+      }
+    }
+  }
+
+  &:hover .checkmark {
+    border-color: var(--color-primary);
+  }
+
+  // État d'erreur pour la checkbox
+  &.has-error {
+    .checkmark {
+      border-color: var(--color-error);
+    }
+
+    .checkbox-text {
+      color: var(--color-error);
+    }
   }
 }
 
-.auth-links {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--spacing-lg);
-}
+// Animation progressive pour les champs du formulaire
+.auth-form-field {
+  animation: slideUpStagger 0.4s ease-out;
+  animation-fill-mode: both;
+  opacity: 0;
 
-.terms-text {
-  text-align: center;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.terms-link {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: var(--font-weight-medium);
-
-  &:hover {
-    text-decoration: underline;
+  &:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  &:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  &:nth-child(4) {
+    animation-delay: 0.25s;
+  }
+  &:nth-child(5) {
+    animation-delay: 0.3s;
   }
 }
 
-.auth-actions {
-  padding: var(--spacing-lg) 0 0 0;
-  justify-content: center;
-  border-top: 1px solid rgba(139, 69, 19, 0.1);
-  margin-top: var(--spacing-lg);
+// Animation pour la checkbox
+.auth-checkbox {
+  animation: slideUpStagger 0.4s ease-out;
+  animation-fill-mode: both;
+  animation-delay: 0.35s;
+  opacity: 0;
 }
 
-.signin-prompt {
-  text-align: center;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  margin: 0;
+// Animation pour le bouton
+.auth-submit-btn {
+  animation: slideUpStagger 0.4s ease-out;
+  animation-fill-mode: both;
+  animation-delay: 0.4s;
+  opacity: 0;
 }
 
-.signin-link {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: var(--font-weight-semibold);
-  margin-left: var(--spacing-xs);
-
-  &:hover {
-    text-decoration: underline;
+@keyframes slideUpStagger {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-// Mobile responsiveness
-@media (max-width: 768px) {
-  .auth-page {
-    padding: var(--spacing-md);
+// Responsive adjustments
+@include mobile {
+  .auth-form {
+    gap: var(--spacing-xs);
   }
 
-  .auth-container {
-    gap: 0;
+  .auth-form-field {
+    margin-bottom: var(--spacing-xs);
+
+    &:has(.password-strength) {
+      margin-bottom: var(--spacing-sm);
+    }
   }
 
-  .auth-card {
-    box-shadow: var(--shadow-md);
+  .auth-checkbox {
+    margin: var(--spacing-sm) 0;
+
+    .checkbox-text {
+      font-size: var(--font-size-xs);
+    }
+  }
+
+  // Désactiver les animations sur mobile pour de meilleures performances
+  @media (prefers-reduced-motion: reduce) {
+    .auth-form-field,
+    .auth-checkbox,
+    .auth-submit-btn {
+      animation: none;
+      opacity: 1;
+    }
   }
 }

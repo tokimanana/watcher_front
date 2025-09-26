@@ -5,100 +5,155 @@
 // Color Palette
 :root {
   // Primary Colors
-  --color-primary: #8B4513;
+  --color-primary: #8b4513;
   --color-primary-dark: #654321;
-  --color-primary-light: #A0522D;
+  --color-primary-light: #a0522d;
+  --color-primary-hover: #9a4f16; // Nouvelle couleur pour hover
 
   // Secondary Colors
-  --color-secondary: #CD853F;
-  --color-secondary-dark: #B8860B;
-  --color-secondary-light: #DAA520;
+  --color-secondary: #cd853f;
+  --color-secondary-dark: #b8860b;
+  --color-secondary-light: #daa520;
 
   // Neutral Colors
-  --color-background: #FDF5E6;
-  --color-background-secondary: #F5E6D3;
-  --color-surface: #FAF5EF;
-  --color-surface-variant: #F8F4F0;
+  --color-background: #fdf5e6;
+  --color-background-secondary: #f5e6d3;
+  --color-surface: #faf5ef;
+  --color-surface-variant: #f8f4f0;
 
   // Text Colors
-  --color-text-primary: #2F1B14;
-  --color-text-secondary: #8B7355;
-  --color-text-muted: #A0958A;
-  --color-text-inverse: #FFFFFF;
+  --color-text-primary: #2f1b14;
+  --color-text-secondary: #8b7355;
+  --color-text-muted: #a0958a;
+  --color-text-inverse: #ffffff;
 
   // Status Colors
-  --color-success: #8FBC8F;
-  --color-success-dark: #6B8E6B;
-  --color-warning: #D2691E;
-  --color-warning-dark: #A0522D;
-  --color-error: #CD5C5C;
-  --color-error-dark: #B22222;
+  --color-success: #8fbc8f;
+  --color-success-dark: #6b8e6b;
+  --color-success-light: #98fb98; // Nouvelle couleur
+  --color-warning: #d2691e;
+  --color-warning-dark: #a0522d;
+  --color-warning-light: #ff8c00; // Nouvelle couleur
+  --color-error: #cd5c5c;
+  --color-error-dark: #b22222;
+  --color-error-light: #f08080; // Nouvelle couleur
   --color-info: #708090;
-  --color-info-dark: #556B2F;
+  --color-info-dark: #556b2f;
+  --color-info-light: #87ceeb; // Nouvelle couleur
 
   // Shadows
   --shadow-sm: 0 2px 4px rgba(139, 69, 19, 0.1);
   --shadow-md: 0 4px 8px rgba(139, 69, 19, 0.15);
   --shadow-lg: 0 8px 16px rgba(139, 69, 19, 0.2);
   --shadow-xl: 0 12px 24px rgba(139, 69, 19, 0.25);
+  --shadow-2xl: 0 16px 32px rgba(139, 69, 19, 0.3); // Nouvelle ombre
 
   // Border Radius
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
+  --radius-2xl: 20px; // Nouveau rayon
   --radius-full: 9999px;
 
   // Spacing
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
+  --spacing-xs: 0.25rem; // 4px
+  --spacing-sm: 0.5rem; // 8px
+  --spacing-md: 1rem; // 16px
+  --spacing-lg: 1.5rem; // 24px
+  --spacing-xl: 2rem; // 32px
+  --spacing-2xl: 3rem; // 48px
+  --spacing-3xl: 4rem; // 64px - Nouveau spacing
 
   // Typography
-  --font-family-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --font-family-secondary: 'Georgia', serif;
+  --font-family-primary: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-family-secondary: "Georgia", serif;
+  --font-family-mono: "Courier New", monospace; // Nouvelle police
 
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
+  --font-size-xs: 0.75rem; // 12px
+  --font-size-sm: 0.875rem; // 14px
+  --font-size-base: 1rem; // 16px
+  --font-size-lg: 1.125rem; // 18px
+  --font-size-xl: 1.25rem; // 20px
+  --font-size-2xl: 1.5rem; // 24px
+  --font-size-3xl: 1.875rem; // 30px
+  --font-size-4xl: 2.25rem; // 36px - Nouvelle taille
 
+  --font-weight-light: 300; // Nouveau poids
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
+  --font-weight-extrabold: 800; // Nouveau poids
+
+  // Line Heights
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
 
   // Transitions
   --transition-fast: 0.15s ease-in-out;
   --transition-normal: 0.3s ease-in-out;
   --transition-slow: 0.5s ease-in-out;
+  --transition-bounce: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); // Nouvelle transition
+
+  // Z-Index Scale
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+
+  // Breakpoints (pour référence - utilisés dans mixins)
+  --breakpoint-mobile: 768px;
+  --breakpoint-tablet: 1024px;
+  --breakpoint-desktop: 1200px;
 }
 
 // Dark Theme Variables
 [data-theme="dark"] {
-  --color-background: #1A1A1A;
-  --color-background-secondary: #2D2D2D;
-  --color-surface: #2D2D2D;
-
+  --color-background: #1a1a1a;
+  --color-background-secondary: #2d2d2d;
+  --color-surface: #2d2d2d;
   --color-surface-variant: #404040;
 
-  --color-text-primary: #F5F5F5;
-  --color-text-secondary: #CCCCCC;
+  --color-text-primary: #f5f5f5;
+  --color-text-secondary: #cccccc;
   --color-text-muted: #999999;
 
+  // Ajustement des couleurs primaires pour le dark mode
+  --color-primary: #b8860b;
+  --color-primary-light: #daa520;
+  --color-primary-hover: #cd853f;
+
+  // Shadows plus prononcées pour le dark mode
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.6);
+  --shadow-2xl: 0 16px 32px rgba(0, 0, 0, 0.7);
 }
 
-// SCSS Variables for backward compatibility
+// High Contrast Theme (pour accessibilité)
+[data-theme="high-contrast"] {
+  --color-primary: #000000;
+  --color-primary-dark: #000000;
+  --color-primary-light: #333333;
+
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-text-primary: #000000;
+  --color-text-secondary: #000000;
+
+  --color-error: #ff0000;
+  --color-success: #008000;
+  --color-warning: #ff8c00;
+}
+
+// SCSS Variables pour rétrocompatibilité
 $primary: var(--color-primary);
 $primary-dark: var(--color-primary-dark);
 $primary-light: var(--color-primary-light);
@@ -110,3 +165,8 @@ $background: var(--color-background);
 $surface: var(--color-surface);
 $text-primary: var(--color-text-primary);
 $text-secondary: var(--color-text-secondary);
+
+// Breakpoints SCSS
+$mobile: 767px;
+$tablet: 768px;
+$desktop: 1024px;
