@@ -1,10 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
   Validators,
+  AbstractControl,
+  ValidationErrors,
 } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,45 +18,65 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../services/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-// Custom validator for password confirmation
-function passwordMatchValidator(form: FormGroup) {
-  const password = form.get('password');
-  const confirmPassword = form.get('confirmPassword');
-
-  if (password && confirmPassword && password.value !== confirmPassword.value) {
-    confirmPassword.setErrors({ passwordMismatch: true });
-    return { passwordMismatch: true };
-  }
-
-  if (confirmPassword?.hasError('passwordMismatch')) {
-    const errors = { ...confirmPassword.errors };
-    delete errors['passwordMismatch'];
-    const hasOtherErrors = Object.keys(errors).length > 0;
-    confirmPassword.setErrors(hasOtherErrors ? errors : null);
-  }
-
-  return null;
-}
-
-// Password strength validator
-function passwordStrengthValidator(control: any) {
+function passwordStrengthValidator(
+  control: AbstractControl
+): ValidationErrors | null {
   const value = control.value;
-  if (!value) return null;
 
+  // Don't validate empty values
+  if (!value || value.length === 0) {
+    return null;
+  }
+
+  const errors: ValidationErrors = {};
+
+  // Check minimum length
+  if (value.length < 8) {
+    errors['minlength'] = { requiredLength: 8, actualLength: value.length };
+  }
+
+  // Check character requirements
   const hasUpperCase = /[A-Z]/.test(value);
   const hasLowerCase = /[a-z]/.test(value);
   const hasNumeric = /[0-9]/.test(value);
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-  const isValidLength = value.length >= 8;
 
-  if (
-    !hasUpperCase ||
-    !hasLowerCase ||
-    !hasNumeric ||
-    !hasSpecialChar ||
-    !isValidLength
-  ) {
-    return { pattern: true };
+  if (!hasUpperCase || !hasLowerCase || !hasNumeric || !hasSpecialChar) {
+    errors['pattern'] = true;
+  }
+
+  // Return null if no errors (valid), otherwise return errors object
+  return Object.keys(errors).length > 0 ? errors : null;
+}
+
+// Improved password match validator
+function passwordMatchValidator(
+  form: AbstractControl
+): ValidationErrors | null {
+  if (!(form instanceof FormGroup)) return null;
+
+  const password = form.get('password');
+  const confirmPassword = form.get('confirmPassword');
+
+  if (!password || !confirmPassword) return null;
+
+  // Only validate if both fields have values
+  if (password.value && confirmPassword.value) {
+    if (password.value !== confirmPassword.value) {
+      // Set error on confirmPassword control
+      confirmPassword.setErrors({
+        ...confirmPassword.errors,
+        passwordMismatch: true,
+      });
+      return { passwordMismatch: true };
+    } else {
+      // Clear passwordMismatch error if passwords match
+      if (confirmPassword.errors?.['passwordMismatch']) {
+        const { passwordMismatch, ...otherErrors } = confirmPassword.errors;
+        const hasOtherErrors = Object.keys(otherErrors).length > 0;
+        confirmPassword.setErrors(hasOtherErrors ? otherErrors : null);
+      }
+    }
   }
 
   return null;
@@ -77,7 +99,7 @@ function passwordStrengthValidator(control: any) {
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
@@ -110,6 +132,39 @@ export class RegisterComponent {
     );
   }
 
+  ngOnInit() {
+    // Listen to password changes to update validation and strength indicator
+    this.registerForm.get('password')?.valueChanges.subscribe(() => {
+      // Force re-validation of the password field
+      const passwordControl = this.registerForm.get('password');
+      if (passwordControl) {
+        passwordControl.updateValueAndValidity({
+          onlySelf: false,
+          emitEvent: false,
+        });
+      }
+
+      // Also update confirm password validation when password changes
+      const confirmPasswordControl = this.registerForm.get('confirmPassword');
+      if (confirmPasswordControl?.touched || confirmPasswordControl?.dirty) {
+        this.registerForm.updateValueAndValidity({
+          onlySelf: false,
+          emitEvent: false,
+        });
+      }
+    });
+
+    // Listen to confirm password changes
+    this.registerForm.get('confirmPassword')?.valueChanges.subscribe(() => {
+      if (this.registerForm.get('confirmPassword')?.touched) {
+        this.registerForm.updateValueAndValidity({
+          onlySelf: false,
+          emitEvent: false,
+        });
+      }
+    });
+  }
+
   togglePasswordVisibility(): void {
     this.hidePassword.update((value) => !value);
   }
@@ -124,7 +179,7 @@ export class RegisterComponent {
 
     let score = 0;
 
-    // Length check
+    // Length checks
     if (password.length >= 8) score++;
     if (password.length >= 12) score++;
 
@@ -134,8 +189,8 @@ export class RegisterComponent {
     if (/[0-9]/.test(password)) score++;
     if (/[^A-Za-z0-9]/.test(password)) score++;
 
-    if (score < 3) return 'weak';
-    if (score < 5) return 'medium';
+    if (score <= 3) return 'weak';
+    if (score <= 5) return 'medium';
     return 'strong';
   }
 
@@ -153,9 +208,48 @@ export class RegisterComponent {
     }
   }
 
+  // Improved error display methods
+  shouldShowPasswordError(): boolean {
+    const passwordControl = this.registerForm.get('password');
+    return !!(passwordControl?.invalid && passwordControl?.touched);
+  }
+
+  shouldShowConfirmPasswordError(): boolean {
+    const confirmPasswordControl = this.registerForm.get('confirmPassword');
+    const formHasMismatchError = this.registerForm.errors?.['passwordMismatch'];
+
+    return !!(
+      (confirmPasswordControl?.invalid && confirmPasswordControl?.touched) ||
+      (formHasMismatchError && confirmPasswordControl?.touched)
+    );
+  }
+
   async onSubmit(): Promise<void> {
+    // Mark all fields as touched to show validation errors
+    this.registerForm.markAllAsTouched();
+
+    // Update validity for all controls
+    Object.keys(this.registerForm.controls).forEach((key) => {
+      const control = this.registerForm.get(key);
+      control?.updateValueAndValidity({ onlySelf: false });
+    });
+
+    this.registerForm.updateValueAndValidity();
+
     if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched();
+      console.log('Form invalid, errors:', this.registerForm.errors);
+
+      // Find first invalid field and focus it
+      const firstInvalidField = Object.keys(this.registerForm.controls).find(
+        (key) => this.registerForm.get(key)?.invalid
+      );
+
+      if (firstInvalidField) {
+        const element = document.getElementById(firstInvalidField);
+        if (element) {
+          element.focus();
+        }
+      }
       return;
     }
 

@@ -1,6 +1,6 @@
 // Utilise tous les styles de base d'_auth-forms.scss
-// Override pour utiliser la version large de la carte
 @import "../../../../../styles.scss";
+
 .auth-card {
   // Utilise déjà auth-card-large dans le HTML pour plus d'espace
   &.auth-card-large {
@@ -55,33 +55,20 @@
     .strength-fill {
       height: 100%;
       border-radius: var(--radius-full);
-      transition: width var(--transition-normal),
-        background-color var(--transition-normal);
+      transition: width var(--transition-normal), background-color var(--transition-normal);
 
       &.weak {
-        background: linear-gradient(
-          90deg,
-          var(--color-error),
-          var(--color-error-light)
-        );
+        background: linear-gradient(90deg, var(--color-error), var(--color-error-light));
         width: 33%;
       }
 
       &.medium {
-        background: linear-gradient(
-          90deg,
-          var(--color-warning),
-          var(--color-warning-light)
-        );
+        background: linear-gradient(90deg, var(--color-warning), var(--color-warning-light));
         width: 66%;
       }
 
       &.strong {
-        background: linear-gradient(
-          90deg,
-          var(--color-success),
-          var(--color-success-light)
-        );
+        background: linear-gradient(90deg, var(--color-success), var(--color-success-light));
         width: 100%;
       }
     }
@@ -112,18 +99,22 @@
   margin: var(--spacing-md) 0;
   cursor: pointer;
   transition: opacity var(--transition-fast);
+  position: relative;
 
   &:hover {
     opacity: 0.8;
   }
 
   input[type="checkbox"] {
-    opacity: 0;
     position: absolute;
-    width: 0;
-    height: 0;
+    opacity: 0;
+    cursor: pointer;
+    height: 18px;
+    width: 18px;
+    margin: 0;
+    z-index: 1;
 
-    &:checked + .checkmark {
+    &:checked ~ .checkmark {
       background-color: var(--color-primary);
       border-color: var(--color-primary);
 
@@ -132,11 +123,11 @@
       }
     }
 
-    &:focus + .checkmark {
+    &:focus ~ .checkmark {
       box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2);
     }
 
-    &:focus-visible + .checkmark {
+    &:focus-visible ~ .checkmark {
       outline: 2px solid var(--color-primary);
       outline-offset: 2px;
     }

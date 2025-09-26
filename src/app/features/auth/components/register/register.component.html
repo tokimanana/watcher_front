@@ -100,10 +100,7 @@
           <!-- Password field -->
           <div
             class="auth-form-field"
-            [class.has-error]="
-              registerForm.get('password')?.invalid &&
-              registerForm.get('password')?.touched
-            "
+            [class.has-error]="shouldShowPasswordError()"
           >
             <label class="field-label" for="password">Password</label>
             <div class="input-container">
@@ -128,8 +125,7 @@
                 }}</mat-icon>
               </button>
             </div>
-            @if (registerForm.get('password')?.invalid &&
-            registerForm.get('password')?.touched) {
+            @if (shouldShowPasswordError()) {
             <div class="field-error">
               <mat-icon class="error-icon">error</mat-icon>
               <span>
@@ -138,8 +134,8 @@
                 (registerForm.get('password')?.errors?.['minlength']) { Password
                 must be at least 8 characters } @else if
                 (registerForm.get('password')?.errors?.['pattern']) { Password
-                must contain at least one uppercase, lowercase, number and
-                special character }
+                must contain at least one uppercase letter, one lowercase
+                letter, one number, and one special character }
               </span>
             </div>
             }
@@ -164,10 +160,7 @@
           <!-- Confirm Password field -->
           <div
             class="auth-form-field"
-            [class.has-error]="
-              registerForm.get('confirmPassword')?.invalid &&
-              registerForm.get('confirmPassword')?.touched
-            "
+            [class.has-error]="shouldShowConfirmPasswordError()"
           >
             <label class="field-label" for="confirmPassword"
               >Confirm Password</label
@@ -194,8 +187,7 @@
                 }}</mat-icon>
               </button>
             </div>
-            @if (registerForm.get('confirmPassword')?.invalid &&
-            registerForm.get('confirmPassword')?.touched) {
+            @if (shouldShowConfirmPasswordError()) {
             <div class="field-error">
               <mat-icon class="error-icon">error</mat-icon>
               <span>
@@ -209,15 +201,26 @@
           </div>
 
           <!-- Terms & Conditions -->
-          <div class="auth-checkbox">
+          <label class="auth-checkbox" for="terms">
             <input type="checkbox" id="terms" formControlName="agreeToTerms" />
             <div class="checkmark"></div>
             <div class="checkbox-text">
               By creating an account, you agree to our
-              <a href="/terms" target="_blank">Terms of Service</a> and
-              <a href="/privacy" target="_blank">Privacy Policy</a>
+              <a
+                href="/terms"
+                target="_blank"
+                (click)="$event.stopPropagation()"
+                >Terms of Service</a
+              >
+              and
+              <a
+                href="/privacy"
+                target="_blank"
+                (click)="$event.stopPropagation()"
+                >Privacy Policy</a
+              >
             </div>
-          </div>
+          </label>
 
           <button
             mat-raised-button
