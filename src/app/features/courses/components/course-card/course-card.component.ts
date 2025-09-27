@@ -8,7 +8,6 @@ import { Course } from '../../../../core/models/course.model';
 import { StarRatingComponent } from '../../../../shared/components/ui/star-rating/star-rating.component';
 import { DifficultyBadgeComponent } from '../difficulty-badge/difficulty-badge.component';
 import { PlatformBadgeComponent } from '../platform-badge/platform-badge.component';
-import { PlatformIconPipe } from '../../../../shared/pipes/platform-icon.pipe';
 
 @Component({
   selector: 'app-course-card',
@@ -20,7 +19,6 @@ import { PlatformIconPipe } from '../../../../shared/pipes/platform-icon.pipe';
     StarRatingComponent,
     DifficultyBadgeComponent,
     PlatformBadgeComponent,
-    PlatformIconPipe
   ],
   templateUrl: './course-card.component.html',
   styleUrls: ['./course-card.component.scss'],
