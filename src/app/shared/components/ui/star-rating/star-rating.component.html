@@ -1,0 +1,17 @@
+<div class="star-rating" [class.small]="small()">
+  @for (star of stars(); track star) {
+  <mat-icon
+    class="star-icon"
+    [class.filled]="star <= Math.floor(rating())"
+    [class.half]="star === Math.ceil(rating()) && !Number.isInteger(rating())"
+  >
+    {{
+      star <= rating()
+        ? "star"
+        : star === Math.ceil(rating()) && !Number.isInteger(rating())
+        ? "star_half"
+        : "star_border"
+    }}
+  </mat-icon>
+  }
+</div>

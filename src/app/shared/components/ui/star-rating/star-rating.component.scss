@@ -1,0 +1,26 @@
+.star-rating {
+  display: inline-flex;
+  align-items: center;
+}
+
+.star-icon {
+  color: var(--color-warning);
+  width: 24px;
+  height: 24px;
+
+  &.filled {
+    color: var(--color-warning);
+  }
+
+  &.half {
+    color: var(--color-warning);
+  }
+}
+
+.small {
+  .star-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
