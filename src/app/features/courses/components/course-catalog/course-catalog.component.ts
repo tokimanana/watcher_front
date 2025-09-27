@@ -5,6 +5,7 @@ import { Course } from '../../../../core/models/course.model';
 import { Router } from '@angular/router';
 import { PlatformBadgeComponent } from '../platform-badge/platform-badge.component';
 import { MockDataService } from '../../../../core/services/mock-data.service';
+import { DifficultyBadgeComponent } from '../difficulty-badge/difficulty-badge.component';
 
 
 interface FilterOption {
@@ -18,7 +19,8 @@ interface FilterOption {
   imports: [
     CommonModule,
     FormsModule,
-    PlatformBadgeComponent
+    PlatformBadgeComponent,
+    DifficultyBadgeComponent
   ],
   templateUrl: './course-catalog.component.html',
   styleUrl: './course-catalog.component.scss'
@@ -279,14 +281,5 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
   getSelectedOptionLabel(options: FilterOption[], selectedValue: string): string {
     const option = options.find(opt => opt.value === selectedValue);
     return option ? option.label : '';
-  }
-
-  getDifficultyClass(difficulty: string): string {
-    switch(difficulty.toLowerCase()) {
-      case 'beginner': return 'beginner';
-      case 'intermediate': return 'intermediate';
-      case 'advanced': return 'advanced';
-      default: return '';
-    }
   }
 }

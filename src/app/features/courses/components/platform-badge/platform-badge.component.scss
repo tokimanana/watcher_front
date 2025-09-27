@@ -32,40 +32,40 @@
     white-space: nowrap;
   }
 
-  // Platform-specific styles with authentic brand colors
+  // Platform-specific styles with muted brand colors that blend better
   &.udemy {
-    background: linear-gradient(145deg, #A435F0, #8A2BE2);
-    color: #ffffff;
-    border-color: rgba(164, 53, 240, 0.3);
-    box-shadow: 0 2px 4px rgba(164, 53, 240, 0.25);
+    background: rgba(164, 53, 240, 0.15);
+    color: #7a2db8;
+    border-color: rgba(164, 53, 240, 0.25);
+    box-shadow: 0 2px 4px rgba(164, 53, 240, 0.1);
   }
 
   &.coursera {
-    background: linear-gradient(145deg, #0056D2, #0044B4);
-    color: #ffffff;
-    border-color: rgba(0, 86, 210, 0.3);
-    box-shadow: 0 2px 4px rgba(0, 86, 210, 0.25);
+    background: rgba(0, 86, 210, 0.15);
+    color: #004299;
+    border-color: rgba(0, 86, 210, 0.25);
+    box-shadow: 0 2px 4px rgba(0, 86, 210, 0.1);
   }
 
   &.youtube {
-    background: linear-gradient(145deg, #FF0000, #DC143C);
-    color: #ffffff;
-    border-color: rgba(255, 0, 0, 0.3);
-    box-shadow: 0 2px 4px rgba(255, 0, 0, 0.25);
+    background: rgba(255, 0, 0, 0.15);
+    color: #cc0000;
+    border-color: rgba(255, 0, 0, 0.25);
+    box-shadow: 0 2px 4px rgba(255, 0, 0, 0.1);
   }
 
   &.freecodecamp {
-    background: linear-gradient(145deg, #006400, #005000);
-    color: #ffffff;
-    border-color: rgba(0, 100, 0, 0.3);
-    box-shadow: 0 2px 4px rgba(0, 100, 0, 0.25);
+    background: rgba(0, 100, 0, 0.15);
+    color: #004000;
+    border-color: rgba(0, 100, 0, 0.25);
+    box-shadow: 0 2px 4px rgba(0, 100, 0, 0.1);
   }
 
   &.edx {
-    background: linear-gradient(145deg, #02262B, #012024);
-    color: #ffffff;
-    border-color: rgba(2, 38, 43, 0.3);
-    box-shadow: 0 2px 4px rgba(2, 38, 43, 0.25);
+    background: rgba(2, 38, 43, 0.15);
+    color: #012024;
+    border-color: rgba(2, 38, 43, 0.25);
+    box-shadow: 0 2px 4px rgba(2, 38, 43, 0.1);
   }
 
   // Default fallback for unknown platforms
