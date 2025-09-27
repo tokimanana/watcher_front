@@ -1,3 +1,9 @@
-<div class="platform-badge" [class]="platformClass">
-  {{ platform() }}
+<div class="platform-badge" [class]="platformClass()">
+  <img
+    [src]="platformIcon()"
+    [alt]="platform()"
+    class="platform-icon"
+    (error)="onImageError($event)"
+  />
+  <span class="platform-name">{{ platform() | titlecase }}</span>
 </div>
