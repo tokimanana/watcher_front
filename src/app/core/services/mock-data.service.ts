@@ -757,20 +757,63 @@ export class MockDataService {
   }
 
   forgotPassword(email: string): Observable<boolean> {
-  return of(true).pipe(
-    delay(300),
-    map(() => {
-      const userExists = this.users.some(user => user.email === email);
+    return of(true).pipe(
+      delay(300),
+      map(() => {
+        const userExists = this.users.some(user => user.email === email);
 
-      if (userExists) {
-        // Simulate successful email sending
-        console.log(`Mock: Password reset email sent to ${email}`);
+        if (userExists) {
+          // Simulate successful email sending
+          console.log(`Mock: Password reset email sent to ${email}`);
+          return true;
+        }
+
+        // Still return true for security (don't reveal if email exists)
         return true;
-      }
+      })
+    );
+  }
 
-      // Still return true for security (don't reveal if email exists)
-      return true;
-    })
-  );
-}
+  searchCoursesWithFilters(filters: {
+    searchTerm?: string;
+    platforms?: string[];
+    technologies?: string[];
+    difficulty?: string;
+    priceRange?: { min: number; max: number };
+    sortBy?: string;
+  }): Observable<Course[]> {
+    let filtered = [...this.courses];
+
+    if (filters.searchTerm) {
+      const term = filters.searchTerm.toLowerCase();
+      filtered = filtered.filter(course =>
+        course.title.toLowerCase().includes(term) ||
+        course.description.toLowerCase().includes(term) ||
+        course.instructor.toLowerCase().includes(term) ||
+        course.technologies.some(tech => tech.toLowerCase().includes(term))
+      );
+    }
+
+    if (filters.platforms?.length) {
+      filtered = filtered.filter(course => filters.platforms!.includes(course.platform));
+    }
+
+    if (filters.technologies?.length) {
+      filtered = filtered.filter(course =>
+        filters.technologies!.some(tech => course.technologies.includes(tech))
+      );
+    }
+
+    if (filters.difficulty) {
+      filtered = filtered.filter(course => course.difficulty === filters.difficulty);
+    }
+
+    if (filters.priceRange) {
+      filtered = filtered.filter(course =>
+        course.price >= filters.priceRange!.min && course.price <= filters.priceRange!.max
+      );
+    }
+
+    return of(filtered).pipe(delay(this.API_DELAY.fast));
+  }
 }

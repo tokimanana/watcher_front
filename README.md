@@ -56,10 +56,9 @@ This platform aggregates courses from multiple online learning platforms (Udemy,
 ### Frontend
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| **Angular** | 18 | Modern TypeScript framework |
-| **Angular Material** | 18 | UI component library (Blue/Azure theme) |
-| **SCSS** | Latest | Enhanced CSS with variables and mixins |
-| **RxJS** | Latest | Reactive programming for HTTP requests |
+| **Angular** | 18.2.0 | Modern TypeScript framework |
+| **Angular Material** | 18.2.14 | UI component library (Blue/Azure theme) |
+| **RxJS** | 7.8.0 | Reactive programming for HTTP requests |
 
 ### Backend
 | Technology | Version | Purpose |
@@ -638,10 +637,8 @@ For questions or feedback, please reach out:
 
 ---
 
-<div align="center">
 
-**Made with ❤️ for the learning community**
+Made with ❤️ for the learning community
 
-⭐ **Star this repo if you find it helpful!** ⭐
+⭐ Star this repo if you find it helpful! ⭐
 
-</div>
