@@ -1,1 +1,190 @@
-<p>course-catalog works!</p>
+<div class="catalog-container">
+  <!-- Header Section -->
+  <div class="catalog-header">
+    <h1>Course Catalog</h1>
+    <p class="catalog-subtitle">
+      Browse {{ filteredCourses().length }} of {{ totalCourses() }} courses
+    </p>
+  </div>
+
+  <!-- Search & Filter Section -->
+  <div class="search-filters">
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search for courses, instructors, or technologies..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event); onSearchChange()"
+      />
+      <button
+        *ngIf="searchQuery()"
+        class="clear-search-btn"
+        (click)="clearSearch()"
+      >
+        <span class="icon">×</span>
+      </button>
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="filter-controls">
+      <!-- Sort Dropdown -->
+      <div class="custom-select" (click)="$event.stopPropagation()">
+        <button class="select-button" (click)="toggleSortDropdown()">
+          <span>{{ getSelectedOptionLabel(sortOptions, sortBy()) }}</span>
+          <span class="icon">▼</span>
+        </button>
+        <div class="select-dropdown" *ngIf="sortDropdownOpen()">
+          <div
+            *ngFor="let option of sortOptions"
+            class="select-option"
+            [class.selected]="sortBy() === option.value"
+            (click)="selectSortOption(option.value)"
+          >
+            {{ option.label }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Platform Dropdown -->
+      <div class="custom-select" (click)="$event.stopPropagation()">
+        <button class="select-button" (click)="togglePlatformDropdown()">
+          <span>{{
+            getSelectedOptionLabel(platforms, selectedPlatform())
+          }}</span>
+          <span class="icon">▼</span>
+        </button>
+        <div class="select-dropdown" *ngIf="platformDropdownOpen()">
+          <div
+            *ngFor="let option of platforms"
+            class="select-option"
+            [class.selected]="selectedPlatform() === option.value"
+            (click)="selectPlatform(option.value)"
+          >
+            {{ option.label }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Filters Toggle -->
+      <button class="filter-toggle" (click)="toggleFilters()">
+        <span class="icon">{{ filtersExpanded() ? "−" : "+" }}</span>
+        <span>{{ filtersExpanded() ? "Less Filters" : "More Filters" }}</span>
+      </button>
+    </div>
+
+    <!-- Advanced Filters (expandable) -->
+    <div class="advanced-filters" *ngIf="filtersExpanded()">
+      <div class="filter-row">
+        <!-- Difficulty Dropdown -->
+        <div class="custom-select" (click)="$event.stopPropagation()">
+          <button class="select-button" (click)="toggleDifficultyDropdown()">
+            <span>{{
+              getSelectedOptionLabel(difficulties, selectedDifficulty())
+            }}</span>
+            <span class="icon">▼</span>
+          </button>
+          <div class="select-dropdown" *ngIf="difficultyDropdownOpen()">
+            <div
+              *ngFor="let option of difficulties"
+              class="select-option"
+              [class.selected]="selectedDifficulty() === option.value"
+              (click)="selectDifficulty(option.value)"
+            >
+              {{ option.label }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Range Dropdown -->
+        <div class="custom-select" (click)="$event.stopPropagation()">
+          <button class="select-button" (click)="togglePriceDropdown()">
+            <span>{{
+              getSelectedOptionLabel(priceRanges, selectedPrice())
+            }}</span>
+            <span class="icon">▼</span>
+          </button>
+          <div class="select-dropdown" *ngIf="priceDropdownOpen()">
+            <div
+              *ngFor="let option of priceRanges"
+              class="select-option"
+              [class.selected]="selectedPrice() === option.value"
+              (click)="selectPrice(option.value)"
+            >
+              {{ option.label }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Clear Filters -->
+        <button
+          class="clear-filters-btn"
+          *ngIf="
+            searchQuery() ||
+            selectedPlatform() !== 'all' ||
+            selectedDifficulty() !== 'all' ||
+            selectedPrice() !== 'any'
+          "
+          (click)="clearAllFilters()"
+        >
+          Clear All
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading()">
+    <div class="spinner"></div>
+    <p>Loading courses...</p>
+  </div>
+
+  <!-- Course Grid -->
+  <div class="course-grid" *ngIf="!loading()">
+    <div
+      *ngFor="let course of filteredCourses()"
+      class="course-card"
+      (click)="navigateToCourse(course.id)"
+    >
+      <div class="course-img">
+        <img
+          [src]="course.imageUrl || 'assets/images/course-placeholder.jpg'"
+          [alt]="course.title"
+        />
+      </div>
+      <div class="course-content">
+        <div class="course-platform">
+          <app-platform-badge [platform]="course.platform"></app-platform-badge>
+        </div>
+        <h3 class="course-title">{{ course.title }}</h3>
+        <div class="course-instructor">{{ course.instructor }}</div>
+        <div class="course-meta">
+          <div class="rating">★ {{ course.rating.toFixed(1) }}</div>
+          <div
+            class="difficulty"
+            [class]="getDifficultyClass(course.difficulty)"
+          >
+            {{ course.difficulty }}
+          </div>
+        </div>
+        <div class="course-price">
+          {{ course.price === 0 ? "Free" : "$" + course.price.toFixed(2) }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredCourses().length === 0">
+      <div class="empty-icon">🔍</div>
+      <h3>No courses found</h3>
+      <p>
+        Try adjusting your search or filters to find what you're looking for.
+      </p>
+      <button class="reset-btn" (click)="clearAllFilters()">
+        Reset Filters
+      </button>
+    </div>
+  </div>
+</div>
