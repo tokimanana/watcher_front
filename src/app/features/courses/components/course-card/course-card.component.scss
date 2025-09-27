@@ -1,0 +1,121 @@
+.course-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background-color: var(--surface);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .course-image-container {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+
+    .course-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .course-badges {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+
+  .course-content {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    flex: 1;
+
+    .course-title {
+      margin: 0 0 0.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .course-rating {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+
+      .rating-count {
+        margin-left: 0.25rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+    }
+
+    .course-instructor {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .course-tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+
+      .tech-tag {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        background-color: var(--surface-alt);
+        border-radius: var(--border-radius-sm);
+        color: var(--text-secondary);
+
+        &.more {
+          background-color: var(--primary-lighter);
+          color: var(--primary);
+        }
+      }
+    }
+
+    .course-price-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+
+      .course-price {
+        font-weight: 600;
+        font-size: 1.125rem;
+      }
+
+      .goto-button {
+        padding: 0.25rem 1rem;
+      }
+    }
+  }
+}
+
+// Media queries for responsive design
+@media (max-width: 768px) {
+  .course-card {
+    .course-content {
+      .course-tech-stack {
+        .tech-tag {
+          padding: 0.2rem 0.4rem;
+        }
+      }
+    }
+  }
+}
