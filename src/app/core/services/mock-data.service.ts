@@ -34,7 +34,8 @@ export class MockDataService {
       instructor: 'Maximilian Schwarzmüller',
       platform: 'udemy',
       url: 'https://www.udemy.com/course/the-complete-guide-to-angular-2/',
-      imageUrl: '/assets/images/angular-course.jpg',
+      // imageUrl: '/assets/images/angular-course.jpg',
+      imageUrl: 'https://via.placeholder.com/400x225/dd0031/ffffff?text=Angular+Complete+Guide',
       price: 89.99,
       currency: 'USD',
       rating: 4.6,
@@ -574,7 +575,10 @@ export class MockDataService {
   ];
 
   // Mock API methods with realistic delays
-  getCourses(page: number = 1, limit: number = 12): Observable<{courses: Course[], total: number}> {
+  getCourses(params: { page?: number; limit?: number } = {}): Observable<{courses: Course[], total: number}> {
+    const page = params.page || 1;
+    const limit = params.limit || 12;
+
     const start = (page - 1) * limit;
     const paginatedCourses = this.courses.slice(start, start + limit);
 

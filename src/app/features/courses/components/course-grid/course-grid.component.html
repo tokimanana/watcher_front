@@ -1,0 +1,24 @@
+<div class="course-grid">
+  @if (isLoading()) { @for (item of skeletonArray(); track item) {
+  <div class="course-grid-item">
+    <div class="course-skeleton">
+      <div class="skeleton-image"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-rating"></div>
+        <div class="skeleton-instructor"></div>
+        <div class="skeleton-tech"></div>
+        <div class="skeleton-footer"></div>
+      </div>
+    </div>
+  </div>
+  } } @else if (courses().length) { @for (course of courses(); track course.id) {
+  <div class="course-grid-item">
+    <app-course-card [course]="course"></app-course-card>
+  </div>
+  } } @else {
+  <div class="no-courses">
+    <p>No courses found. Try adjusting your filters.</p>
+  </div>
+  }
+</div>

@@ -1,0 +1,51 @@
+<div class="course-card" (click)="navigateToCourse($event)">
+  <div class="course-image-container">
+    <img
+      [src]="course().imageUrl"
+      [alt]="course().title"
+      class="course-image"
+    />
+    <div class="course-badges">
+      <app-platform-badge [platform]="course().platform"></app-platform-badge>
+      <app-difficulty-badge [level]="course().difficulty"></app-difficulty-badge>
+    </div>
+  </div>
+
+  <div class="course-content">
+    <h3 class="course-title">{{ course().title }}</h3>
+
+    <div class="course-rating">
+      <app-star-rating
+        [rating]="course().rating"
+        [readOnly]="true"
+      ></app-star-rating>
+      <span class="rating-count">({{ course().reviewCount }})</span>
+    </div>
+
+    <div class="course-instructor">{{ course().instructor }}</div>
+
+    <div class="course-tech-stack">
+      @for (tech of course().technologies.slice(0, 3); track tech) {
+      <span class="tech-tag">{{ tech }}</span>
+      } @if (course().technologies.length > 3) {
+      <span class="tech-tag more">+{{ course().technologies.length - 3 }}</span>
+      }
+    </div>
+
+    <div class="course-price-container">
+      <span class="course-price">
+        @if (course().price === 0) { Free } @else { ${{ course().price.toFixed(2) }}
+        }
+      </span>
+
+      <button
+        mat-raised-button
+        color="primary"
+        class="goto-button"
+        (click)="navigateToExternalCourse($event)"
+      >
+        Go to Course
+      </button>
+    </div>
+  </div>
+</div>

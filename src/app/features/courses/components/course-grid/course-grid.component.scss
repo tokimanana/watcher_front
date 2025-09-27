@@ -1,0 +1,128 @@
+// src/app/features/courses/components/course-grid/course-grid.component.scss
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+
+  .course-grid-item {
+    display: flex;
+    height: 100%;
+  }
+
+  .no-courses {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    background-color: var(--surface-alt);
+    border-radius: var(--border-radius-lg);
+
+    p {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+    }
+  }
+
+  // Skeleton loading state
+  .course-skeleton {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    background-color: var(--surface);
+
+    .skeleton-image {
+      aspect-ratio: 16 / 9;
+      background-color: var(--surface-alt);
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    .skeleton-content {
+      padding: 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      .skeleton-title {
+        height: 1.5rem;
+        width: 90%;
+        background-color: var(--surface-alt);
+        margin-bottom: 0.75rem;
+        border-radius: var(--border-radius-sm);
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+
+      .skeleton-rating {
+        height: 1rem;
+        width: 70%;
+        background-color: var(--surface-alt);
+        margin-bottom: 0.75rem;
+        border-radius: var(--border-radius-sm);
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+
+      .skeleton-instructor {
+        height: 0.875rem;
+        width: 60%;
+        background-color: var(--surface-alt);
+        margin-bottom: 0.75rem;
+        border-radius: var(--border-radius-sm);
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+
+      .skeleton-tech {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+
+        &::before,
+        &::after {
+          content: "";
+          height: 1rem;
+          width: 3rem;
+          background-color: var(--surface-alt);
+          border-radius: var(--border-radius-sm);
+          animation: pulse 1.5s infinite ease-in-out;
+        }
+      }
+
+      .skeleton-footer {
+        height: 2rem;
+        width: 100%;
+        background-color: var(--surface-alt);
+        border-radius: var(--border-radius-sm);
+        margin-top: auto;
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+// Media queries
+@media (max-width: 768px) {
+  .course-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+}
