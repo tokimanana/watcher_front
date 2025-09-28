@@ -1,4 +1,5 @@
 import { Routes } from "@angular/router";
+import { authGuard } from "../../core/guards/auth.guard";
 
 export const routes: Routes = [
   {
@@ -15,6 +16,7 @@ export const routes: Routes = [
   },
   {
     path: 'tech-interests',
-    loadComponent: () => import('./components/tech-interests-setup/tech-interests-setup.component').then(c => c.TechInterestsSetupComponent)
+    loadComponent: () => import('./components/tech-interests-setup/tech-interests-setup.component').then(c => c.TechInterestsSetupComponent),
+    canActivate: [authGuard]
   }
 ];
