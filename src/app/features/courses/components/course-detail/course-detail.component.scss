@@ -7,32 +7,56 @@
   padding: var(--spacing-lg);
 }
 
-// Loading and error states
-.loading-container,
-.error-container {
+// Loading state
+.loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  gap: var(--spacing-lg);
-}
+  padding: var(--spacing-xl) 0;
 
-.spinner {
-  border: 3px solid rgba(0, 0, 0, 0.1);
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border-top-color: var(--color-primary);
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+    border-radius: 50%;
+    border-top-color: var(--color-primary);
+    animation: spin 1s linear infinite;
   }
-  100% {
-    transform: rotate(360deg);
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  p {
+    margin-top: var(--spacing-md);
+    color: var(--color-text-secondary);
+  }
+}
+
+// Error state
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
+
+  .alert-error {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md);
+    background-color: var(--color-error-light);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-md);
+    color: var(--color-error-dark);
+    margin-bottom: var(--spacing-md);
+
+    mat-icon {
+      margin-right: var(--spacing-sm);
+    }
   }
 }
 
@@ -49,12 +73,10 @@
 
     &:hover {
       color: var(--color-primary);
+      text-decoration: underline;
     }
 
     mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
       margin-right: var(--spacing-xs);
     }
   }
@@ -63,14 +85,289 @@
 // Course header
 .course-header {
   display: flex;
-  margin-bottom: var(--spacing-xl);
-  gap: var(--spacing-xl);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 
   .course-header-content {
     flex: 1;
+  }
+
+  .course-header {
     display: flex;
-    flex-direction: column;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+
+    .course-header-content {
+      flex: 1;
+
+      // Remove the old platform-badge styles and use the component instead
+      app-platform-badge {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+      }
+    }
+
+    // Course title
+    .course-title {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-text-primary);
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .instructor-info {
+      display: flex;
+      align-items: center;
+      margin: var(--spacing-sm) 0 var(--spacing-md);
+      color: var(--color-text-secondary);
+
+      mat-icon {
+        font-size: 1.1rem;
+        width: 1.1rem;
+        height: 1.1rem;
+        margin-right: var(--spacing-xs);
+      }
+    }
+
+    // Rest of your existing styles...
+    .rating-summary {
+      display: flex;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+
+      .rating-value {
+        display: flex;
+        align-items: center;
+
+        .rating-number {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: var(--color-primary);
+          margin-right: var(--spacing-sm);
+        }
+      }
+
+      .review-count {
+        margin-left: var(--spacing-sm);
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+      }
+    }
+
+    .course-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+
+      .difficulty-badge,
+      .duration-badge,
+      .price-badge,
+      .clicks-badge {
+        display: flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: var(--radius-md);
+        font-size: 0.9rem;
+
+        mat-icon {
+          font-size: 1.1rem;
+          width: 1.1rem;
+          height: 1.1rem;
+          margin-right: var(--spacing-xs);
+        }
+      }
+
+      .duration-badge {
+        background-color: var(--color-surface);
+        color: var(--color-text-secondary);
+      }
+
+      .price-badge {
+        background-color: var(--color-surface);
+        color: var(--color-primary-dark);
+
+        &.free {
+          background-color: rgba(46, 125, 50, 0.1);
+          color: var(--color-success);
+        }
+      }
+
+      .clicks-badge {
+        background-color: var(--color-surface-variant);
+        color: var(--color-text-secondary);
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: var(--spacing-md);
+
+      button {
+        min-width: 140px;
+      }
+    }
+
+    .course-image-container {
+      width: 300px;
+      position: relative;
+
+      .course-image {
+        width: 100%;
+        height: auto;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-md);
+      }
+
+      .last-updated {
+        text-align: right;
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+        margin-top: var(--spacing-xs);
+      }
+    }
+  }
+
+  // Responsive adjustments
+  @include tablet {
+    .course-header {
+      flex-direction: column-reverse;
+      gap: var(--spacing-lg);
+
+      .course-image-container {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+    }
+  }
+
+  @include mobile {
+    .course-header {
+      .course-title {
+        font-size: var(--font-size-xl);
+      }
+
+      .course-badges {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+
+        > div {
+          width: 100%;
+        }
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        width: 100%;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  // Course title
+  .course-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .instructor-info {
+    display: flex;
+    align-items: center;
+    margin: var(--spacing-sm) 0 var(--spacing-md);
+    color: var(--color-text-secondary);
+
+    mat-icon {
+      font-size: 1.1rem;
+      width: 1.1rem;
+      height: 1.1rem;
+      margin-right: var(--spacing-xs);
+    }
+  }
+
+  .rating-summary {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+
+    .rating-value {
+      display: flex;
+      align-items: center;
+
+      .rating-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        margin-right: var(--spacing-sm);
+      }
+    }
+
+    .review-count {
+      margin-left: var(--spacing-sm);
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+    }
+  }
+
+  .course-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+
+    .difficulty-badge,
+    .duration-badge,
+    .price-badge,
+    .clicks-badge {
+      display: flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+
+      mat-icon {
+        font-size: 1.1rem;
+        width: 1.1rem;
+        height: 1.1rem;
+        margin-right: var(--spacing-xs);
+      }
+    }
+
+    .duration-badge {
+      background-color: var(--color-surface);
+      color: var(--color-text-secondary);
+    }
+
+    .price-badge {
+      background-color: var(--color-surface);
+      color: var(--color-primary-dark);
+
+      &.free {
+        background-color: rgba(46, 125, 50, 0.1);
+        color: var(--color-success);
+      }
+    }
+
+    .clicks-badge {
+      background-color: var(--color-surface-variant);
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .action-buttons {
+    display: flex;
     gap: var(--spacing-md);
+
+    button {
+      min-width: 140px;
+    }
   }
 
   .course-image-container {
@@ -85,162 +382,11 @@
     }
 
     .last-updated {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background-color: rgba(0, 0, 0, 0.7);
-      color: white;
-      font-size: var(--font-size-xs);
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-radius: var(--border-radius-sm);
+      text-align: right;
+      font-size: 0.8rem;
+      color: var(--color-text-secondary);
+      margin-top: var(--spacing-xs);
     }
-  }
-}
-
-// Platform badge
-.platform-badge {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--color-surface-variant);
-  border-radius: var(--border-radius-full);
-  padding: var(--spacing-xs) var(--spacing-md);
-  width: fit-content;
-  gap: var(--spacing-sm);
-
-  .platform-icon {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-  }
-
-  .platform-name {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-on-surface-variant);
-  }
-
-  &[data-platform="udemy"] {
-    background-color: rgba(230, 63, 58, 0.1);
-  }
-
-  &[data-platform="coursera"] {
-    background-color: rgba(0, 86, 210, 0.1);
-  }
-
-  &[data-platform="youtube"] {
-    background-color: rgba(255, 0, 0, 0.1);
-  }
-
-  &[data-platform="freecodecamp"] {
-    background-color: rgba(0, 100, 0, 0.1);
-  }
-}
-
-// Course title
-.course-title {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0;
-  line-height: 1.3;
-}
-
-// Instructor info
-.instructor-info {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  color: var(--color-text-secondary);
-
-  mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-  }
-}
-
-// Rating summary
-.rating-summary {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-
-  .rating-value {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-
-    .rating-number {
-      font-size: var(--font-size-xl);
-      font-weight: var(--font-weight-bold);
-      color: var(--color-warning);
-    }
-  }
-
-  .review-count {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
-  }
-}
-
-// Course badges
-.course-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-  margin: var(--spacing-sm) 0;
-
-  .difficulty-badge,
-  .duration-badge,
-  .price-badge,
-  .clicks-badge {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: var(--border-radius-full);
-    color: white;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-
-    mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
-  }
-
-  .difficulty-badge {
-    background-color: var(--color-warning);
-  }
-
-  .duration-badge {
-    background-color: var(--color-info);
-    color: var(--color-on-info);
-  }
-
-  .price-badge {
-    background-color: var(--color-primary);
-
-    &.free {
-      background-color: var(--color-success);
-    }
-  }
-
-  .clicks-badge {
-    background-color: var(--color-surface-variant);
-    color: var(--color-on-surface-variant);
-  }
-}
-
-// Action buttons
-.action-buttons {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-md);
-
-  button {
-    min-width: 140px;
   }
 }
 
@@ -257,17 +403,6 @@
     margin-top: 0;
     margin-bottom: var(--spacing-md);
     color: var(--color-text-primary);
-  }
-
-  h2 {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-  }
-
-  h3 {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-medium);
-    margin-top: var(--spacing-xl);
   }
 }
 
@@ -286,11 +421,16 @@
   gap: var(--spacing-sm);
 
   .tech-tag {
+    padding: 6px 12px;
     background-color: var(--color-surface-variant);
-    color: var(--color-on-surface-variant);
-    font-size: var(--font-size-sm);
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: var(--border-radius-full);
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+
+    &:hover {
+      background-color: var(--color-primary-light);
+      color: var(--color-on-primary);
+    }
   }
 }
 
@@ -305,63 +445,56 @@
 // Rating distribution
 .rating-distribution {
   margin-top: var(--spacing-md);
+
+  .rating-bar-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+
+    .rating-bar-label {
+      flex: 0 0 50px;
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+    }
+
+    .rating-bar-wrapper {
+      flex: 1;
+      height: 12px;
+      background-color: var(--color-surface);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin: 0 var(--spacing-sm);
+
+      .rating-bar {
+        height: 100%;
+        background-color: var(--color-primary);
+        border-radius: var(--radius-full);
+      }
+    }
+
+    .rating-bar-count {
+      flex: 0 0 30px;
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+      text-align: right;
+    }
+  }
 }
 
-.rating-bar-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: var(--spacing-sm);
-}
-
-.rating-bar-label {
-  width: 40px;
-  text-align: right;
-  margin-right: var(--spacing-sm);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.rating-bar-wrapper {
-  flex: 1;
-  height: 8px;
-  background-color: var(--color-surface-variant);
-  border-radius: var(--border-radius-full);
-  overflow: hidden;
-}
-
-.rating-bar {
-  height: 100%;
-  background-color: var(--color-warning);
-  border-radius: var(--border-radius-full);
-}
-
-.rating-bar-count {
-  width: 40px;
-  text-align: right;
-  margin-left: var(--spacing-sm);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-// Empty reviews state
+// Empty reviews
 .empty-reviews {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: var(--spacing-xl);
-  text-align: center;
+  color: var(--color-text-secondary);
 
   mat-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
+    font-size: 3rem;
+    height: 3rem;
+    width: 3rem;
     margin-bottom: var(--spacing-md);
-    color: var(--color-text-disabled);
-  }
-
-  p {
-    font-size: var(--font-size-md);
-    color: var(--color-text-secondary);
+    opacity: 0.6;
   }
 }
 
@@ -369,92 +502,84 @@
 .reviews-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
-}
+  gap: var(--spacing-md);
 
-// Review card
-.review-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
+  .review-card {
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
 
-  .review-avatar {
-    background-color: var(--color-primary);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: var(--font-weight-bold);
-  }
-
-  .review-title-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .review-content {
-    margin-bottom: var(--spacing-md);
-    line-height: 1.6;
-  }
-
-  .pros-cons-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-    margin-top: var(--spacing-lg);
-
-    @include mobile {
-      grid-template-columns: 1fr;
+    &:hover {
+      box-shadow: var(--shadow-md);
     }
-  }
 
-  .pros,
-  .cons {
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius-md);
-
-    h4 {
+    .review-avatar {
+      background-color: var(--color-primary);
+      color: var(--color-on-primary);
       display: flex;
       align-items: center;
-      gap: var(--spacing-xs);
-      margin-top: 0;
-      margin-bottom: var(--spacing-sm);
-      font-size: var(--font-size-md);
-      font-weight: var(--font-weight-medium);
+      justify-content: center;
+      font-weight: 600;
     }
 
-    ul {
-      margin: 0;
-      padding-left: var(--spacing-lg);
-
-      li {
-        margin-bottom: var(--spacing-xs);
-        color: var(--color-text-secondary);
-      }
+    .review-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-  }
 
-  .pros {
-    background-color: rgba(0, 128, 0, 0.1);
-
-    .pros-title {
-      color: var(--color-success);
-
-      .pros-icon {
-        color: var(--color-success);
-      }
+    .review-content {
+      margin-bottom: var(--spacing-md);
+      line-height: 1.6;
     }
-  }
 
-  .cons {
-    background-color: rgba(255, 0, 0, 0.1);
+    .pros-cons-container {
+      display: flex;
+      gap: var(--spacing-lg);
+      margin-top: var(--spacing-md);
 
-    .cons-title {
-      color: var(--color-error);
+      .pros,
+      .cons {
+        flex: 1;
 
-      .cons-icon {
-        color: var(--color-error);
+        h4 {
+          display: flex;
+          align-items: center;
+          margin-bottom: var(--spacing-sm);
+          font-weight: 600;
+
+          mat-icon {
+            margin-right: var(--spacing-xs);
+            font-size: 1.1rem;
+          }
+        }
+
+        .pros-title {
+          color: var(--color-success);
+
+          .pros-icon {
+            color: var(--color-success);
+          }
+        }
+
+        .cons-title {
+          color: var(--color-error);
+
+          .cons-icon {
+            color: var(--color-error);
+          }
+        }
+
+        ul {
+          margin: 0;
+          padding-left: var(--spacing-lg);
+
+          li {
+            margin-bottom: var(--spacing-xs);
+            color: var(--color-text-secondary);
+          }
+        }
       }
     }
   }
@@ -463,14 +588,67 @@
 // Related courses
 .related-courses {
   margin-top: var(--spacing-xl);
-  padding-top: var(--spacing-xl);
-  border-top: 1px solid var(--color-border);
 
   h2 {
     font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    margin-top: 0;
+    font-weight: var(--font-weight-bold);
     margin-bottom: var(--spacing-md);
+  }
+
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+
+  .recommended-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--spacing-md);
+
+    .recommended-card {
+      cursor: pointer;
+      background-color: var(--color-surface);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .recommended-image {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+      }
+
+      .recommended-content {
+        padding: var(--spacing-sm);
+
+        .recommended-title {
+          font-size: var(--font-size-md);
+          font-weight: var(--font-weight-semibold);
+          margin: 0 0 var(--spacing-xs);
+          color: var(--color-text-primary);
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .recommended-meta {
+          display: flex;
+          justify-content: space-between;
+          color: var(--color-text-secondary);
+          font-size: var(--font-size-sm);
+
+          .recommended-rating {
+            color: var(--color-primary);
+            font-weight: var(--font-weight-semibold);
+          }
+        }
+      }
+    }
   }
 }
 
@@ -484,6 +662,15 @@
       width: 100%;
       max-width: 500px;
       margin: 0 auto;
+    }
+  }
+
+  .reviews-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+
+    button {
+      width: 100%;
     }
   }
 }
@@ -515,12 +702,13 @@
     }
   }
 
-  .reviews-header {
+  .pros-cons-container {
     flex-direction: column;
-    gap: var(--spacing-md);
+  }
 
-    button {
-      width: 100%;
-    }
+  .review-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
   }
 }

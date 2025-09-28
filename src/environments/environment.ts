@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api-production.com/api',
+  apiUrl: 'http://localhost:3000',
   appName: 'Course Review Platform',
   useMockData: false
 };
