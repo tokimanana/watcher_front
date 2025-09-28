@@ -42,7 +42,7 @@
             class="nav-link login-link"
           >
             <mat-icon>person</mat-icon>
-            <span>Profile</span>
+            {{ user()?.userName || 'Profile' }}
           </a>
 
           <a
