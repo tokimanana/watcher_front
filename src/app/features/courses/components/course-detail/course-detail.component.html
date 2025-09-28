@@ -157,7 +157,7 @@
           <mat-card class="review-card">
             <mat-card-header>
               <div mat-card-avatar class="review-avatar">
-                {{ review.user?.name?.charAt(0) || "U" }}
+                {{ review.user?.userName?.charAt(0) || "U" }}
               </div>
               <mat-card-title>
                 <div class="review-title-row">
@@ -170,7 +170,7 @@
                 </div>
               </mat-card-title>
               <mat-card-subtitle>
-                By {{ review.user?.name || "Anonymous" }} •
+                By {{ review.user?.userName || "Anonymous" }} •
                 {{ review.createdAt | date : "mediumDate" }}
               </mat-card-subtitle>
             </mat-card-header>

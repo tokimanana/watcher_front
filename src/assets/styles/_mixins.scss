@@ -432,6 +432,12 @@
   overflow: hidden;
 }
 
+@mixin body-text-small {
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  font-weight: var(--font-weight-normal);
+}
+
 // Keyframes
 @keyframes fadeIn {
   from {

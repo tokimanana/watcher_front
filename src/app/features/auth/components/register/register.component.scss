@@ -1,241 +1,239 @@
-// Utilise tous les styles de base d'_auth-forms.scss
-@import "../../../../../styles.scss";
-
-.auth-card {
-  // Utilise déjà auth-card-large dans le HTML pour plus d'espace
-  &.auth-card-large {
-    flex: 0 0 480px;
-    max-width: 480px;
-
-    @include tablet {
-      max-width: 520px;
-    }
-
-    @include mobile {
-      flex: 1;
-      max-width: 100%;
+:host {
+  .auth-card {
+    &.auth-card-large {
+      flex: 0 0 480px;
+      max-width: 480px;
     }
   }
-}
 
-// Espacement réduit pour les formulaires plus longs
-.auth-form {
-  gap: var(--spacing-sm);
+  // Espacement réduit pour les formulaires plus longs
+  .auth-form {
+    gap: var(--spacing-sm);
 
-  .auth-form-field {
-    margin-bottom: var(--spacing-sm);
+    .auth-form-field {
+      margin-bottom: var(--spacing-sm);
 
-    // Espacement supplémentaire pour les champs avec indicateurs
-    &:has(.password-strength) {
-      margin-bottom: var(--spacing-md);
+      // Espacement supplémentaire pour les champs avec indicateurs
+      &:has(.password-strength) {
+        margin-bottom: var(--spacing-md);
+      }
     }
   }
-}
 
-// Override pour le header avec moins d'espacement
-.auth-header {
-  margin-bottom: var(--spacing-lg);
-
-  @include mobile {
-    margin-bottom: var(--spacing-md);
+  // Override pour le header avec moins d'espacement
+  .auth-header {
+    margin-bottom: var(--spacing-lg);
   }
-}
 
-// Styles spécifiques pour l'indicateur de force du mot de passe
-.password-strength {
-  margin-top: var(--spacing-sm);
+  // Styles spécifiques pour l'indicateur de force du mot de passe
+  .password-strength {
+    margin-top: var(--spacing-sm);
 
-  .strength-meter {
-    height: 3px;
-    background: var(--color-surface-variant);
-    border-radius: var(--radius-full);
-    overflow: hidden;
-    margin-bottom: var(--spacing-xs);
-
-    .strength-fill {
-      height: 100%;
+    .strength-meter {
+      height: 3px;
+      background: var(--color-surface-variant);
       border-radius: var(--radius-full);
-      transition: width var(--transition-normal), background-color var(--transition-normal);
+      overflow: hidden;
+      margin-bottom: var(--spacing-xs);
+
+      .strength-fill {
+        height: 100%;
+        border-radius: var(--radius-full);
+        transition: width var(--transition-normal),
+          background-color var(--transition-normal);
+
+        &.weak {
+          background: linear-gradient(
+            90deg,
+            var(--color-error),
+            var(--color-error-light)
+          );
+          width: 33%;
+        }
+
+        &.medium {
+          background: linear-gradient(
+            90deg,
+            var(--color-warning),
+            var(--color-warning-light)
+          );
+          width: 66%;
+        }
+
+        &.strong {
+          background: linear-gradient(
+            90deg,
+            var(--color-success),
+            var(--color-success-light)
+          );
+          width: 100%;
+        }
+      }
+    }
+
+    .strength-text {
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
 
       &.weak {
-        background: linear-gradient(90deg, var(--color-error), var(--color-error-light));
-        width: 33%;
+        color: var(--color-error);
       }
-
       &.medium {
-        background: linear-gradient(90deg, var(--color-warning), var(--color-warning-light));
-        width: 66%;
+        color: var(--color-warning-dark);
       }
-
       &.strong {
-        background: linear-gradient(90deg, var(--color-success), var(--color-success-light));
-        width: 100%;
+        color: var(--color-success-dark);
       }
     }
   }
 
-  .strength-text {
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-medium);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-
-    &.weak {
-      color: var(--color-error);
-    }
-    &.medium {
-      color: var(--color-warning-dark);
-    }
-    &.strong {
-      color: var(--color-success-dark);
-    }
-  }
-}
-
-// Styles pour la checkbox des termes et conditions
-.auth-checkbox {
-  display: flex;
-  align-items: flex-start;
-  margin: var(--spacing-md) 0;
-  cursor: pointer;
-  transition: opacity var(--transition-fast);
-  position: relative;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
+  // Styles pour la checkbox des termes et conditions
+  .auth-checkbox {
+    display: flex;
+    align-items: flex-start;
+    margin: var(--spacing-md) 0;
     cursor: pointer;
-    height: 18px;
-    width: 18px;
-    margin: 0;
-    z-index: 1;
+    transition: opacity var(--transition-fast);
+    position: relative;
 
-    &:checked ~ .checkmark {
-      background-color: var(--color-primary);
-      border-color: var(--color-primary);
+    &:hover {
+      opacity: 0.8;
 
-      &::after {
-        display: block;
+      .checkmark {
+        border-color: var(--color-primary);
       }
     }
 
-    &:focus ~ .checkmark {
-      box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2);
-    }
-
-    &:focus-visible ~ .checkmark {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
-    }
-  }
-
-  .checkmark {
-    height: 18px;
-    width: 18px;
-    background-color: var(--color-surface);
-    border: 2px solid rgba(139, 69, 19, 0.3);
-    border-radius: var(--radius-sm);
-    position: relative;
-    margin-right: var(--spacing-sm);
-    margin-top: 2px;
-    flex-shrink: 0;
-    transition: all var(--transition-fast);
-
-    &::after {
-      content: "";
+    input[type="checkbox"] {
       position: absolute;
-      display: none;
-      left: 5px;
-      top: 1px;
-      width: 4px;
-      height: 8px;
-      border: solid var(--color-text-inverse);
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
+      opacity: 0;
+      cursor: pointer;
+      height: 18px;
+      width: 18px;
+      margin: 0;
+      z-index: 1;
+
+      &:checked ~ .checkmark {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+
+        &::after {
+          display: block;
+        }
+      }
+
+      &:focus ~ .checkmark {
+        box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2);
+      }
+
+      &:focus-visible ~ .checkmark {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+      }
     }
-  }
 
-  .checkbox-text {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-secondary);
-    line-height: 1.4;
-
-    a {
-      color: var(--color-primary);
-      text-decoration: none;
-      font-weight: var(--font-weight-medium);
+    .checkmark {
+      height: 18px;
+      width: 18px;
+      background-color: var(--color-surface);
+      border: 2px solid rgba(139, 69, 19, 0.3);
+      border-radius: var(--radius-sm);
+      position: relative;
+      margin-right: var(--spacing-sm);
+      margin-top: 2px;
+      flex-shrink: 0;
       transition: all var(--transition-fast);
 
-      &:hover {
-        text-decoration: underline;
-        color: var(--color-primary-light);
+      &::after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 5px;
+        top: 1px;
+        width: 4px;
+        height: 8px;
+        border: solid var(--color-text-inverse);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
       }
-
-      &:focus-visible {
-        outline: 2px solid var(--color-primary);
-        outline-offset: 1px;
-        border-radius: var(--radius-sm);
-      }
-    }
-  }
-
-  &:hover .checkmark {
-    border-color: var(--color-primary);
-  }
-
-  // État d'erreur pour la checkbox
-  &.has-error {
-    .checkmark {
-      border-color: var(--color-error);
     }
 
     .checkbox-text {
-      color: var(--color-error);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+
+      a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: var(--font-weight-medium);
+        transition: all var(--transition-fast);
+
+        &:hover {
+          text-decoration: underline;
+          color: var(--color-primary-light);
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--color-primary);
+          outline-offset: 1px;
+          border-radius: var(--radius-sm);
+        }
+      }
+    }
+
+    // État d'erreur pour la checkbox
+    &.has-error {
+      .checkmark {
+        border-color: var(--color-error);
+      }
+
+      .checkbox-text {
+        color: var(--color-error);
+      }
     }
   }
-}
 
-// Animation progressive pour les champs du formulaire
-.auth-form-field {
-  animation: slideUpStagger 0.4s ease-out;
-  animation-fill-mode: both;
-  opacity: 0;
+  // Animation progressive pour les champs du formulaire
+  .auth-form-field {
+    animation: slideUpStagger 0.4s ease-out;
+    animation-fill-mode: both;
+    opacity: 0;
 
-  &:nth-child(1) {
-    animation-delay: 0.1s;
+    &:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+    &:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+    &:nth-child(4) {
+      animation-delay: 0.25s;
+    }
+    &:nth-child(5) {
+      animation-delay: 0.3s;
+    }
   }
-  &:nth-child(2) {
-    animation-delay: 0.15s;
-  }
-  &:nth-child(3) {
-    animation-delay: 0.2s;
-  }
-  &:nth-child(4) {
-    animation-delay: 0.25s;
-  }
-  &:nth-child(5) {
-    animation-delay: 0.3s;
-  }
-}
 
-// Animation pour la checkbox
-.auth-checkbox {
-  animation: slideUpStagger 0.4s ease-out;
-  animation-fill-mode: both;
-  animation-delay: 0.35s;
-  opacity: 0;
-}
+  // Animation pour la checkbox
+  .auth-checkbox {
+    animation: slideUpStagger 0.4s ease-out;
+    animation-fill-mode: both;
+    animation-delay: 0.35s;
+    opacity: 0;
+  }
 
-// Animation pour le bouton
-.auth-submit-btn {
-  animation: slideUpStagger 0.4s ease-out;
-  animation-fill-mode: both;
-  animation-delay: 0.4s;
-  opacity: 0;
+  // Animation pour le bouton
+  .auth-submit-btn {
+    animation: slideUpStagger 0.4s ease-out;
+    animation-fill-mode: both;
+    animation-delay: 0.4s;
+    opacity: 0;
+  }
 }
 
 @keyframes slideUpStagger {
@@ -249,30 +247,49 @@
   }
 }
 
-// Responsive adjustments
-@include mobile {
-  .auth-form {
-    gap: var(--spacing-xs);
+// Media queries natives
+@media (min-width: 768px) and (max-width: 1023px) {
+  :host .auth-card.auth-card-large {
+    max-width: 520px;
   }
+}
 
-  .auth-form-field {
-    margin-bottom: var(--spacing-xs);
+@media (max-width: 767px) {
+  :host {
+    .auth-card.auth-card-large {
+      flex: 1;
+      max-width: 100%;
+    }
 
-    &:has(.password-strength) {
-      margin-bottom: var(--spacing-sm);
+    .auth-header {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .auth-form {
+      gap: var(--spacing-xs);
+
+      .auth-form-field {
+        margin-bottom: var(--spacing-xs);
+
+        &:has(.password-strength) {
+          margin-bottom: var(--spacing-sm);
+        }
+      }
+    }
+
+    .auth-checkbox {
+      margin: var(--spacing-sm) 0;
+
+      .checkbox-text {
+        font-size: var(--font-size-xs);
+      }
     }
   }
+}
 
-  .auth-checkbox {
-    margin: var(--spacing-sm) 0;
-
-    .checkbox-text {
-      font-size: var(--font-size-xs);
-    }
-  }
-
-  // Désactiver les animations sur mobile pour de meilleures performances
-  @media (prefers-reduced-motion: reduce) {
+// Désactiver les animations si préférences réduites
+@media (prefers-reduced-motion: reduce) {
+  :host {
     .auth-form-field,
     .auth-checkbox,
     .auth-submit-btn {

@@ -1,23 +1,32 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { ThemeToggleComponent } from './components/theme-toogle/theme-toogle.component';
+import { Component, inject } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
+import { AuthService } from './features/auth/services/auth.service';
+import { ThemeToggleComponent } from './components/theme-toogle/theme-toogle.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    RouterOutlet,
     CommonModule,
+    RouterOutlet,
     RouterLink,
     RouterLinkActive,
     MatIconModule,
     ThemeToggleComponent,
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = 'watcher_front';
+  private readonly authService = inject(AuthService);
+
+  // Make auth state available to the template
+  readonly isAuthenticated = this.authService.isAuthenticated;
+  readonly user = this.authService.user;
+
+  logout(): void {
+    this.authService.logout().subscribe();
+  }
 }

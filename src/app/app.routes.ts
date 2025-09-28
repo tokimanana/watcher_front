@@ -14,10 +14,10 @@ export const routes: Routes = [
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then(m => m.routes)
   },
-  {
-    path: 'courses',
-    loadChildren: () => import('./features/courses/courses.routes').then(m => m.routes)
-  },
+  // {
+  //   path: 'courses',
+  //   loadChildren: () => import('./features/courses/courses.routes').then(m => m.routes)
+  // },
   // {
   //   path: 'reviews',
   //   loadChildren: () => import('./features/reviews/reviews.routes').then(m => m.routes),

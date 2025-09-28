@@ -12,9 +12,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { LoginCredentials } from '../../../../core/models/auth.model';
 
 @Component({
   selector: 'app-login',
@@ -37,11 +37,13 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
-  private readonly snackBar = inject(MatSnackBar);
 
+  // Local signals
   hidePassword = signal(true);
-  isLoading = signal(false);
-  errorMessage = signal<string | null>(null);
+
+  // Auth service signals
+  readonly isLoading = this.authService.isLoading;
+  readonly error = this.authService.error;
 
   loginForm: FormGroup;
 
@@ -56,39 +58,34 @@ export class LoginComponent {
     this.hidePassword.update((value) => !value);
   }
 
+  // Getter pour l'erreur à afficher dans le template
+  errorMessage(): string | null {
+    return this.error();
+  }
+
   async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
 
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-
     try {
-      const credentials = this.loginForm.value;
+      const credentials: LoginCredentials = this.loginForm.value;
 
       this.authService.login(credentials).subscribe({
         next: (user) => {
-          this.snackBar.open(`Welcome back, ${user.name}!`, 'Close', {
-            duration: 3000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top'
-          });
-          this.router.navigate(['/home']);
+          // Redirection après connexion réussie
+          this.router.navigate(['/courses']);
         },
         error: (error) => {
-          this.errorMessage.set(error.message || 'Login failed. Please try again.');
-          this.isLoading.set(false);
-        },
-        complete: () => {
-          this.isLoading.set(false);
+          // L'erreur est déjà gérée par le service et affichée via les notifications
+          // On peut ajouter des actions spécifiques au composant si nécessaire
+          console.error('Login failed:', error);
         }
       });
     } catch (error) {
       console.error('Login error:', error);
-      this.errorMessage.set('An unexpected error occurred. Please try again.');
-      this.isLoading.set(false);
+      // Les erreurs inattendues sont aussi gérées par le service
     }
   }
 }

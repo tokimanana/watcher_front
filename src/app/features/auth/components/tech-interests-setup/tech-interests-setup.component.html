@@ -1,1 +1,105 @@
-<p>tech-interests-setup works!</p>
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-brand">
+      <div class="brand-logo">
+        <mat-icon class="logo-icon">psychology</mat-icon>
+      </div>
+      <h1 class="brand-title">Choose Your Interests</h1>
+      <p class="brand-subtitle">
+        Select at least 3 technologies you'd like to learn about.
+      </p>
+    </div>
+
+    <mat-card class="auth-card auth-card-large">
+      <div class="selection-counter">
+        <p class="counter-text">
+          {{ selectedTechs().size }} selected
+          @if (selectedTechs().size < 3) {
+            <span class="min-requirement">(minimum 3 required)</span>
+          }
+          @if (isSelectionLimitReached()) {
+            <span class="max-limit">(maximum 10 reached)</span>
+          }
+        </p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-message">
+          <mat-icon>error</mat-icon>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <div class="tech-categories">
+        @for (category of techCategories; track category.id) {
+          <mat-expansion-panel
+            class="category-panel"
+            [expanded]="isCategoryExpanded(category.id)"
+          >
+            <mat-expansion-panel-header (click)="toggleCategory(category.id)">
+              <mat-panel-title>
+                <div class="category-header">
+                  <mat-icon class="category-icon">{{ category.icon }}</mat-icon>
+                  <span class="category-name">{{ category.name }}</span>
+                  @if (getSelectedTechCountForCategory(category) > 0) {
+                    <span class="selection-count">
+                      {{ getSelectedTechCountForCategory(category) }}
+                    </span>
+                  }
+                </div>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="tech-options">
+              @for (tech of category.technologies; track tech.id) {
+                <div
+                  class="tech-chip"
+                  [class.selected]="isTechnologySelected(tech.id)"
+                  [class.disabled]="isSelectionLimitReached() && !isTechnologySelected(tech.id)"
+                  (click)="toggleTechnology(tech.id)"
+                >
+                  <div class="tech-details">
+                    <div class="tech-header">
+                      <span class="tech-name">{{ tech.name }}</span>
+                      @if (tech.isPopular) {
+                        <span class="popular-badge">
+                          <mat-icon>local_fire_department</mat-icon> Popular
+                        </span>
+                      }
+                    </div>
+                    <span class="tech-description">{{ tech.description }}</span>
+                  </div>
+                  <span class="difficulty-badge" [ngClass]="tech.difficulty">
+                    {{ tech.difficulty }}
+                  </span>
+                </div>
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+      </div>
+
+      <div class="action-buttons">
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="onSubmit()"
+          [disabled]="selectedTechs().size < 3 || isLoading()"
+          class="submit-btn"
+        >
+          @if (isLoading()) {
+            <span>
+              <mat-spinner diameter="20" class="spinner"></mat-spinner>
+              Setting up...
+            </span>
+          } @else {
+            <span>Continue</span>
+          }
+        </button>
+        <button mat-button class="skip-btn" (click)="skipStep()">
+          Skip for now
+        </button>
+      </div>
+    </mat-card>
+  </div>
+</div>
