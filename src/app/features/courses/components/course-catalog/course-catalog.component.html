@@ -162,12 +162,7 @@
         <div class="course-instructor">{{ course.instructor }}</div>
         <div class="course-meta">
           <div class="rating">★ {{ course.rating.toFixed(1) }}</div>
-          <div
-            class="difficulty"
-            [class]="getDifficultyClass(course.difficulty)"
-          >
-            {{ course.difficulty }}
-          </div>
+          <app-difficulty-badge [level]="course.difficulty"></app-difficulty-badge>
         </div>
         <div class="course-price">
           {{ course.price === 0 ? "Free" : "$" + course.price.toFixed(2) }}

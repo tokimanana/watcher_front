@@ -1,28 +1,106 @@
+@import "../../../../../styles.scss";
+
 .platform-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--border-radius-sm);
-  font-size: 0.75rem;
-  font-weight: 500;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
+  @include badge-base;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  background-color: var(--color-surface-variant);
+  border: 1px solid rgba(139, 69, 19, 0.2);
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  .platform-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: var(--spacing-xs);
+    object-fit: contain;
+    flex-shrink: 0;
+
+    // Fallback for broken images
+    &.error {
+      display: none;
+    }
+  }
+
+  .platform-name {
+    font-weight: var(--font-weight-semibold);
+    white-space: nowrap;
+  }
+
+  // Platform-specific styles with muted brand colors that blend better
+  &.udemy {
+    background: rgba(164, 53, 240, 0.15);
+    color: #7a2db8;
+    border-color: rgba(164, 53, 240, 0.25);
+    box-shadow: 0 2px 4px rgba(164, 53, 240, 0.1);
+  }
+
+  &.coursera {
+    background: rgba(0, 86, 210, 0.15);
+    color: #004299;
+    border-color: rgba(0, 86, 210, 0.25);
+    box-shadow: 0 2px 4px rgba(0, 86, 210, 0.1);
+  }
+
+  &.youtube {
+    background: rgba(255, 0, 0, 0.15);
+    color: #cc0000;
+    border-color: rgba(255, 0, 0, 0.25);
+    box-shadow: 0 2px 4px rgba(255, 0, 0, 0.1);
+  }
+
+  &.freecodecamp {
+    background: rgba(0, 100, 0, 0.15);
+    color: #004000;
+    border-color: rgba(0, 100, 0, 0.25);
+    box-shadow: 0 2px 4px rgba(0, 100, 0, 0.1);
+  }
+
+  &.edx {
+    background: rgba(2, 38, 43, 0.15);
+    color: #012024;
+    border-color: rgba(2, 38, 43, 0.25);
+    box-shadow: 0 2px 4px rgba(2, 38, 43, 0.1);
+  }
+
+  // Default fallback for unknown platforms
+  &:not(.udemy):not(.coursera):not(.youtube):not(.freecodecamp):not(.edx) {
+    background-color: var(--color-surface-variant);
+    color: var(--color-text-secondary);
+    border-color: rgba(139, 69, 19, 0.2);
+  }
+
+  // Hover effect
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
 }
 
-.udemy {
-  background-color: #a435f0;
+// Size variants
+.platform-badge.small {
+  padding: 2px var(--spacing-xs);
+  font-size: var(--font-size-xs);
+
+  .platform-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+  }
 }
 
-.coursera {
-  background-color: #0056d2;
-}
+.platform-badge.large {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
 
-.youtube {
-  background-color: #ff0000;
-}
-
-.freecodecamp {
-  background-color: #0a0a23;
-}
-
-.edx {
-  background-color: #02262b;
+  .platform-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: var(--spacing-sm);
+  }
 }
