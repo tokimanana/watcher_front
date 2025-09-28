@@ -14,12 +14,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { Router, RouterLink } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AuthService } from '../../services/auth.service';
 import { PasswordStrengthService } from '../../services/password-strength.service';
 import { passwordMatchValidator } from '../../../../shared/validators/password-validator';
 import { emailValidator } from '../../../../shared/validators/email-validator';
+import { RegisterData } from '../../../../core/models/auth.model';
 
 @Component({
   selector: 'app-register',
@@ -42,13 +42,15 @@ export class RegisterComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
-  private readonly snackBar = inject(MatSnackBar);
   private readonly passwordStrengthService = inject(PasswordStrengthService);
 
+  // Signals
   hidePassword = signal(true);
   hideConfirmPassword = signal(true);
-  isLoading = signal(false);
-  errorMessage = signal<string | null>(null);
+
+  // Auth service signals
+  readonly isLoading = this.authService.isLoading;
+  readonly error = this.authService.error;
 
   registerForm: FormGroup;
 
@@ -133,6 +135,11 @@ export class RegisterComponent implements OnInit {
     );
   }
 
+  // Getter pour l'erreur à afficher dans le template
+  errorMessage(): string | null {
+    return this.error();
+  }
+
   async onSubmit(): Promise<void> {
     this.registerForm.markAllAsTouched();
 
@@ -159,40 +166,40 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-
     try {
-      const { confirmPassword, agreeToTerms, ...userData } =
-        this.registerForm.value;
+      const { confirmPassword, agreeToTerms, ...userData } = this.registerForm.value;
 
-      this.authService.register(userData).subscribe({
+      // Créer l'objet RegisterData selon votre modèle
+      const registerData: RegisterData = {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password
+      };
+
+      this.authService.register(registerData).subscribe({
         next: (user) => {
-          this.snackBar.open(
-            `Welcome to Course Watcher, ${user.name}!`,
-            'Close',
-            {
-              duration: 4000,
-              horizontalPosition: 'end',
-              verticalPosition: 'top',
-            }
-          );
+          // La redirection et les notifications sont gérées par le service
+          // On peut quand même rediriger vers une page spécifique si nécessaire
           this.router.navigate(['/home']);
         },
         error: (error) => {
-          this.errorMessage.set(
-            error.message || 'Registration failed. Please try again.'
+          // L'erreur est déjà gérée par le service et affichée via les notifications
+          // Le focus sur le premier champ invalide peut être conservé si nécessaire
+          const firstInvalidField = Object.keys(this.registerForm.controls).find(
+            (key) => this.registerForm.get(key)?.invalid
           );
-          this.isLoading.set(false);
-        },
-        complete: () => {
-          this.isLoading.set(false);
-        },
+
+          if (firstInvalidField) {
+            const element = document.getElementById(firstInvalidField);
+            if (element) {
+              element.focus();
+            }
+          }
+        }
       });
     } catch (error) {
       console.error('Registration error:', error);
-      this.errorMessage.set('An unexpected error occurred. Please try again.');
-      this.isLoading.set(false);
+      // Les erreurs inattendues sont aussi gérées par le service
     }
   }
 }

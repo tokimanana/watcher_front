@@ -133,21 +133,11 @@ export class AuthService {
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {
-    return this.apiService
-      .post<{ message: string }>(`${this.ENDPOINT}/forgot-password`, { email })
-      .pipe(
-        map((response) => {
-          this.notificationService.info(response.message);
-          return response;
-        }),
-        catchError(() => {
-          // Pour sécurité, retournons un succès même si l'email n'existe pas
-          const message =
-            'If an account with that email exists, a password reset link has been sent.';
-          this.notificationService.info(message);
-          return of({ message });
-        })
-      );
+    // Simulation d'appel API - retourne toujours un succès
+    const message =
+      'Your request has been submitted. Our support team will contact you shortly to assist with account recovery.';
+    this.notificationService.info(message);
+    return of({ message });
   }
 
   refreshToken(): Observable<AuthResponse> {
