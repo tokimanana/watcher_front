@@ -1,244 +1,279 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import {
-  BehaviorSubject,
-  catchError,
-  delay,
-  map,
   Observable,
+  catchError,
+  finalize,
+  map,
   of,
-  tap,
+  switchMap,
   throwError,
 } from 'rxjs';
-import { User } from '../../../core/models/user.model';
 import {
-  JwtPayload,
   LoginCredentials,
   RegisterData,
 } from '../../../core/models/auth.model';
-import { MockDataService } from '../../../core/services/mock-data.service';
+import { User } from '../../../core/models/user.model';
+import { BaseApiService } from '../../../core/services/base-api.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { StorageService } from '../../../core/services/storage.service';
 import { AuthResponse } from '../../../core/models/auth-response.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly http = inject(HttpClient);
-  private readonly mockDataService = inject(MockDataService);
+  private readonly ENDPOINT = 'users';
 
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly REFRESH_TOKEN_KEY = 'auth_token_refresh';
-  private readonly USER_KEY = 'auth_user';
+  // Dependencies
+  private readonly apiService = inject(BaseApiService);
+  private readonly storageService = inject(StorageService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
 
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUserSubject$ = this.currentUserSubject.asObservable();
+  // State signals
+  private readonly authState = signal<{
+    isLoading: boolean;
+    isAuthenticated: boolean;
+    user: User | null;
+    error: string | null;
+  }>({
+    isLoading: false,
+    isAuthenticated: false,
+    user: null,
+    error: null,
+  });
 
-  private isAuthenticatedSubject = new BehaviorSubject<boolean | null>(null);
-  public isAuthenticatedSubject$ = this.isAuthenticatedSubject.asObservable();
+  // Public computed signals
+  readonly isLoading = computed(() => this.authState().isLoading);
+  readonly isAuthenticated = computed(() => this.authState().isAuthenticated);
+  readonly user = computed(() => this.authState().user);
+  readonly error = computed(() => this.authState().error);
+  readonly userInitials = computed(() => {
+    const user = this.user();
+    if (!user?.userName) return '?';
+
+    // Extraire les initiales du userName
+    const nameParts = user.userName.split(' ');
+    if (nameParts.length >= 2) {
+      return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`.toUpperCase();
+    } else {
+      return user.userName.charAt(0).toUpperCase();
+    }
+  });
 
   constructor() {
     this.loadUserFromStorage();
   }
 
-  private loadUserFromStorage(): void {
-    const token = localStorage.getItem(this.TOKEN_KEY);
-    const userJson = localStorage.getItem(this.USER_KEY);
-
-    if (token && userJson) {
-      try {
-        const user = JSON.parse(userJson) as User;
-        this.currentUserSubject.next(user);
-        this.isAuthenticatedSubject.next(true);
-
-        if (this.isTokenExpired()) {
-          console.log('Token expired, attempting to refresh...');
-          this.refreshToken().subscribe({
-            error: (err) => {
-              console.error('Failed to refresh token:', err);
-              this.logout();
-            },
-          });
-        }
-      } catch (err) {
-        console.error('Failed parsing stored user data', err);
-        this.logout();
-      }
-    }
-  }
-
-  // Login with email and password
   login(credentials: LoginCredentials): Observable<User> {
-    // Get mock users from the MockDataService
-    return this.mockDataService.getUsers().pipe(
-      map((users) => {
-        const user = users.find((u) => u.email === credentials.email);
+    // Update loading state
+    this.updateAuthState({ isLoading: true, error: null });
 
-        if (!user) {
-          throw new Error('Invalid email or password');
-        }
-
-        if (credentials.password !== 'password') {
-          throw new Error('Invalid email or password');
-        }
-
-        return user;
-      }),
-      delay(800),
-      tap((user) => {
-        const authResponse: AuthResponse = {
-          accessToken: this.generateMockJwt(user),
-          refreshToken: 'mock-refresh-token-' + Math.random(),
-          user,
-        };
-        this.handleAuthResponse(authResponse);
-      }),
-      catchError((err) => throwError(() => err))
-    );
+    return this.apiService
+      .post<AuthResponse>(`${this.ENDPOINT}/authenticate`, credentials)
+      .pipe(
+        map((response) => this.handleAuthResponse(response)),
+        catchError((error) => {
+          const errorMsg =
+            error.message || 'Login failed. Please check your credentials.';
+          this.updateAuthState({ isLoading: false, error: errorMsg });
+          this.notificationService.error(errorMsg);
+          return throwError(() => new Error(errorMsg));
+        }),
+        finalize(() => {
+          this.updateAuthState({ isLoading: false });
+        })
+      );
   }
-
-  //login(credentials): Observable<AuthResponse> {
-  //   return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials);
-  // }
 
   register(data: RegisterData): Observable<User> {
-    return this.mockDataService.getUsers().pipe(
-      map((users) => {
-        if (users.some((u) => u.email === data.email)) {
-          throw new Error('Email already exists');
-        }
+    this.updateAuthState({ isLoading: true, error: null });
 
-        const newUser: User = {
-          id: Math.random().toString(36).substring(2, 15),
-          email: data.email,
-          name: data.name,
-          techInterests: data.techInterests || [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        return newUser;
+    return this.apiService.post<User>(this.ENDPOINT, data).pipe(
+      map((user) => {
+        this.notificationService.success(
+          'Registration successful! Please log in.'
+        );
+        return user;
       }),
-      delay(800),
-      tap((user) => {
-        const authResponse: AuthResponse = {
-          accessToken: this.generateMockJwt(user),
-          refreshToken: 'mock-refresh-token-' + Math.random(),
-          user,
-        };
-        this.handleAuthResponse(authResponse);
+      catchError((error) => {
+        const errorMsg =
+          error.message || 'Registration failed. Please try again.';
+        this.updateAuthState({ isLoading: false, error: errorMsg });
+        this.notificationService.error(errorMsg);
+        return throwError(() => new Error(errorMsg));
       }),
-      catchError((err) => throwError(() => err))
-    );
-
-    // return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, data).pipe(
-    //   tap(response => this.handleAuthResponse(response)),
-    //   map(response => response.user),
-    //   catchError(error => {
-    //     gestion d'erreur
-    //   })
-    // );
-  }
-
-  private isTokenExpired(): boolean {
-    const token = this.getToken();
-    if (!token) return true;
-
-    const decoded = this.decodeToken(token);
-    if (!decoded) return true;
-
-    const now = Math.floor(Date.now() / 1000);
-    return decoded.exp < now;
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
-  }
-
-  private decodeToken(token: string): JwtPayload | null {
-    try {
-      const parts = token.split('.');
-      if (parts.length !== 3) return null;
-      const payload = atob(parts[1]);
-      return JSON.parse(payload);
-    } catch (err) {
-      console.error('Error decoding token', err);
-      return null;
-    }
-  }
-
-  refreshToken(): Observable<string> {
-    const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
-    if (!refreshToken) {
-      return throwError(() => new Error('No refresh token available'));
-    }
-
-    return of('new-mock-jwt-token' + Math.random()).pipe(
-      delay(300),
-      tap((token) => {
-        localStorage.setItem(this.TOKEN_KEY, token);
-
-        const user = this.currentUserSubject.value;
-        if (user) {
-          const newToken = this.generateMockJwt(user);
-          localStorage.setItem(this.TOKEN_KEY, newToken);
-        }
+      finalize(() => {
+        this.updateAuthState({ isLoading: false });
       })
     );
   }
 
-  private generateMockJwt(user: User): string {
-    const header = {
-      alg: 'HS256',
-      typ: 'JWT',
-    };
-
-    const now = Math.floor(Date.now() / 1000);
-    const expiresIn = 3600;
-
-    const payload: JwtPayload = {
-      sub: user.id,
-      name: user.name,
-      email: user.email,
-      iat: now,
-      exp: now + expiresIn,
-    };
-
-    //mock JWT payload
-    const encodedHeader = btoa(JSON.stringify(header));
-    const encodedPayload = btoa(JSON.stringify(payload));
-    const encodedSignature = btoa('mock-signature-' + Math.random());
-
-    return `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
-  }
-
-  logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    this.currentUserSubject.next(null);
-    this.isAuthenticatedSubject.next(false);
-  }
-
-  private handleAuthResponse(response: AuthResponse): void {
-    localStorage.setItem(this.TOKEN_KEY, response.accessToken);
-    localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
-
-    this.currentUserSubject.next(response.user);
-    this.isAuthenticatedSubject.next(true);
+  updateTechInterests(
+    userId: string,
+    technologies: string[]
+  ): Observable<User> {
+    return this.apiService
+      .put<User>(`${this.ENDPOINT}/${userId}/tech-interests`, { technologies })
+      .pipe(
+        map((user) => {
+          // Mettre à jour l'utilisateur dans le state
+          this.updateAuthState({ user });
+          this.notificationService.success(
+            'Tech interests updated successfully!'
+          );
+          return user;
+        }),
+        catchError((error) => {
+          this.notificationService.error('Failed to update tech interests');
+          return throwError(() => error);
+        })
+      );
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {
-  return this.mockDataService.forgotPassword(email).pipe(
-    map(() => ({
-      message: 'If an account with that email exists, a password reset link has been sent.'
-    })),
-    catchError(error => {
-      console.error('Error in forgotPassword:', error);
-      return of({
-        message: 'If an account with that email exists, a password reset link has been sent.'
+    return this.apiService
+      .post<{ message: string }>(`${this.ENDPOINT}/forgot-password`, { email })
+      .pipe(
+        map((response) => {
+          this.notificationService.info(response.message);
+          return response;
+        }),
+        catchError(() => {
+          // Pour sécurité, retournons un succès même si l'email n'existe pas
+          const message =
+            'If an account with that email exists, a password reset link has been sent.';
+          this.notificationService.info(message);
+          return of({ message });
+        })
+      );
+  }
+
+  refreshToken(): Observable<AuthResponse> {
+    const refreshToken = this.storageService.getRefreshToken();
+
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    return this.apiService
+      .post<AuthResponse>(`${this.ENDPOINT}/refresh-token`, { refreshToken })
+      .pipe(
+        map((response) => {
+          this.handleAuthResponse(response);
+          return response; // Retourner l'AuthResponse complète, pas seulement l'utilisateur
+        }),
+        catchError((error) => {
+          this.logout();
+          return throwError(() => error);
+        })
+      );
+  }
+
+  logout(): Observable<void> {
+    // Only attempt to revoke if we have a token
+    const hasToken = !!this.storageService.getAccessToken();
+
+    if (hasToken) {
+      return this.apiService
+        .post<void>(`${this.ENDPOINT}/revoke-tokens`, {})
+        .pipe(
+          catchError((error) => {
+            console.error('Error during logout:', error);
+            return of(void 0); // Continue with logout even if API call fails
+          }),
+          finalize(() => {
+            this.completeLogout();
+          })
+        );
+    } else {
+      this.completeLogout();
+      return of(void 0);
+    }
+  }
+
+  hasRole(role: string): boolean {
+    return this.user()?.role === role;
+  }
+
+  verifyToken(): Observable<boolean> {
+    if (!this.storageService.getAccessToken()) {
+      return of(false);
+    }
+
+    return this.apiService
+      .get<{ valid: boolean }>(`${this.ENDPOINT}/verify-token`)
+      .pipe(
+        map((response) => response.valid),
+        catchError(() => of(false))
+      );
+  }
+
+  private handleAuthResponse(response: AuthResponse): User {
+    this.storageService.saveAccessToken(response.accessToken);
+    this.storageService.saveRefreshToken(response.refreshToken);
+    this.storageService.saveUser(response.user);
+
+    this.updateAuthState({
+      isAuthenticated: true,
+      user: response.user,
+      error: null,
+    });
+
+    return response.user;
+  }
+
+  private completeLogout(): void {
+    this.storageService.clearAll();
+
+    this.updateAuthState({
+      isAuthenticated: false,
+      user: null,
+    });
+
+    this.notificationService.info('You have been logged out successfully');
+    this.router.navigate(['/auth/login']);
+  }
+
+  private loadUserFromStorage(): void {
+    const user = this.storageService.getUser();
+    const hasToken = !!this.storageService.getAccessToken();
+
+    if (user && hasToken) {
+      this.updateAuthState({
+        isAuthenticated: true,
+        user,
       });
-    })
-  );
-}
+
+      this.verifyToken()
+        .pipe(
+          switchMap((isValid) => {
+            if (!isValid) {
+              return this.refreshToken();
+            }
+            return of(null);
+          }),
+          catchError(() => {
+            this.logout();
+            return of(null);
+          })
+        )
+        .subscribe();
+    }
+  }
+
+  private updateAuthState(
+    stateUpdate: Partial<{
+      isLoading: boolean;
+      isAuthenticated: boolean;
+      user: User | null;
+      error: string | null;
+    }>
+  ): void {
+    this.authState.update((state) => ({
+      ...state,
+      ...stateUpdate,
+    }));
+  }
 }

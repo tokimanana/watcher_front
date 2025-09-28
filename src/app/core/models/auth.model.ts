@@ -4,16 +4,18 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
+  name: string;
   email: string;
   password: string;
-  name: string;
-  techInterests?: string[];
+  confirmPassword?: string; // Utilisé côté frontend uniquement pour la validation
 }
 
-export interface JwtPayload {
-  sub: string; // user id
-  name: string;
+export interface PasswordResetRequest {
   email: string;
-  iat: number; // issued at
-  exp: number; // expires at
+}
+
+export interface PasswordReset {
+  token: string;
+  password: string;
+  confirmPassword?: string; // Utilisé côté frontend uniquement pour la validation
 }

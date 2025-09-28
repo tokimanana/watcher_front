@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   HttpClient,
   HttpErrorResponse,
@@ -17,15 +17,10 @@ export class BaseApiService {
   protected readonly apiUrl: string = environment.apiUrl;
   protected readonly defaultTimeout: number = 30000;
 
-  constructor(protected http: HttpClient) {}
+  protected readonly http = inject(HttpClient);
 
-  /**
-   * Effectue une requête GET
-   * @param endpoint - Le chemin de l'endpoint relatif à l'URL de base
-   * @param params - Paramètres optionnels de la requête
-   * @param headers - En-têtes HTTP personnalisés
-   * @param timeoutMs - Timeout personnalisé en millisecondes
-   */
+  constructor() {}
+
   public get<T>(
     endpoint: string,
     params?: Record<string, any>,
@@ -46,13 +41,6 @@ export class BaseApiService {
       );
   }
 
-  /**
-   * Effectue une requête POST
-   * @param endpoint - Le chemin de l'endpoint relatif à l'URL de base
-   * @param body - Corps de la requête
-   * @param headers - En-têtes HTTP personnalisés
-   * @param timeoutMs - Timeout personnalisé en millisecondes
-   */
   public post<T>(
     endpoint: string,
     body: any,
@@ -72,13 +60,6 @@ export class BaseApiService {
       );
   }
 
-  /**
-   * Effectue une requête PUT
-   * @param endpoint - Le chemin de l'endpoint relatif à l'URL de base
-   * @param body - Corps de la requête
-   * @param headers - En-têtes HTTP personnalisés
-   * @param timeoutMs - Timeout personnalisé en millisecondes
-   */
   public put<T>(
     endpoint: string,
     body: any,
@@ -98,13 +79,6 @@ export class BaseApiService {
       );
   }
 
-  /**
-   * Effectue une requête PATCH
-   * @param endpoint - Le chemin de l'endpoint relatif à l'URL de base
-   * @param body - Corps de la requête
-   * @param headers - En-têtes HTTP personnalisés
-   * @param timeoutMs - Timeout personnalisé en millisecondes
-   */
   public patch<T>(
     endpoint: string,
     body: any,
@@ -124,13 +98,6 @@ export class BaseApiService {
       );
   }
 
-  /**
-   * Effectue une requête DELETE
-   * @param endpoint - Le chemin de l'endpoint relatif à l'URL de base
-   * @param params - Paramètres optionnels de la requête
-   * @param headers - En-têtes HTTP personnalisés
-   * @param timeoutMs - Timeout personnalisé en millisecondes
-   */
   public delete<T>(
     endpoint: string,
     params?: Record<string, any>,
