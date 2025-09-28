@@ -6,9 +6,17 @@ import {
   HttpErrorResponse,
 } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, filter, take, switchMap, finalize } from 'rxjs/operators';
+import {
+  catchError,
+  filter,
+  take,
+  switchMap,
+  finalize,
+  map,
+} from 'rxjs/operators';
 import { inject } from '@angular/core';
 import { AuthService } from '../../features/auth/services/auth.service';
+import { StorageService } from '../../core/services/storage.service';
 
 let isRefreshing = false;
 const refreshTokenSubject = new BehaviorSubject<string | null>(null);
@@ -18,6 +26,7 @@ export const authInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn
 ) => {
   const authService = inject(AuthService);
+  const storageService = inject(StorageService);
 
   if (
     req.url.includes('/auth/login') ||
@@ -27,7 +36,7 @@ export const authInterceptor: HttpInterceptorFn = (
     return next(req);
   }
 
-  const token = authService.getToken();
+  const token = storageService.getAccessToken();
 
   if (token) {
     req = addTokenToRequest(req, token);
@@ -65,6 +74,7 @@ function handle401Error(
     refreshTokenSubject.next(null);
 
     return authService.refreshToken().pipe(
+      map((authResponse) => authResponse.accessToken),
       switchMap((token) => {
         refreshTokenSubject.next(token);
         return next(addTokenToRequest(request, token));

@@ -12,27 +12,19 @@
         <a
           routerLink="/home"
           routerLinkActive="active"
-          [routerLinkActiveOptions]="{exact: true}"
+          [routerLinkActiveOptions]="{ exact: true }"
           class="nav-link"
         >
           <mat-icon>home</mat-icon>
           <span>Home</span>
         </a>
 
-        <a
-          routerLink="/courses"
-          routerLinkActive="active"
-          class="nav-link"
-        >
+        <a routerLink="/courses" routerLinkActive="active" class="nav-link">
           <mat-icon>library_books</mat-icon>
           <span>Courses</span>
         </a>
 
-        <a
-          routerLink="/reviews"
-          routerLinkActive="active"
-          class="nav-link"
-        >
+        <a routerLink="/reviews" routerLinkActive="active" class="nav-link">
           <mat-icon>rate_review</mat-icon>
           <span>Reviews</span>
         </a>
@@ -41,11 +33,33 @@
       <div class="nav-actions">
         <app-theme-toggle></app-theme-toggle>
 
+        <!-- Authentication-based navigation -->
+        @if (isAuthenticated()) {
+        <div class="auth-buttons">
+          <a
+            routerLink="/profile"
+            routerLinkActive="active"
+            class="nav-link login-link"
+          >
+            <mat-icon>person</mat-icon>
+            {{ user()?.userName || 'Profile' }}
+          </a>
+
+          <a
+            class="nav-link register-link"
+            (click)="logout()"
+            style="cursor: pointer"
+          >
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </a>
+        </div>
+        } @else {
         <div class="auth-buttons">
           <a
             routerLink="/auth/login"
             routerLinkActive="active"
-            [routerLinkActiveOptions]="{exact: true}"
+            [routerLinkActiveOptions]="{ exact: true }"
             class="nav-link login-link"
           >
             <mat-icon>login</mat-icon>
@@ -61,6 +75,7 @@
             <span>Register</span>
           </a>
         </div>
+        }
       </div>
     </nav>
   </header>
