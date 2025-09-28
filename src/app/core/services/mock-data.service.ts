@@ -445,8 +445,7 @@ export class MockDataService {
     {
       id: '1',
       email: 'john.doe@example.com',
-      name: 'John Doe',
-      avatar: '/public/avatar1.jpg',
+      userName: 'John Doe',
       techInterests: ['Angular', 'Node.js', 'PostgreSQL'],
       createdAt: new Date('2024-01-10'),
       updatedAt: new Date('2024-09-20'),

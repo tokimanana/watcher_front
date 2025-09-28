@@ -1,1 +1,304 @@
-<p>tech-interests-setup works!</p>
+<div class="tech-setup-page">
+  <div class="tech-setup-container">
+    <!-- Progress Indicator -->
+    <div class="progress-section">
+      <div class="progress-bar">
+        <div
+          class="progress-fill"
+          [style.width.%]="(currentStep() / totalSteps) * 100"
+        ></div>
+      </div>
+      <div class="progress-text">
+        Step {{ currentStep() }} of {{ totalSteps }}
+      </div>
+    </div>
+
+    <div class="setup-content">
+      <!-- Step 1: Welcome -->
+      @if (currentStep() === 1) {
+      <div class="welcome-section">
+        <div class="welcome-header">
+          <div class="welcome-icon">
+            <mat-icon class="large-icon">rocket_launch</mat-icon>
+          </div>
+          <h1 class="welcome-title">Welcome to Course Watcher!</h1>
+          <p class="welcome-subtitle">
+            Let's personalize your learning journey by selecting your tech
+            interests. This will help us recommend the most relevant courses for
+            you.
+          </p>
+        </div>
+
+        <div class="welcome-stats">
+          <div class="stat-item">
+            <mat-icon>school</mat-icon>
+            <div class="stat-content">
+              <div class="stat-number">10,000+</div>
+              <div class="stat-label">Courses Available</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <mat-icon>people</mat-icon>
+            <div class="stat-content">
+              <div class="stat-number">50,000+</div>
+              <div class="stat-label">Active Learners</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <mat-icon>trending_up</mat-icon>
+            <div class="stat-content">
+              <div class="stat-number">95%</div>
+              <div class="stat-label">Completion Rate</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="welcome-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="nextStep()"
+            class="primary-btn"
+          >
+            Get Started
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+          <button
+            mat-button
+            color="primary"
+            (click)="skipSetup()"
+            class="skip-btn"
+          >
+            Skip for now
+          </button>
+        </div>
+      </div>
+      }
+
+      <!-- Step 2: Tech Selection -->
+      @if (currentStep() === 2) {
+      <div class="selection-section">
+        <div class="selection-header">
+          <h1 class="selection-title">Choose Your Tech Interests</h1>
+          <p class="selection-subtitle">
+            Select at least 3 technologies you're interested in learning. Don't
+            worry, you can always change these later.
+          </p>
+          <div class="selection-counter">
+            <span class="counter-text">
+              {{ getSelectedTechnologiesCount() }} selected @if
+              (getSelectedTechnologiesCount() < 3) {
+              <span class="counter-min"
+                >({{ 3 - getSelectedTechnologiesCount() }} more needed)</span
+              >
+              }
+            </span>
+            <span class="counter-max">Max: 10</span>
+          </div>
+        </div>
+
+        @if (errorMessage()) {
+        <div class="error-banner">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMessage() }}</span>
+        </div>
+        }
+
+        <form [formGroup]="setupForm" class="tech-form">
+          @for (category of techCategories; track category.id) {
+          <div class="tech-category">
+            <div class="category-header">
+              <div
+                class="category-icon"
+                [style.background-color]="category.color"
+              >
+                <mat-icon>{{ category.icon }}</mat-icon>
+              </div>
+              <h3 class="category-title">{{ category.name }}</h3>
+              <div class="category-count">
+                {{ getSelectedTechCountForCategory(category) }} selected
+                selected
+              </div>
+            </div>
+
+            <div class="technologies-grid">
+              @for (tech of category.technologies; track tech.id) {
+              <div
+                class="tech-card"
+                [class.selected]="isTechnologySelected(tech.id)"
+                [class.disabled]="
+                  !isTechnologySelected(tech.id) &&
+                  getSelectedTechnologiesCount() >= 10
+                "
+                (click)="toggleTechnology(tech.id)"
+              >
+                <div class="tech-card-header">
+                  <div class="tech-name">{{ tech.name }}</div>
+                  @if (tech.popular) {
+                  <div class="popular-badge">
+                    <mat-icon>star</mat-icon>
+                    Popular
+                  </div>
+                  }
+                </div>
+
+                <div class="tech-description">{{ tech.description }}</div>
+
+                <div class="tech-card-footer">
+                  <div
+                    class="difficulty-badge"
+                    [style.background-color]="
+                      getDifficultyColor(tech.difficulty)
+                    "
+                  >
+                    {{ getDifficultyText(tech.difficulty) }}
+                  </div>
+
+                  @if (isTechnologySelected(tech.id)) {
+                  <div class="selected-indicator">
+                    <mat-icon>check_circle</mat-icon>
+                  </div>
+                  }
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+          }
+        </form>
+
+        <div class="selection-actions">
+          <button
+            mat-button
+            color="primary"
+            (click)="previousStep()"
+            class="back-btn"
+          >
+            <mat-icon>arrow_back</mat-icon>
+            Back
+          </button>
+
+          <div class="action-spacer"></div>
+
+          <button
+            mat-button
+            color="primary"
+            (click)="skipSetup()"
+            class="skip-btn"
+          >
+            Skip
+          </button>
+
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="nextStep()"
+            [disabled]="!canProceed()"
+            class="next-btn"
+          >
+            Continue
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </div>
+      }
+
+      <!-- Step 3: Confirmation -->
+      @if (currentStep() === 3) {
+      <div class="confirmation-section">
+        <div class="confirmation-header">
+          <div class="confirmation-icon">
+            <mat-icon class="large-icon">check_circle_outline</mat-icon>
+          </div>
+          <h1 class="confirmation-title">Perfect! You're All Set</h1>
+          <p class="confirmation-subtitle">
+            Here's a summary of your selected technologies. We'll use these to
+            personalize your course recommendations.
+          </p>
+        </div>
+
+        <div class="selected-technologies">
+          <h3 class="selected-title">
+            Your Selected Technologies ({{ getSelectedTechnologiesCount() }})
+          </h3>
+
+          <div class="selected-categories">
+            @for (category of techCategories; track category.id) { @if
+            (hasCategorySelectedTechs(category))
+            {
+            <div class="selected-category">
+              <div class="selected-category-header">
+                <div
+                  class="category-icon-small"
+                  [style.background-color]="category.color"
+                >
+                  <mat-icon>{{ category.icon }}</mat-icon>
+                </div>
+                <h4 class="selected-category-name">{{ category.name }}</h4>
+              </div>
+
+              <div class="selected-tech-chips">
+                @for (tech of category.technologies; track tech.id) { @if
+                (isTechnologySelected(tech.id)) {
+                <div class="tech-chip" [style.border-color]="category.color">
+                  <span class="chip-name">{{ tech.name }}</span>
+                  <div
+                    class="chip-difficulty"
+                    [style.background-color]="
+                      getDifficultyColor(tech.difficulty)
+                    "
+                  >
+                    {{ getDifficultyText(tech.difficulty) }}
+                  </div>
+                </div>
+                } }
+              </div>
+            </div>
+            } }
+          </div>
+        </div>
+
+        <div class="confirmation-actions">
+          <button
+            mat-button
+            color="primary"
+            (click)="previousStep()"
+            [disabled]="isLoading()"
+            class="back-btn"
+          >
+            <mat-icon>arrow_back</mat-icon>
+            Back to Edit
+          </button>
+
+          <div class="action-spacer"></div>
+
+          <button
+            mat-button
+            color="primary"
+            (click)="skipSetup()"
+            [disabled]="isLoading()"
+            class="skip-btn"
+          >
+            Skip Setup
+          </button>
+
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="onSubmit()"
+            [disabled]="isLoading()"
+            class="finish-btn"
+            [class.loading]="isLoading()"
+          >
+            @if (isLoading()) {
+            <mat-spinner diameter="20" class="spinner"></mat-spinner>
+            Setting up... } @else {
+              <span>Finish Setup <mat-icon>check</mat-icon></span>
+            }
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>
