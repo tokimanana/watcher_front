@@ -1,8 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
+import { Component, inject } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './features/auth/services/auth.service';
 import { ThemeToggleComponent } from './components/theme-toogle/theme-toogle.component';
@@ -14,22 +12,19 @@ import { ThemeToggleComponent } from './components/theme-toogle/theme-toogle.com
     CommonModule,
     RouterOutlet,
     RouterLink,
-    MatButtonModule,
+    RouterLinkActive,
     MatIconModule,
-    MatToolbarModule,
-    ThemeToggleComponent
+    ThemeToggleComponent,
   ],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   private readonly authService = inject(AuthService);
 
+  // Make auth state available to the template
   readonly isAuthenticated = this.authService.isAuthenticated;
   readonly user = this.authService.user;
-
-  ngOnInit(): void {
-  }
 
   logout(): void {
     this.authService.logout().subscribe();
