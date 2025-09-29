@@ -49,7 +49,7 @@ export class TechInterestsSetupComponent {
 
   // State signals
   selectedTechs = signal(new Set<string>());
-  expandedCategories = signal(new Set<string>(['frontend']));
+  expandedCategories = signal(new Set<string>());
 
   // Auth service signals
   readonly isLoading = this.authService.isLoading;
