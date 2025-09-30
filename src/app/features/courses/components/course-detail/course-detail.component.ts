@@ -3,9 +3,9 @@ import {
   OnInit,
   inject,
   signal,
-  computed,
   ChangeDetectionStrategy,
   OnDestroy,
+  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -14,13 +14,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
-import { switchMap, catchError, of, finalize } from 'rxjs';
+import { switchMap, catchError, of } from 'rxjs';
 
-import { Course } from '../../../../core/models/course.model';
+import { Course, CourseHelpers } from '../../../../core/models/course.model';
 import { CourseService } from '../../services/course.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { StarRatingComponent } from '../../../../shared/components/ui/star-rating/star-rating.component';
-import { DifficultyColorPipe } from '../../../../shared/pipes/difficulty-color.pipe';
 import { PlatformBadgeComponent } from '../platform-badge/platform-badge.component';
 
 @Component({
@@ -35,8 +34,7 @@ import { PlatformBadgeComponent } from '../platform-badge/platform-badge.compone
     MatChipsModule,
     MatTabsModule,
     StarRatingComponent,
-    DifficultyColorPipe,
-    PlatformBadgeComponent
+    PlatformBadgeComponent,
   ],
   templateUrl: './course-detail.component.html',
   styleUrl: './course-detail.component.scss',
@@ -114,7 +112,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
         error: (err) => {
           console.warn('Click tracking failed, opening anyway:', err);
           window.open(course.url, '_blank');
-        }
+        },
       });
     } else {
       window.open(course.url, '_blank');
@@ -132,15 +130,6 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
   writeReview() {
     const course = this.course();
     if (!course) return;
-
-    if (!this.isAuthenticated()) {
-      this.router.navigate(['/auth/login'], {
-        queryParams: {
-          returnUrl: `/reviews/new?courseId=${course.id}`
-        }
-      });
-      return;
-    }
 
     this.router.navigate(['/reviews/new'], {
       queryParams: { courseId: course.id },
@@ -173,5 +162,17 @@ export class CourseDetailComponent implements OnInit, OnDestroy {
   private loadMockReviews() {
     // TODO: Replace with actual review service call
     this.courseReviews.set([]);
+  }
+
+  formatDuration(hours: number): string {
+    return CourseHelpers.formatDuration(hours);
+  }
+
+  formatPrice(price: number, isPaid: boolean): string {
+    return CourseHelpers.formatPrice(price, isPaid);
+  }
+
+  getLevelBadgeClass(level: string): string {
+    return CourseHelpers.getLevelBadgeClass(level);
   }
 }

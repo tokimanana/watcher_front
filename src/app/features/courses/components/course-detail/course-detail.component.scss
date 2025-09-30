@@ -1,14 +1,15 @@
-@import "../../../../../assets/styles/mixins";
-
 .course-detail-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--spacing-lg);
 }
 
-.loading-container {
-  @include flex-column-center;
-  padding: var(--spacing-xl) 0;
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
 
   .spinner {
     width: 40px;
@@ -24,87 +25,89 @@
       transform: rotate(360deg);
     }
   }
-
-  p {
-    margin-top: var(--spacing-md);
-    color: var(--color-text-secondary);
-  }
 }
 
 .error-container {
-  @include flex-column-center;
-  padding: var(--spacing-lg);
-  gap: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  gap: 1rem;
 
   .alert-error {
-    @include flex-start;
-    padding: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    padding: 1rem;
     background-color: rgba(205, 92, 92, 0.1);
     border: 1px solid var(--color-error);
-    border-radius: var(--radius-md);
+    border-radius: 8px;
     color: var(--color-error-dark);
 
     mat-icon {
-      margin-right: var(--spacing-sm);
+      margin-right: 0.5rem;
     }
   }
 }
 
 .breadcrumb {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 1rem;
 
   .breadcrumb-link {
-    @include flex-start;
+    display: flex;
+    align-items: center;
     color: var(--color-text-secondary);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: color 0.3s;
 
     &:hover {
       color: var(--color-primary);
     }
 
     mat-icon {
-      margin-right: var(--spacing-xs);
+      margin-right: 0.5rem;
     }
   }
 }
 
 .course-header {
   display: flex;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
+  gap: 2rem;
+  margin-bottom: 2rem;
 
   .course-header-content {
     flex: 1;
 
     app-platform-badge {
       display: block;
-      margin-bottom: var(--spacing-sm);
+      margin-bottom: 0.5rem;
     }
   }
 
   .course-title {
-    @include heading-2;
-    margin-bottom: var(--spacing-md);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
   }
 
   .rating-summary {
-    @include flex-start;
-    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
 
     .rating-value {
-      @include flex-start;
+      display: flex;
+      align-items: center;
 
       .rating-number {
         font-size: 1.5rem;
         font-weight: 700;
         color: var(--color-primary);
-        margin-right: var(--spacing-sm);
+        margin-right: 0.5rem;
       }
     }
 
     .review-count {
-      margin-left: var(--spacing-sm);
+      margin-left: 0.5rem;
       color: var(--color-text-secondary);
       font-size: 0.9rem;
     }
@@ -113,15 +116,14 @@
   .course-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 
-    .duration-badge,
-    .price-badge,
-    .clicks-badge {
-      @include flex-start;
+    > div {
+      display: flex;
+      align-items: center;
       padding: 4px 10px;
-      border-radius: var(--radius-md);
+      border-radius: 8px;
       font-size: 0.9rem;
       background-color: var(--color-surface-variant);
 
@@ -129,7 +131,7 @@
         font-size: 1.1rem;
         width: 1.1rem;
         height: 1.1rem;
-        margin-right: var(--spacing-xs);
+        margin-right: 0.25rem;
       }
     }
 
@@ -141,9 +143,10 @@
 
   .action-buttons {
     display: flex;
-    gap: var(--spacing-md);
+    gap: 1rem;
 
-    button {
+    button,
+    a {
       min-width: 140px;
     }
   }
@@ -154,128 +157,20 @@
     .course-image {
       width: 100%;
       height: auto;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .last-updated {
       text-align: right;
       font-size: 0.8rem;
       color: var(--color-text-secondary);
-      margin-top: var(--spacing-xs);
+      margin-top: 0.25rem;
     }
   }
 }
 
-.course-tabs {
-  margin-bottom: var(--spacing-xl);
-
-  .tab-content {
-    padding: var(--spacing-lg) 0;
-
-    h2,
-    h3 {
-      margin-top: 0;
-      margin-bottom: var(--spacing-md);
-    }
-  }
-}
-
-.tech-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
-
-  .tech-tag {
-    padding: 6px 12px;
-    background-color: var(--color-surface-variant);
-    border-radius: var(--radius-full);
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    transition: all 0.2s;
-
-    &:hover {
-      background-color: var(--color-primary-light);
-      color: var(--color-text-inverse);
-    }
-  }
-}
-
-.reviews-header {
-  @include flex-between;
-  margin-bottom: var(--spacing-lg);
-}
-
-.empty-reviews {
-  @include flex-column-center;
-  padding: var(--spacing-xl);
-  color: var(--color-text-secondary);
-
-  mat-icon {
-    font-size: 3rem;
-    height: 3rem;
-    width: 3rem;
-    margin-bottom: var(--spacing-md);
-    opacity: 0.6;
-  }
-}
-
-.related-courses {
-  margin-top: var(--spacing-xl);
-
-  h2 {
-    @include heading-3;
-  }
-
-  .recommended-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: var(--spacing-md);
-
-    .recommended-card {
-      cursor: pointer;
-      background-color: var(--color-surface);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-md);
-      }
-
-      .recommended-image {
-        width: 100%;
-        height: 140px;
-        object-fit: cover;
-      }
-
-      .recommended-content {
-        padding: var(--spacing-sm);
-
-        .recommended-title {
-          @include line-clamp(2);
-          font-size: var(--font-size-md);
-          font-weight: var(--font-weight-semibold);
-          margin: 0 0 var(--spacing-xs);
-        }
-
-        .recommended-meta {
-          @include flex-between;
-          font-size: var(--font-size-sm);
-          color: var(--color-text-secondary);
-
-          .recommended-rating {
-            color: var(--color-primary);
-            font-weight: var(--font-weight-semibold);
-          }
-        }
-      }
-    }
-  }
-}
-
-@include tablet {
+@media (max-width: 768px) {
   .course-header {
     flex-direction: column-reverse;
 
@@ -286,17 +181,17 @@
     }
   }
 
-  .reviews-header {
+  .action-buttons {
     flex-direction: column;
-    gap: var(--spacing-md);
 
-    button {
+    button,
+    a {
       width: 100%;
     }
   }
 }
 
-@include mobile {
+@media (max-width: 480px) {
   .course-detail-container {
     padding: var(--spacing-md);
   }
@@ -305,14 +200,6 @@
     flex-direction: column;
 
     > div {
-      width: 100%;
-    }
-  }
-
-  .action-buttons {
-    flex-direction: column;
-
-    button {
       width: 100%;
     }
   }

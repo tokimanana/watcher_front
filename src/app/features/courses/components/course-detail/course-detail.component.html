@@ -1,90 +1,88 @@
 <div class="course-detail-container">
   @if (loading()) {
-  <div class="loading-container">
+  <div class="loading-state">
     <div class="spinner"></div>
-    <p class="text-secondary">Loading course details...</p>
+    <p>Loading course details...</p>
   </div>
-  } @if (error() && !loading()) {
+  } @else if (error()) {
   <div class="error-container">
-    <div class="alert alert-error">
-      <mat-icon>error</mat-icon>
+    <div class="alert-error">
+      <mat-icon>error_outline</mat-icon>
       <span>{{ error() }}</span>
     </div>
     <button mat-raised-button color="primary" (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
-      Back to Courses
+      Return to Courses
     </button>
   </div>
-  } @if (course() && !loading() && !error()) {
+  } @else if (course()) {
   <div class="breadcrumb">
-    <a routerLink="/courses" class="breadcrumb-link">
-      <mat-icon>keyboard_arrow_left</mat-icon>
-      Back to Courses
+    <a class="breadcrumb-link" routerLink="/courses">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Back to Courses</span>
     </a>
   </div>
 
   <div class="course-header">
     <div class="course-header-content">
-      <app-platform-badge [platform]="course()!.platform" size="large">
-      </app-platform-badge>
+      <app-platform-badge [platform]="course()!.platform"></app-platform-badge>
 
       <h1 class="course-title">{{ course()!.title }}</h1>
 
-      <div class="instructor-info">
-        <mat-icon>person</mat-icon>
-        <span>{{ course()!.instructor }}</span>
-      </div>
-
       <div class="rating-summary">
         <div class="rating-value">
-          <span class="rating-number">{{ course()!.rating.toFixed(1) }}</span>
+          <span class="rating-number">{{
+            course()!.numReviews > 0 ? "4.5" : "0.0"
+          }}</span>
           <app-star-rating
-            [rating]="course()!.rating"
+            [rating]="course()!.numReviews > 0 ? 4.5 : 0"
             [readOnly]="true"
           ></app-star-rating>
         </div>
-        <span class="review-count">({{ course()!.reviewCount }} reviews)</span>
+        <span class="review-count">({{ course()!.numReviews }} reviews)</span>
       </div>
 
       <div class="course-badges">
         <div
           class="difficulty-badge"
-          [style.background-color]="course()!.difficulty | difficultyColor"
+          [class]="getLevelBadgeClass(course()!.level)"
         >
           <mat-icon>signal_cellular_alt</mat-icon>
-          <span>{{ course()!.difficulty | titlecase }}</span>
+          <span>{{ course()!.level }}</span>
         </div>
 
         <div class="duration-badge">
           <mat-icon>schedule</mat-icon>
-          <span>{{ course()!.duration }}</span>
+          <span>{{ formatDuration(course()!.contentDuration) }}</span>
         </div>
 
-        <div class="price-badge" [class.free]="course()!.price === 0">
-          <mat-icon>{{
-            course()!.price === 0 ? "money_off" : "attach_money"
-          }}</mat-icon>
-          <span>{{
-            course()!.price === 0
-              ? "Free"
-              : (course()!.price | currency : course()!.currency)
-          }}</span>
+        <div class="price-badge" [class.free]="!course()!.isPaid">
+          <mat-icon>{{ !course()!.isPaid ? "attach_money" : "paid" }}</mat-icon>
+          <span>{{ formatPrice(course()!.price, course()!.isPaid) }}</span>
         </div>
 
         <div class="clicks-badge">
-          <mat-icon>visibility</mat-icon>
-          <span>{{ course()!.clickCount }} clicks</span>
+          <mat-icon>touch_app</mat-icon>
+          <span
+            >{{ course()!.numSubscribers.toLocaleString() }} enrollments</span
+          >
         </div>
       </div>
 
       <div class="action-buttons">
-        <button mat-raised-button color="primary" (click)="goToCourse()">
+        <a
+          mat-raised-button
+          color="primary"
+          [href]="course()!.url"
+          (click)="goToCourse()"
+        >
           <mat-icon>launch</mat-icon>
           Go to Course
-        </button>
-        <button mat-stroked-button color="accent" (click)="writeReview()">
+        </a>
+
+        <button mat-raised-button color="accent" (click)="writeReview()">
           <mat-icon>rate_review</mat-icon>
-          Write Review
+          Write a Review
         </button>
       </div>
     </div>
@@ -95,163 +93,79 @@
         [alt]="course()!.title"
         class="course-image"
       />
-      <div class="last-updated">
-        Updated: {{ course()!.updatedAt | date : "mediumDate" }}
-      </div>
+      <p class="last-updated">
+        Last updated: {{ course()!.publishedTimestamp | date : "mediumDate" }}
+      </p>
     </div>
   </div>
 
-  <mat-tab-group animationDuration="300ms" class="course-tabs">
+  <mat-tab-group
+    class="course-tabs"
+    [selectedIndex]="activeTab()"
+    (selectedIndexChange)="activeTab.set($event)"
+  >
     <mat-tab label="About">
       <div class="tab-content">
-        <h2>Course Description</h2>
-        <p class="course-description">{{ course()!.description }}</p>
+        <h2>About this Course</h2>
+        <p>
+          This course has {{ course()!.numLectures }} lectures and runs for
+          {{ formatDuration(course()!.contentDuration) }}.
+        </p>
 
-        <h3>Technologies Covered</h3>
+        @if (course()!.technologies && course()!.technologies.length) {
+        <h3>Technologies</h3>
         <div class="tech-tags">
           @for (tech of course()!.technologies; track tech) {
           <span class="tech-tag">{{ tech }}</span>
           }
         </div>
+        }
       </div>
     </mat-tab>
 
-    <mat-tab label="Reviews ({{ courseReviews().length }})">
+    <!-- Reviews Tab -->
+    <mat-tab label="Reviews">
       <div class="tab-content">
         <div class="reviews-header">
-          <div class="review-stats">
-            <h2>Student Reviews</h2>
-
-            <div class="rating-distribution">
-              @for (item of ratingDistribution(); track item.rating) {
-              <div class="rating-bar-container">
-                <div class="rating-bar-label">
-                  <span>{{ item.rating }} ★</span>
-                </div>
-                <div class="rating-bar-wrapper">
-                  <div
-                    class="rating-bar"
-                    [style.width.%]="item.percentage"
-                  ></div>
-                </div>
-                <div class="rating-bar-count">{{ item.count }}</div>
-              </div>
-              }
-            </div>
-          </div>
-
+          <h2>Student Reviews ({{ course()!.numReviews }})</h2>
           <button mat-raised-button color="primary" (click)="writeReview()">
-            <mat-icon>add</mat-icon>
-            Add Review
+            <mat-icon>rate_review</mat-icon>
+            Write a Review
           </button>
         </div>
 
-        @if (courseReviews().length === 0) {
         <div class="empty-reviews">
           <mat-icon>rate_review</mat-icon>
-          <p>No reviews yet. Be the first to share your experience!</p>
+          <p>Reviews will be available soon!</p>
+          <p class="review-notice">
+            We're currently working on implementing the review system.
+          </p>
+          <button mat-raised-button color="primary" (click)="writeReview()">
+            Write a Review
+          </button>
         </div>
-        } @if (courseReviews().length > 0) {
-        <div class="reviews-list">
-          @for (review of courseReviews(); track review.id) {
-          <mat-card class="review-card">
-            <mat-card-header>
-              <div mat-card-avatar class="review-avatar">
-                {{ review.user?.userName?.charAt(0) || "U" }}
-              </div>
-              <mat-card-title>
-                <div class="review-title-row">
-                  <span>{{ review.title }}</span>
-                  <app-star-rating
-                    [rating]="review.rating"
-                    [readOnly]="true"
-                    [small]="true"
-                  ></app-star-rating>
-                </div>
-              </mat-card-title>
-              <mat-card-subtitle>
-                By {{ review.user?.userName || "Anonymous" }} •
-                {{ review.createdAt | date : "mediumDate" }}
-              </mat-card-subtitle>
-            </mat-card-header>
-
-            <mat-card-content>
-              <p class="review-content">{{ review.content }}</p>
-
-              <div class="pros-cons-container">
-                <div class="pros">
-                  <h4 class="pros-title">
-                    <mat-icon class="pros-icon">thumb_up</mat-icon>
-                    Pros
-                  </h4>
-                  <ul class="pros-list">
-                    @for (pro of review.pros; track pro) {
-                    <li>{{ pro }}</li>
-                    } @if (!review.pros.length) {
-                    <li>No pros mentioned</li>
-                    }
-                  </ul>
-                </div>
-
-                <div class="cons">
-                  <h4 class="cons-title">
-                    <mat-icon class="cons-icon">thumb_down</mat-icon>
-                    Cons
-                  </h4>
-                  <ul class="cons-list">
-                    @for (con of review.cons; track con) {
-                    <li>{{ con }}</li>
-                    } @if (!review.cons.length) {
-                    <li>No cons mentioned</li>
-                    }
-                  </ul>
-                </div>
-              </div>
-            </mat-card-content>
-
-            <mat-card-actions>
-              <button mat-button color="accent">
-                <mat-icon>thumb_up_alt</mat-icon>
-                Helpful ({{ review.helpful }})
-              </button>
-            </mat-card-actions>
-          </mat-card>
-          }
-        </div>
-        }
       </div>
     </mat-tab>
   </mat-tab-group>
 
   <div class="related-courses">
-    <h2>Related Courses</h2>
-    @if (recommendedCourses().length === 0) {
-    <p class="text-secondary">
-      No related courses found. We're working on intelligent course
-      recommendations.
-    </p>
-    } @else {
+    <h2>You might also like</h2>
     <div class="recommended-grid">
-      @for (course of recommendedCourses(); track course.id) {
-      <div class="recommended-card" (click)="navigateToCourse(course.id)">
-        <img
-          [src]="course.imageUrl"
-          [alt]="course.title"
-          class="recommended-image"
-        />
-        <div class="recommended-content">
-          <h3 class="recommended-title">{{ course.title }}</h3>
-          <div class="recommended-meta">
-            <span class="recommended-rating"
-              >★ {{ course.rating.toFixed(1) }}</span
-            >
-            <span class="recommended-platform">{{ course.platform }}</span>
-          </div>
-        </div>
+      <div class="empty-recommendations">
+        <p>Recommendations will be available soon.</p>
       </div>
-      }
     </div>
-    }
+  </div>
+  } @else {
+  <div class="error-container">
+    <div class="alert-error">
+      <mat-icon>error_outline</mat-icon>
+      <span>Course not found</span>
+    </div>
+    <button mat-raised-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Return to Courses
+    </button>
   </div>
   }
 </div>
