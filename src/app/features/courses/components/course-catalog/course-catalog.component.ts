@@ -36,7 +36,7 @@ interface FilterOption {
   styleUrl: './course-catalog.component.scss',
 })
 export class CourseCatalogComponent implements OnInit, OnDestroy {
-  readonly courseService = inject(CourseService);
+  private readonly courseService = inject(CourseService);
   private readonly router = inject(Router);
 
   searchQuery = signal('');
@@ -50,9 +50,9 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
   priceDropdownOpen = signal(false);
 
   // Service state
-  courses = this.courseService.courses;
-  loading = this.courseService.loading;
-  pagination = this.courseService.pagination;
+  courses = computed(() => this.courseService.courses());
+  loading = computed(() => this.courseService.loading());
+  pagination = computed(() => this.courseService.pagination());
 
   sortOptions: FilterOption[] = [
     { value: 'numSubscribers', label: 'Most Popular' },
@@ -244,5 +244,17 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
 
   getLevelBadgeClass(level: string): string {
     return CourseHelpers.getLevelBadgeClass(level);
+  }
+
+  goToNextPage(): void {
+    if (this.pagination() && this.pagination()!.page < this.pagination()!.totalPages) {
+      this.courseService.goToPage(this.pagination()!.page + 1);
+    }
+  }
+
+  goToPreviousPage(): void {
+    if (this.pagination() && this.pagination()!.page > 1) {
+      this.courseService.goToPage(this.pagination()!.page - 1);
+    }
   }
 }

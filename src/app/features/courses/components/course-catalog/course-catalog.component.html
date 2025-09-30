@@ -109,9 +109,7 @@
     <div class="spinner"></div>
     <p>Loading courses...</p>
   </div>
-  }
-
-  @if (!loading()) {
+  } @if (!loading()) {
   <div class="course-grid">
     @for (course of courses(); track course.id) {
     <div class="course-card" (click)="navigateToCourse(course.id)">
@@ -150,9 +148,7 @@
         </div>
       </div>
     </div>
-    }
-
-    @if (courses().length === 0) {
+    } @if (courses().length === 0) {
     <div class="empty-state">
       <div class="empty-icon">🔍</div>
       <h3>No courses found</h3>
@@ -163,14 +159,12 @@
     </div>
     }
   </div>
-  }
-
-  @if (pagination() && pagination()!.totalPages > 1) {
+  } @if (pagination() && pagination()!.totalPages > 1) {
   <div class="pagination">
     <button
       class="pagination-btn"
       [disabled]="pagination()!.page === 1"
-      (click)="courseService.goToPage(pagination()!.page - 1)"
+      (click)="goToPreviousPage()"
     >
       Previous
     </button>
@@ -180,7 +174,7 @@
     <button
       class="pagination-btn"
       [disabled]="pagination()!.page === pagination()!.totalPages"
-      (click)="courseService.goToPage(pagination()!.page + 1)"
+      (click)="goToNextPage()"
     >
       Next
     </button>
