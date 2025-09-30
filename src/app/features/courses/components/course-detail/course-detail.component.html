@@ -1,88 +1,74 @@
 <div class="course-detail-container">
   @if (loading()) {
-  <div class="loading-state">
+  <div class="loading-container">
     <div class="spinner"></div>
-    <p>Loading course details...</p>
+    <p class="text-secondary">Loading course details...</p>
   </div>
-  } @else if (error()) {
+  }
+
+  @if (error() && !loading()) {
   <div class="error-container">
-    <div class="alert-error">
-      <mat-icon>error_outline</mat-icon>
+    <div class="alert alert-error">
+      <mat-icon>error</mat-icon>
       <span>{{ error() }}</span>
     </div>
     <button mat-raised-button color="primary" (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
-      Return to Courses
+      Back to Courses
     </button>
   </div>
-  } @else if (course()) {
+  }
+
+  @if (course() && !loading() && !error()) {
   <div class="breadcrumb">
-    <a class="breadcrumb-link" routerLink="/courses">
-      <mat-icon>arrow_back</mat-icon>
-      <span>Back to Courses</span>
+    <a routerLink="/courses" class="breadcrumb-link">
+      <mat-icon>keyboard_arrow_left</mat-icon>
+      Back to Courses
     </a>
   </div>
 
   <div class="course-header">
     <div class="course-header-content">
-      <app-platform-badge [platform]="course()!.platform"></app-platform-badge>
+      <app-platform-badge
+        [platform]="course()!.platform"
+        size="large"
+      ></app-platform-badge>
 
       <h1 class="course-title">{{ course()!.title }}</h1>
 
-      <div class="rating-summary">
-        <div class="rating-value">
-          <span class="rating-number">{{
-            course()!.numReviews > 0 ? "4.5" : "0.0"
-          }}</span>
-          <app-star-rating
-            [rating]="course()!.numReviews > 0 ? 4.5 : 0"
-            [readOnly]="true"
-          ></app-star-rating>
-        </div>
-        <span class="review-count">({{ course()!.numReviews }} reviews)</span>
-      </div>
-
-      <div class="course-badges">
-        <div
-          class="difficulty-badge"
-          [class]="getLevelBadgeClass(course()!.level)"
-        >
-          <mat-icon>signal_cellular_alt</mat-icon>
-          <span>{{ course()!.level }}</span>
-        </div>
-
-        <div class="duration-badge">
+      <div class="course-meta-badges">
+        <div class="badge-item">
           <mat-icon>schedule</mat-icon>
           <span>{{ formatDuration(course()!.contentDuration) }}</span>
         </div>
 
-        <div class="price-badge" [class.free]="!course()!.isPaid">
-          <mat-icon>{{ !course()!.isPaid ? "attach_money" : "paid" }}</mat-icon>
+        <div class="badge-item">
+          <mat-icon>signal_cellular_alt</mat-icon>
+          <span>{{ course()!.level }}</span>
+        </div>
+
+        <div class="badge-item" [class.free]="!course()!.isPaid">
+          <mat-icon>{{
+            course()!.isPaid ? "attach_money" : "money_off"
+          }}</mat-icon>
           <span>{{ formatPrice(course()!.price, course()!.isPaid) }}</span>
         </div>
 
-        <div class="clicks-badge">
-          <mat-icon>touch_app</mat-icon>
-          <span
-            >{{ course()!.numSubscribers.toLocaleString() }} enrollments</span
-          >
+        <div class="badge-item">
+          <mat-icon>people</mat-icon>
+          <span>{{ formatNumber(course()!.numSubscribers) }} students</span>
+        </div>
+
+        <div class="badge-item">
+          <mat-icon>star</mat-icon>
+          <span>{{ formatNumber(course()!.numReviews) }} reviews</span>
         </div>
       </div>
 
       <div class="action-buttons">
-        <a
-          mat-raised-button
-          color="primary"
-          [href]="course()!.url"
-          (click)="goToCourse()"
-        >
+        <button mat-raised-button color="primary" (click)="goToCourse()">
           <mat-icon>launch</mat-icon>
-          Go to Course
-        </a>
-
-        <button mat-raised-button color="accent" (click)="writeReview()">
-          <mat-icon>rate_review</mat-icon>
-          Write a Review
+          Go to Course on Udemy
         </button>
       </div>
     </div>
@@ -93,79 +79,76 @@
         [alt]="course()!.title"
         class="course-image"
       />
-      <p class="last-updated">
-        Last updated: {{ course()!.publishedTimestamp | date : "mediumDate" }}
-      </p>
+      <div class="published-date">
+        Published: {{ formatDate(course()!.publishedTimestamp) }}
+      </div>
     </div>
   </div>
 
-  <mat-tab-group
-    class="course-tabs"
-    [selectedIndex]="activeTab()"
-    (selectedIndexChange)="activeTab.set($event)"
-  >
-    <mat-tab label="About">
-      <div class="tab-content">
-        <h2>About this Course</h2>
-        <p>
-          This course has {{ course()!.numLectures }} lectures and runs for
-          {{ formatDuration(course()!.contentDuration) }}.
-        </p>
+  <div class="course-details-section">
+    <div class="details-card">
+      <h2>Course Information</h2>
 
-        @if (course()!.technologies && course()!.technologies.length) {
-        <h3>Technologies</h3>
+      <div class="detail-row">
+        <span class="detail-label">Platform:</span>
+        <span class="detail-value">Udemy</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Level:</span>
+        <app-difficulty-badge
+          [level]="getLevelBadgeClass(course()!.level)"
+        ></app-difficulty-badge>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Duration:</span>
+        <span class="detail-value">{{
+          formatDuration(course()!.contentDuration)
+        }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Number of Lectures:</span>
+        <span class="detail-value">{{ course()!.numLectures }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Total Students:</span>
+        <span class="detail-value">{{
+          formatNumber(course()!.numSubscribers)
+        }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Reviews:</span>
+        <span class="detail-value">{{
+          formatNumber(course()!.numReviews)
+        }}</span>
+      </div>
+
+      @if (course()!.technologies && course()!.technologies.length > 0) {
+      <div class="detail-row">
+        <span class="detail-label">Technologies:</span>
         <div class="tech-tags">
           @for (tech of course()!.technologies; track tech) {
           <span class="tech-tag">{{ tech }}</span>
           }
         </div>
-        }
       </div>
-    </mat-tab>
+      }
+    </div>
 
-    <!-- Reviews Tab -->
-    <mat-tab label="Reviews">
-      <div class="tab-content">
-        <div class="reviews-header">
-          <h2>Student Reviews ({{ course()!.numReviews }})</h2>
-          <button mat-raised-button color="primary" (click)="writeReview()">
-            <mat-icon>rate_review</mat-icon>
-            Write a Review
-          </button>
-        </div>
-
-        <div class="empty-reviews">
-          <mat-icon>rate_review</mat-icon>
-          <p>Reviews will be available soon!</p>
-          <p class="review-notice">
-            We're currently working on implementing the review system.
-          </p>
-          <button mat-raised-button color="primary" (click)="writeReview()">
-            Write a Review
-          </button>
-        </div>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
-
-  <div class="related-courses">
-    <h2>You might also like</h2>
-    <div class="recommended-grid">
-      <div class="empty-recommendations">
-        <p>Recommendations will be available soon.</p>
+    <div class="details-card reviews-placeholder">
+      <h2>Reviews</h2>
+      <div class="placeholder-content">
+        <mat-icon>rate_review</mat-icon>
+        <p>Review system coming soon!</p>
+        <small
+          >Check back later to see what students think about this course.</small
+        >
       </div>
     </div>
-  </div>
-  } @else {
-  <div class="error-container">
-    <div class="alert-error">
-      <mat-icon>error_outline</mat-icon>
-      <span>Course not found</span>
-    </div>
-    <button mat-raised-button color="primary" (click)="goBack()">
-      <mat-icon>arrow_back</mat-icon>
-      Return to Courses
-    </button>
   </div>
   }
 </div>

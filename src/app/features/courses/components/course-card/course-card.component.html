@@ -7,23 +7,31 @@
     />
     <div class="course-badges">
       <app-platform-badge [platform]="course().platform"></app-platform-badge>
-      <app-difficulty-badge [level]="course().difficulty"></app-difficulty-badge>
+      <app-difficulty-badge
+        [level]="getLevelBadgeClass(course().level)"
+      ></app-difficulty-badge>
     </div>
   </div>
 
   <div class="course-content">
     <h3 class="course-title">{{ course().title }}</h3>
 
-    <div class="course-rating">
-      <app-star-rating
-        [rating]="course().rating"
-        [readOnly]="true"
-      ></app-star-rating>
-      <span class="rating-count">({{ course().reviewCount }})</span>
+    <div class="course-meta">
+      <div class="meta-item">
+        <mat-icon>schedule</mat-icon>
+        <span>{{ formatDuration(course().contentDuration) }}</span>
+      </div>
+      <div class="meta-item">
+        <mat-icon>people</mat-icon>
+        <span>{{ formatNumber(course().numSubscribers) }}</span>
+      </div>
+      <div class="meta-item">
+        <mat-icon>star</mat-icon>
+        <span>{{ formatNumber(course().numReviews) }}</span>
+      </div>
     </div>
 
-    <div class="course-instructor">{{ course().instructor }}</div>
-
+    @if (course().technologies && course().technologies.length > 0) {
     <div class="course-tech-stack">
       @for (tech of course().technologies.slice(0, 3); track tech) {
       <span class="tech-tag">{{ tech }}</span>
@@ -31,11 +39,11 @@
       <span class="tech-tag more">+{{ course().technologies.length - 3 }}</span>
       }
     </div>
+    }
 
-    <div class="course-price-container">
+    <div class="course-footer">
       <span class="course-price">
-        @if (course().price === 0) { Free } @else { ${{ course().price.toFixed(2) }}
-        }
+        {{ formatPrice(course().price, course().isPaid) }}
       </span>
 
       <button
@@ -44,7 +52,8 @@
         class="goto-button"
         (click)="navigateToExternalCourse($event)"
       >
-        Go to Course
+        <mat-icon>launch</mat-icon>
+        View Course
       </button>
     </div>
   </div>

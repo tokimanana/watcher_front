@@ -37,11 +37,6 @@ export class CourseService extends BaseApiService implements MetaHandler {
   constructor() {
     super();
     this.metaHandler = this;
-
-    effect(() => {
-      const currentFilters = this.filtersSignal();
-      this.fetchCourses(currentFilters);
-    });
   }
 
   readonly courses = this.coursesSignal.asReadonly();
@@ -80,7 +75,7 @@ export class CourseService extends BaseApiService implements MetaHandler {
     this.filtersSignal.set(filters || {});
 
     return this.get<CourseListResponse>(
-      'courses',
+      'course',
       this.buildFilterParams(filters)
     ).pipe(
       map((response) => {
@@ -105,7 +100,7 @@ export class CourseService extends BaseApiService implements MetaHandler {
   getCourseById(courseId: string): Observable<Course> {
     this.loadingSignal.set(true);
 
-    return this.get<UdemyCourseRaw>(`courses/${courseId}`).pipe(
+    return this.get<UdemyCourseRaw>(`course/${courseId}`).pipe(
       map((raw) => CourseAdapter.toFrontend(raw)),
       tap((course) => {
         this.selectedCourseSignal.set(course);
@@ -131,7 +126,7 @@ export class CourseService extends BaseApiService implements MetaHandler {
   }
 
   trackCourseClick(courseId: string): Observable<void> {
-    return this.post<void>(`courses/${courseId}/click`, {}).pipe(
+    return this.post<void>(`course/${courseId}/click`, {}).pipe(
       catchError((error) => {
         console.warn('Failed to track course click', error);
         return of(void 0);
@@ -139,8 +134,9 @@ export class CourseService extends BaseApiService implements MetaHandler {
     );
   }
 
-  updateFilters(filters: CourseFilters): void {
-    this.filtersSignal.update(current => ({ ...current, ...filters }));
+  updateFilters(filters: Partial<CourseFilters>): void {
+    this.filtersSignal.update((current) => ({ ...current, ...filters }));
+    this.fetchCourses(this.filtersSignal());
   }
 
   clearFilters(): void {
