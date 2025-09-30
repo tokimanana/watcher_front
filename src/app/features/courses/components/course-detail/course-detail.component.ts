@@ -5,6 +5,7 @@ import {
   signal,
   computed,
   ChangeDetectionStrategy,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -13,15 +14,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
-import { switchMap, tap, catchError, map, finalize, of } from 'rxjs';
+import { switchMap, catchError, of, finalize } from 'rxjs';
 
 import { Course } from '../../../../core/models/course.model';
-import { Review } from '../../../../core/models/review.model';
 import { CourseService } from '../../services/course.service';
-import { MockDataService } from '../../../../core/services/mock-data.service';
+import { AuthService } from '../../../auth/services/auth.service';
 import { StarRatingComponent } from '../../../../shared/components/ui/star-rating/star-rating.component';
 import { DifficultyColorPipe } from '../../../../shared/pipes/difficulty-color.pipe';
-import { PlatformBadgeComponent } from "../platform-badge/platform-badge.component";
+import { PlatformBadgeComponent } from '../platform-badge/platform-badge.component';
 
 @Component({
   selector: 'app-course-detail',
@@ -37,23 +37,28 @@ import { PlatformBadgeComponent } from "../platform-badge/platform-badge.compone
     StarRatingComponent,
     DifficultyColorPipe,
     PlatformBadgeComponent
-],
+  ],
   templateUrl: './course-detail.component.html',
   styleUrl: './course-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CourseDetailComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private courseService = inject(CourseService);
-  private mockDataService = inject(MockDataService);
+export class CourseDetailComponent implements OnInit, OnDestroy {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly courseService = inject(CourseService);
+  private readonly authService = inject(AuthService);
 
-  course = signal<Course | null>(null);
-  courseReviews = signal<Review[]>([]);
-  loading = signal(true);
+  // Service signals
+  readonly course = this.courseService.selectedCourse;
+  readonly loading = this.courseService.loading;
+  readonly isAuthenticated = this.authService.isAuthenticated;
+
+  // Local state
   error = signal<string | null>(null);
   activeTab = signal(0);
 
+  // Mock data for reviews (will be replaced with real review service later)
+  courseReviews = signal<any[]>([]);
   recommendedCourses = signal<Course[]>([]);
 
   ratingDistribution = computed(() => this.calculateRatingDistribution());
@@ -64,84 +69,55 @@ export class CourseDetailComponent implements OnInit {
         switchMap((params) => {
           const courseId = params.get('id');
           if (!courseId) {
-            throw new Error('Course ID is required');
+            this.error.set('Course ID is required');
+            return of(null);
           }
 
-          this.mockDataService.incrementClickCount(courseId).subscribe();
-
+          // Load course details
           return this.courseService.getCourseById(courseId).pipe(
-            tap((course) => {
-              if (!course) {
-                throw new Error('Course not found');
-              }
-              this.course.set(course);
-            }),
             catchError((err) => {
               console.error('Error loading course:', err);
-              this.error.set(
-                'Course not found or unable to load course details.'
-              );
+              this.error.set('Course not found or unable to load details.');
               return of(null);
-            })
-          );
-        }),
-        switchMap((course) => {
-          if (!course) {
-            return of({ reviews: [], recommendations: [] });
-          }
-
-          return of(null).pipe(
-            switchMap(() => {
-              const reviews$ = this.mockDataService
-                .getReviewsForCourse(course.id)
-                .pipe(catchError(() => of([])));
-
-              const recommendations$ = this.mockDataService
-                .getRecommendedCourses(
-                  'current-user-id', // Replace with actual user ID when auth is implemented
-                  4
-                )
-                .pipe(catchError(() => of([])));
-
-              return of({}).pipe(
-                switchMap(() =>
-                  reviews$.pipe(
-                    map((reviews) => ({
-                      reviews,
-                      recommendations: [] as Course[],
-                    }))
-                  )
-                ),
-                switchMap((data) =>
-                  recommendations$.pipe(
-                    map((recommendations) => ({
-                      reviews: data.reviews,
-                      recommendations,
-                    }))
-                  )
-                )
-              );
             })
           );
         })
       )
       .subscribe({
-        next: (data) => {
-          this.courseReviews.set(data.reviews);
-          this.recommendedCourses.set(data.recommendations);
-          this.loading.set(false);
+        next: (course) => {
+          if (course) {
+            // TODO: Load reviews when review service is ready
+            // TODO: Load recommendations based on tech interests
+            this.loadMockReviews();
+          }
         },
         error: (err) => {
           console.error('Subscription error:', err);
           this.error.set('Failed to load course data. Please try again.');
-          this.loading.set(false);
         },
       });
   }
 
+  ngOnDestroy() {
+    this.courseService.clearSelectedCourse();
+  }
+
   goToCourse() {
-    if (this.course()) {
-      window.open(this.course()!.url, '_blank');
+    const course = this.course();
+    if (!course) return;
+
+    if (this.isAuthenticated()) {
+      this.courseService.trackCourseClick(course.id).subscribe({
+        next: () => {
+          window.open(course.url, '_blank');
+        },
+        error: (err) => {
+          console.warn('Click tracking failed, opening anyway:', err);
+          window.open(course.url, '_blank');
+        }
+      });
+    } else {
+      window.open(course.url, '_blank');
     }
   }
 
@@ -154,11 +130,21 @@ export class CourseDetailComponent implements OnInit {
   }
 
   writeReview() {
-    if (this.course()) {
-      this.router.navigate(['/reviews/new'], {
-        queryParams: { courseId: this.course()!.id },
+    const course = this.course();
+    if (!course) return;
+
+    if (!this.isAuthenticated()) {
+      this.router.navigate(['/auth/login'], {
+        queryParams: {
+          returnUrl: `/reviews/new?courseId=${course.id}`
+        }
       });
+      return;
     }
+
+    this.router.navigate(['/reviews/new'], {
+      queryParams: { courseId: course.id },
+    });
   }
 
   private calculateRatingDistribution(): {
@@ -179,5 +165,13 @@ export class CourseDetailComponent implements OnInit {
         percentage: Math.round((count / reviews.length) * 100),
       };
     });
+  }
+
+  /**
+   * Temporary mock reviews (replace with ReviewService later)
+   */
+  private loadMockReviews() {
+    // TODO: Replace with actual review service call
+    this.courseReviews.set([]);
   }
 }

@@ -1,12 +1,11 @@
-import { Component, signal, OnInit, computed, OnDestroy } from '@angular/core';
+import { Component, signal, OnInit, computed, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Course } from '../../../../core/models/course.model';
 import { Router } from '@angular/router';
+import { CourseFilters } from '../../../../core/models/course.model';
+import { CourseService } from '../../services/course.service';
 import { PlatformBadgeComponent } from '../platform-badge/platform-badge.component';
-import { MockDataService } from '../../../../core/services/mock-data.service';
 import { DifficultyBadgeComponent } from '../difficulty-badge/difficulty-badge.component';
-
 
 interface FilterOption {
   value: string;
@@ -14,7 +13,7 @@ interface FilterOption {
 }
 
 @Component({
-  selector: 'app-catalog',
+  selector: 'app-course-catalog',
   standalone: true,
   imports: [
     CommonModule,
@@ -26,130 +25,60 @@ interface FilterOption {
   styleUrl: './course-catalog.component.scss'
 })
 export class CourseCatalogComponent implements OnInit, OnDestroy {
+  private readonly courseService = inject(CourseService);
+  private readonly router = inject(Router);
+
+  // Local UI state
   searchQuery = signal('');
-  sortBy = signal('mostPopular');
+  sortBy = signal('numSubscribers'); // Backend sort field
   selectedPlatform = signal('all');
   selectedDifficulty = signal('all');
   selectedPrice = signal('any');
   filtersExpanded = signal(false);
 
+  // Dropdown states
   sortDropdownOpen = signal(false);
   platformDropdownOpen = signal(false);
   difficultyDropdownOpen = signal(false);
   priceDropdownOpen = signal(false);
 
-  courses = signal<Course[]>([]);
-  loading = signal(false);
+  // Service signals
+  readonly courses = this.courseService.courses;
+  readonly loading = this.courseService.loading;
+  readonly totalCourses = this.courseService.totalCourses;
+  readonly pagination = this.courseService.pagination;
+  readonly filteredCourses = this.courses;
 
+  // Filter options
   sortOptions: FilterOption[] = [
-    { value: 'mostPopular', label: 'Most Popular' },
-    { value: 'highestRated', label: 'Highest Rated' },
-    { value: 'recentlyUpdated', label: 'Recently Updated' },
-    { value: 'priceLowToHigh', label: 'Price: Low to High' },
-    { value: 'priceHighToLow', label: 'Price: High to Low' }
+    { value: 'numSubscribers', label: 'Most Popular' },
+    { value: 'numReviews', label: 'Most Reviewed' },
+    { value: 'publishedTimestamp', label: 'Recently Added' },
+    { value: 'price', label: 'Price: Low to High' },
+    { value: 'contentDuration', label: 'Duration' }
   ];
 
   platforms: FilterOption[] = [
     { value: 'all', label: 'All Platforms' },
-    { value: 'udemy', label: 'Udemy' },
-    { value: 'coursera', label: 'Coursera' },
-    { value: 'youtube', label: 'YouTube' },
-    { value: 'freecodecamp', label: 'freeCodeCamp' }
+    { value: 'udemy', label: 'Udemy' }
   ];
 
   difficulties: FilterOption[] = [
     { value: 'all', label: 'All Levels' },
-    { value: 'beginner', label: 'Beginner' },
-    { value: 'intermediate', label: 'Intermediate' },
-    { value: 'advanced', label: 'Advanced' }
+    { value: 'Beginner', label: 'Beginner' },
+    { value: 'Intermediate', label: 'Intermediate' },
+    { value: 'Advanced', label: 'Advanced' },
+    { value: 'All Levels', label: 'All Levels' }
   ];
 
   priceRanges: FilterOption[] = [
     { value: 'any', label: 'Any Price' },
     { value: 'free', label: 'Free Only' },
-    { value: 'paid', label: 'Paid Only' },
-    { value: 'under50', label: 'Under $50' },
-    { value: 'under100', label: 'Under $100' }
+    { value: 'paid', label: 'Paid Only' }
   ];
 
-  // Computed values
-  totalCourses = computed(() => this.courses().length);
-  hasOpenDropdown = computed(() =>
-    this.sortDropdownOpen() ||
-    this.platformDropdownOpen() ||
-    this.difficultyDropdownOpen() ||
-    this.priceDropdownOpen()
-  );
-
-  filteredCourses = computed(() => {
-    let filtered = [...this.courses()];
-    const query = this.searchQuery().toLowerCase();
-
-    // Apply search filter
-    if (query) {
-      filtered = filtered.filter(course =>
-        course.title.toLowerCase().includes(query) ||
-        course.instructor.toLowerCase().includes(query) ||
-        course.description.toLowerCase().includes(query) ||
-        course.technologies.some(tech => tech.toLowerCase().includes(query))
-      );
-    }
-
-    // Apply platform filter
-    if (this.selectedPlatform() !== 'all') {
-      filtered = filtered.filter(course =>
-        course.platform.toLowerCase() === this.selectedPlatform()
-      );
-    }
-
-    // Apply difficulty filter
-    if (this.selectedDifficulty() !== 'all') {
-      filtered = filtered.filter(course =>
-        course.difficulty.toLowerCase() === this.selectedDifficulty()
-      );
-    }
-
-    // Apply price filter
-    const priceFilter = this.selectedPrice();
-    if (priceFilter !== 'any') {
-      filtered = filtered.filter(course => {
-        switch (priceFilter) {
-          case 'free': return course.price === 0;
-          case 'paid': return course.price > 0;
-          case 'under50': return course.price < 50;
-          case 'under100': return course.price < 100;
-          default: return true;
-        }
-      });
-    }
-
-    // Apply sorting
-    const sortBy = this.sortBy();
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'highestRated':
-          return b.rating - a.rating;
-        case 'recentlyUpdated':
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        case 'priceLowToHigh':
-          return a.price - b.price;
-        case 'priceHighToLow':
-          return b.price - a.price;
-        case 'mostPopular':
-        default:
-          return b.reviewCount - a.reviewCount;
-      }
-    });
-
-    return filtered;
-  });
-
   private clickListener?: (event: Event) => void;
-
-  constructor(
-    private mockDataService: MockDataService,
-    private router: Router
-  ) {}
+  private searchDebounceTimer?: number;
 
   ngOnInit() {
     this.loadCourses();
@@ -159,6 +88,9 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.clickListener) {
       document.removeEventListener('click', this.clickListener);
+    }
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
     }
   }
 
@@ -173,63 +105,84 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
   }
 
   private loadCourses() {
-    this.loading.set(true);
-    this.mockDataService.getCourses().subscribe({
-      next: (response) => {
-        this.courses.set(response.courses);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading courses:', error);
-        this.loading.set(false);
-      }
-    });
+    const filters = this.buildFilters();
+    this.courseService.getAllCourses(filters).subscribe();
   }
 
-  // Search methods
+  private buildFilters(): CourseFilters {
+    const filters: CourseFilters = {
+      sortBy: this.sortBy() as any,
+      sortOrder: 'desc',
+      limit: 24
+    };
+
+    const search = this.searchQuery().trim();
+    if (search) {
+      filters.search = search;
+    }
+
+    if (this.selectedDifficulty() !== 'all') {
+      filters.level = this.selectedDifficulty();
+    }
+
+    const priceFilter = this.selectedPrice();
+    if (priceFilter === 'free') {
+      filters.isPaid = false;
+    } else if (priceFilter === 'paid') {
+      filters.isPaid = true;
+    }
+
+    return filters;
+  }
+
   onSearchChange() {
-    // Filtering is handled by computed property
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+
+    this.searchDebounceTimer = window.setTimeout(() => {
+      this.loadCourses();
+    }, 500);
   }
 
   clearSearch() {
     this.searchQuery.set('');
+    this.loadCourses();
   }
 
-  // Dropdown methods
   toggleSortDropdown() {
     this.sortDropdownOpen.update(open => !open);
     if (this.sortDropdownOpen()) {
-      this.platformDropdownOpen.set(false);
-      this.difficultyDropdownOpen.set(false);
-      this.priceDropdownOpen.set(false);
+      this.closeOtherDropdowns('sort');
     }
   }
 
   togglePlatformDropdown() {
     this.platformDropdownOpen.update(open => !open);
     if (this.platformDropdownOpen()) {
-      this.sortDropdownOpen.set(false);
-      this.difficultyDropdownOpen.set(false);
-      this.priceDropdownOpen.set(false);
+      this.closeOtherDropdowns('platform');
     }
   }
 
   toggleDifficultyDropdown() {
     this.difficultyDropdownOpen.update(open => !open);
     if (this.difficultyDropdownOpen()) {
-      this.sortDropdownOpen.set(false);
-      this.platformDropdownOpen.set(false);
-      this.priceDropdownOpen.set(false);
+      this.closeOtherDropdowns('difficulty');
     }
   }
 
   togglePriceDropdown() {
     this.priceDropdownOpen.update(open => !open);
     if (this.priceDropdownOpen()) {
-      this.sortDropdownOpen.set(false);
-      this.platformDropdownOpen.set(false);
-      this.difficultyDropdownOpen.set(false);
+      this.closeOtherDropdowns('price');
     }
+  }
+
+  private closeOtherDropdowns(except: string) {
+    if (except !== 'sort') this.sortDropdownOpen.set(false);
+    if (except !== 'platform') this.platformDropdownOpen.set(false);
+    if (except !== 'difficulty') this.difficultyDropdownOpen.set(false);
+    if (except !== 'price') this.priceDropdownOpen.set(false);
   }
 
   closeAllDropdowns() {
@@ -239,47 +192,58 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
     this.priceDropdownOpen.set(false);
   }
 
-  // Selection handlers
   selectSortOption(option: string) {
     this.sortBy.set(option);
     this.sortDropdownOpen.set(false);
+    this.loadCourses();
   }
 
   selectPlatform(platform: string) {
     this.selectedPlatform.set(platform);
     this.platformDropdownOpen.set(false);
+    // Platform filter not needed for now (only Udemy)
   }
 
   selectDifficulty(difficulty: string) {
     this.selectedDifficulty.set(difficulty);
     this.difficultyDropdownOpen.set(false);
+    this.loadCourses();
   }
 
   selectPrice(price: string) {
     this.selectedPrice.set(price);
     this.priceDropdownOpen.set(false);
-  }
-
-  // Filter toggle methods
-  toggleFilters() {
-    this.filtersExpanded.update(expanded => !expanded);
+    this.loadCourses();
   }
 
   navigateToCourse(courseId: string) {
     this.router.navigate(['/courses', courseId]);
   }
 
-  // Clear filter methods
+  toggleFilters() {
+    this.filtersExpanded.update(expanded => !expanded);
+  }
+
   clearAllFilters() {
     this.searchQuery.set('');
     this.selectedPlatform.set('all');
     this.selectedDifficulty.set('all');
     this.selectedPrice.set('any');
-    this.sortBy.set('mostPopular');
+    this.sortBy.set('numSubscribers');
+    this.loadCourses();
   }
 
   getSelectedOptionLabel(options: FilterOption[], selectedValue: string): string {
     const option = options.find(opt => opt.value === selectedValue);
     return option ? option.label : '';
+  }
+
+  hasActiveFilters(): boolean {
+    return (
+      this.searchQuery().trim() !== '' ||
+      this.selectedPlatform() !== 'all' ||
+      this.selectedDifficulty() !== 'all' ||
+      this.selectedPrice() !== 'any'
+    );
   }
 }

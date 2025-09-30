@@ -159,10 +159,11 @@
           <app-platform-badge [platform]="course.platform"></app-platform-badge>
         </div>
         <h3 class="course-title">{{ course.title }}</h3>
-        <div class="course-instructor">{{ course.instructor }}</div>
         <div class="course-meta">
           <div class="rating">★ {{ course.rating.toFixed(1) }}</div>
-          <app-difficulty-badge [level]="course.difficulty"></app-difficulty-badge>
+          <app-difficulty-badge
+            [level]="course.difficulty"
+          ></app-difficulty-badge>
         </div>
         <div class="course-price">
           {{ course.price === 0 ? "Free" : "$" + course.price.toFixed(2) }}
@@ -170,7 +171,6 @@
       </div>
     </div>
 
-    <!-- Empty State -->
     <div class="empty-state" *ngIf="filteredCourses().length === 0">
       <div class="empty-icon">🔍</div>
       <h3>No courses found</h3>

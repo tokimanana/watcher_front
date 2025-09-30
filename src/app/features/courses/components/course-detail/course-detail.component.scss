@@ -1,4 +1,3 @@
-@import "../../../../../assets/styles/variables";
 @import "../../../../../assets/styles/mixins";
 
 .course-detail-container {
@@ -7,18 +6,14 @@
   padding: var(--spacing-lg);
 }
 
-// Loading state
 .loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  @include flex-column-center;
   padding: var(--spacing-xl) 0;
 
   .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid rgba(var(--color-primary-rgb), 0.2);
+    border: 4px solid rgba(139, 69, 19, 0.2);
     border-radius: 50%;
     border-top-color: var(--color-primary);
     animation: spin 1s linear infinite;
@@ -36,23 +31,18 @@
   }
 }
 
-// Error state
 .error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  @include flex-column-center;
   padding: var(--spacing-lg);
   gap: var(--spacing-md);
 
   .alert-error {
-    display: flex;
-    align-items: center;
+    @include flex-start;
     padding: var(--spacing-md);
-    background-color: var(--color-error-light);
+    background-color: rgba(205, 92, 92, 0.1);
     border: 1px solid var(--color-error);
     border-radius: var(--radius-md);
     color: var(--color-error-dark);
-    margin-bottom: var(--spacing-md);
 
     mat-icon {
       margin-right: var(--spacing-sm);
@@ -60,20 +50,17 @@
   }
 }
 
-// Breadcrumb navigation
 .breadcrumb {
   margin-bottom: var(--spacing-md);
 
   .breadcrumb-link {
-    display: inline-flex;
-    align-items: center;
+    @include flex-start;
     color: var(--color-text-secondary);
     text-decoration: none;
     transition: color 0.3s ease;
 
     &:hover {
       color: var(--color-primary);
-      text-decoration: underline;
     }
 
     mat-icon {
@@ -82,7 +69,6 @@
   }
 }
 
-// Course header
 .course-header {
   display: flex;
   gap: var(--spacing-lg);
@@ -90,216 +76,24 @@
 
   .course-header-content {
     flex: 1;
-  }
 
-  .course-header {
-    display: flex;
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-
-    .course-header-content {
-      flex: 1;
-
-      // Remove the old platform-badge styles and use the component instead
-      app-platform-badge {
-        display: block;
-        margin-bottom: var(--spacing-sm);
-      }
-    }
-
-    // Course title
-    .course-title {
-      font-size: var(--font-size-2xl);
-      font-weight: var(--font-weight-bold);
-      color: var(--color-text-primary);
-      margin: 0;
-      line-height: 1.3;
-    }
-
-    .instructor-info {
-      display: flex;
-      align-items: center;
-      margin: var(--spacing-sm) 0 var(--spacing-md);
-      color: var(--color-text-secondary);
-
-      mat-icon {
-        font-size: 1.1rem;
-        width: 1.1rem;
-        height: 1.1rem;
-        margin-right: var(--spacing-xs);
-      }
-    }
-
-    // Rest of your existing styles...
-    .rating-summary {
-      display: flex;
-      align-items: center;
-      margin-bottom: var(--spacing-md);
-
-      .rating-value {
-        display: flex;
-        align-items: center;
-
-        .rating-number {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: var(--color-primary);
-          margin-right: var(--spacing-sm);
-        }
-      }
-
-      .review-count {
-        margin-left: var(--spacing-sm);
-        color: var(--color-text-secondary);
-        font-size: 0.9rem;
-      }
-    }
-
-    .course-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-md);
-
-      .difficulty-badge,
-      .duration-badge,
-      .price-badge,
-      .clicks-badge {
-        display: flex;
-        align-items: center;
-        padding: 4px 10px;
-        border-radius: var(--radius-md);
-        font-size: 0.9rem;
-
-        mat-icon {
-          font-size: 1.1rem;
-          width: 1.1rem;
-          height: 1.1rem;
-          margin-right: var(--spacing-xs);
-        }
-      }
-
-      .duration-badge {
-        background-color: var(--color-surface);
-        color: var(--color-text-secondary);
-      }
-
-      .price-badge {
-        background-color: var(--color-surface);
-        color: var(--color-primary-dark);
-
-        &.free {
-          background-color: rgba(46, 125, 50, 0.1);
-          color: var(--color-success);
-        }
-      }
-
-      .clicks-badge {
-        background-color: var(--color-surface-variant);
-        color: var(--color-text-secondary);
-      }
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: var(--spacing-md);
-
-      button {
-        min-width: 140px;
-      }
-    }
-
-    .course-image-container {
-      width: 300px;
-      position: relative;
-
-      .course-image {
-        width: 100%;
-        height: auto;
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-md);
-      }
-
-      .last-updated {
-        text-align: right;
-        font-size: 0.8rem;
-        color: var(--color-text-secondary);
-        margin-top: var(--spacing-xs);
-      }
+    app-platform-badge {
+      display: block;
+      margin-bottom: var(--spacing-sm);
     }
   }
 
-  // Responsive adjustments
-  @include tablet {
-    .course-header {
-      flex-direction: column-reverse;
-      gap: var(--spacing-lg);
-
-      .course-image-container {
-        width: 100%;
-        max-width: 500px;
-        margin: 0 auto;
-      }
-    }
-  }
-
-  @include mobile {
-    .course-header {
-      .course-title {
-        font-size: var(--font-size-xl);
-      }
-
-      .course-badges {
-        flex-direction: column;
-        gap: var(--spacing-sm);
-
-        > div {
-          width: 100%;
-        }
-      }
-
-      .action-buttons {
-        flex-direction: column;
-        width: 100%;
-
-        button {
-          width: 100%;
-        }
-      }
-    }
-  }
-
-  // Course title
   .course-title {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
-    margin: 0;
-    line-height: 1.3;
-  }
-
-  .instructor-info {
-    display: flex;
-    align-items: center;
-    margin: var(--spacing-sm) 0 var(--spacing-md);
-    color: var(--color-text-secondary);
-
-    mat-icon {
-      font-size: 1.1rem;
-      width: 1.1rem;
-      height: 1.1rem;
-      margin-right: var(--spacing-xs);
-    }
+    @include heading-2;
+    margin-bottom: var(--spacing-md);
   }
 
   .rating-summary {
-    display: flex;
-    align-items: center;
+    @include flex-start;
     margin-bottom: var(--spacing-md);
 
     .rating-value {
-      display: flex;
-      align-items: center;
+      @include flex-start;
 
       .rating-number {
         font-size: 1.5rem;
@@ -322,15 +116,14 @@
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
 
-    .difficulty-badge,
     .duration-badge,
     .price-badge,
     .clicks-badge {
-      display: flex;
-      align-items: center;
+      @include flex-start;
       padding: 4px 10px;
       border-radius: var(--radius-md);
       font-size: 0.9rem;
+      background-color: var(--color-surface-variant);
 
       mat-icon {
         font-size: 1.1rem;
@@ -340,24 +133,9 @@
       }
     }
 
-    .duration-badge {
-      background-color: var(--color-surface);
-      color: var(--color-text-secondary);
-    }
-
-    .price-badge {
-      background-color: var(--color-surface);
-      color: var(--color-primary-dark);
-
-      &.free {
-        background-color: rgba(46, 125, 50, 0.1);
-        color: var(--color-success);
-      }
-    }
-
-    .clicks-badge {
-      background-color: var(--color-surface-variant);
-      color: var(--color-text-secondary);
+    .price-badge.free {
+      background-color: rgba(143, 188, 143, 0.2);
+      color: var(--color-success-dark);
     }
   }
 
@@ -372,12 +150,11 @@
 
   .course-image-container {
     width: 300px;
-    position: relative;
 
     .course-image {
       width: 100%;
       height: auto;
-      border-radius: var(--border-radius-lg);
+      border-radius: var(--radius-lg);
       box-shadow: var(--shadow-md);
     }
 
@@ -390,31 +167,20 @@
   }
 }
 
-// Tab content
 .course-tabs {
   margin-bottom: var(--spacing-xl);
 
   .tab-content {
     padding: var(--spacing-lg) 0;
-  }
 
-  h2,
-  h3 {
-    margin-top: 0;
-    margin-bottom: var(--spacing-md);
-    color: var(--color-text-primary);
+    h2,
+    h3 {
+      margin-top: 0;
+      margin-bottom: var(--spacing-md);
+    }
   }
 }
 
-// Course description
-.course-description {
-  line-height: 1.7;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-md);
-  margin-bottom: var(--spacing-lg);
-}
-
-// Technology tags
 .tech-tags {
   display: flex;
   flex-wrap: wrap;
@@ -426,66 +192,22 @@
     border-radius: var(--radius-full);
     font-size: 0.9rem;
     color: var(--color-text-secondary);
+    transition: all 0.2s;
 
     &:hover {
       background-color: var(--color-primary-light);
-      color: var(--color-on-primary);
+      color: var(--color-text-inverse);
     }
   }
 }
 
-// Reviews section
 .reviews-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  @include flex-between;
   margin-bottom: var(--spacing-lg);
 }
 
-// Rating distribution
-.rating-distribution {
-  margin-top: var(--spacing-md);
-
-  .rating-bar-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: var(--spacing-xs);
-
-    .rating-bar-label {
-      flex: 0 0 50px;
-      font-size: 0.9rem;
-      color: var(--color-text-secondary);
-    }
-
-    .rating-bar-wrapper {
-      flex: 1;
-      height: 12px;
-      background-color: var(--color-surface);
-      border-radius: var(--radius-full);
-      overflow: hidden;
-      margin: 0 var(--spacing-sm);
-
-      .rating-bar {
-        height: 100%;
-        background-color: var(--color-primary);
-        border-radius: var(--radius-full);
-      }
-    }
-
-    .rating-bar-count {
-      flex: 0 0 30px;
-      font-size: 0.9rem;
-      color: var(--color-text-secondary);
-      text-align: right;
-    }
-  }
-}
-
-// Empty reviews
 .empty-reviews {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  @include flex-column-center;
   padding: var(--spacing-xl);
   color: var(--color-text-secondary);
 
@@ -498,105 +220,11 @@
   }
 }
 
-// Reviews list
-.reviews-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-
-  .review-card {
-    background-color: var(--color-surface);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    transition: box-shadow 0.2s ease;
-
-    &:hover {
-      box-shadow: var(--shadow-md);
-    }
-
-    .review-avatar {
-      background-color: var(--color-primary);
-      color: var(--color-on-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-    }
-
-    .review-title-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .review-content {
-      margin-bottom: var(--spacing-md);
-      line-height: 1.6;
-    }
-
-    .pros-cons-container {
-      display: flex;
-      gap: var(--spacing-lg);
-      margin-top: var(--spacing-md);
-
-      .pros,
-      .cons {
-        flex: 1;
-
-        h4 {
-          display: flex;
-          align-items: center;
-          margin-bottom: var(--spacing-sm);
-          font-weight: 600;
-
-          mat-icon {
-            margin-right: var(--spacing-xs);
-            font-size: 1.1rem;
-          }
-        }
-
-        .pros-title {
-          color: var(--color-success);
-
-          .pros-icon {
-            color: var(--color-success);
-          }
-        }
-
-        .cons-title {
-          color: var(--color-error);
-
-          .cons-icon {
-            color: var(--color-error);
-          }
-        }
-
-        ul {
-          margin: 0;
-          padding-left: var(--spacing-lg);
-
-          li {
-            margin-bottom: var(--spacing-xs);
-            color: var(--color-text-secondary);
-          }
-        }
-      }
-    }
-  }
-}
-
-// Related courses
 .related-courses {
   margin-top: var(--spacing-xl);
 
   h2 {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-bold);
-    margin-bottom: var(--spacing-md);
-  }
-
-  .text-secondary {
-    color: var(--color-text-secondary);
+    @include heading-3;
   }
 
   .recommended-grid {
@@ -626,21 +254,16 @@
         padding: var(--spacing-sm);
 
         .recommended-title {
+          @include line-clamp(2);
           font-size: var(--font-size-md);
           font-weight: var(--font-weight-semibold);
           margin: 0 0 var(--spacing-xs);
-          color: var(--color-text-primary);
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
         }
 
         .recommended-meta {
-          display: flex;
-          justify-content: space-between;
-          color: var(--color-text-secondary);
+          @include flex-between;
           font-size: var(--font-size-sm);
+          color: var(--color-text-secondary);
 
           .recommended-rating {
             color: var(--color-primary);
@@ -652,11 +275,9 @@
   }
 }
 
-// Responsive adjustments
 @include tablet {
   .course-header {
     flex-direction: column-reverse;
-    gap: var(--spacing-lg);
 
     .course-image-container {
       width: 100%;
@@ -680,13 +301,8 @@
     padding: var(--spacing-md);
   }
 
-  .course-title {
-    font-size: var(--font-size-xl);
-  }
-
   .course-badges {
     flex-direction: column;
-    gap: var(--spacing-sm);
 
     > div {
       width: 100%;
@@ -695,20 +311,9 @@
 
   .action-buttons {
     flex-direction: column;
-    width: 100%;
 
     button {
       width: 100%;
     }
-  }
-
-  .pros-cons-container {
-    flex-direction: column;
-  }
-
-  .review-title-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
   }
 }

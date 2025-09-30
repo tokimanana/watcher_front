@@ -2,10 +2,10 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  border-radius: var(--border-radius-lg);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  background-color: var(--surface);
+  background-color: var(--color-surface);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 
@@ -43,7 +43,7 @@
     .course-title {
       margin: 0 0 0.5rem;
       font-weight: 600;
-      color: var(--text-primary);
+      color: var(--color-text-primary);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -59,14 +59,8 @@
       .rating-count {
         margin-left: 0.25rem;
         font-size: 0.875rem;
-        color: var(--text-secondary);
+        color: var(--color-text-secondary);
       }
-    }
-
-    .course-instructor {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
     }
 
     .course-tech-stack {
@@ -78,13 +72,13 @@
       .tech-tag {
         font-size: 0.75rem;
         padding: 0.25rem 0.5rem;
-        background-color: var(--surface-alt);
-        border-radius: var(--border-radius-sm);
-        color: var(--text-secondary);
+        background-color: var(--color-surface-variant);
+        border-radius: var(--radius-sm);
+        color: var(--color-text-secondary);
 
         &.more {
-          background-color: var(--primary-lighter);
-          color: var(--primary);
+          background-color: var(--color-primary-light);
+          color: var(--color-text-inverse);
         }
       }
     }
@@ -107,15 +101,8 @@
   }
 }
 
-// Media queries for responsive design
 @media (max-width: 768px) {
-  .course-card {
-    .course-content {
-      .course-tech-stack {
-        .tech-tag {
-          padding: 0.2rem 0.4rem;
-        }
-      }
-    }
+  .course-card .course-content .course-tech-stack .tech-tag {
+    padding: 0.2rem 0.4rem;
   }
 }

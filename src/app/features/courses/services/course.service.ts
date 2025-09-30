@@ -156,9 +156,9 @@ export class CourseService extends BaseApiService implements MetaHandler {
 
     if (filters.minPrice !== undefined) params['minPrice'] = filters.minPrice;
     if (filters.maxPrice !== undefined) params['maxPrice'] = filters.maxPrice;
-    if (filters.minDuration !== undefined) params['minDuration'] = filters.minDuration;
-    if (filters.maxDuration !== undefined) params['maxDuration'] = filters.maxDuration;
-    if (filters.minSubscribers !== undefined) params['minSubscribers'] = filters.minSubscribers;
+    // if (filters.minDuration !== undefined) params['minDuration'] = filters.minDuration;
+    // if (filters.maxDuration !== undefined) params['maxDuration'] = filters.maxDuration;
+    // if (filters.minSubscribers !== undefined) params['minSubscribers'] = filters.minSubscribers;
 
     return params;
   }
