@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '../../core/guards/auth.guard';
 
-export const coursesRoutes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
