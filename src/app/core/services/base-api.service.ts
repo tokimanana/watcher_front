@@ -143,13 +143,14 @@ export class BaseApiService {
   }
 
   private isApiResponse<T>(response: any): response is ApiResponse<T> {
+    // More flexible check - only require the essential fields
     return (
       response &&
       typeof response === 'object' &&
       'data' in response &&
       'success' in response &&
-      'code' in response &&
       'message' in response
+      // Removed 'code' requirement to match old version
     );
   }
 
@@ -162,10 +163,14 @@ export class BaseApiService {
       errorCode = 'CLIENT_ERROR';
     } else {
       errorCode = error.status;
-      // Essayer d'extraire le message d'erreur du format API
+
+      // Try to extract error message from API response format
       if (error.error && this.isApiResponse(error.error)) {
         errorMessage = error.error.message;
-        errorCode = error.error.code;
+        // Use code from response if available
+        if ('code' in error.error) {
+          errorCode = error.error.code;
+        }
       } else if (error.error && error.error.message) {
         errorMessage = error.error.message;
       } else {

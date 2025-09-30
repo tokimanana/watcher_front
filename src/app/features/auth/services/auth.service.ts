@@ -1,14 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  Observable,
-  catchError,
-  finalize,
-  map,
-  of,
-  switchMap,
-  throwError,
-} from 'rxjs';
+import { Observable, catchError, finalize, map, of, throwError } from 'rxjs';
 import {
   LoginCredentials,
   RegisterData,
@@ -17,16 +9,20 @@ import { User } from '../../../core/models/user.model';
 import { BaseApiService } from '../../../core/services/base-api.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { StorageService } from '../../../core/services/storage.service';
-import { AuthResponse } from '../../../core/models/auth-response.model';
+
+interface AuthResponseData {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
-export class AuthService {
+export class AuthService extends BaseApiService {
   private readonly ENDPOINT = 'users';
 
   // Dependencies
-  private readonly apiService = inject(BaseApiService);
   private readonly storageService = inject(StorageService);
   private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
@@ -63,34 +59,35 @@ export class AuthService {
   });
 
   constructor() {
+    super();
     this.loadUserFromStorage();
   }
 
   login(credentials: LoginCredentials): Observable<User> {
-    // Update loading state
     this.updateAuthState({ isLoading: true, error: null });
 
-    return this.apiService
-      .post<AuthResponse>(`${this.ENDPOINT}/authenticate`, credentials)
-      .pipe(
-        map((response) => this.handleAuthResponse(response)),
-        catchError((error) => {
-          const errorMsg =
-            error.message || 'Login failed. Please check your credentials.';
-          this.updateAuthState({ isLoading: false, error: errorMsg });
-          this.notificationService.error(errorMsg);
-          return throwError(() => new Error(errorMsg));
-        }),
-        finalize(() => {
-          this.updateAuthState({ isLoading: false });
-        })
-      );
+    return this.post<AuthResponseData>(
+      `${this.ENDPOINT}/authenticate`,
+      credentials
+    ).pipe(
+      map((response) => this.handleAuthResponse(response)),
+      catchError((error) => {
+        const errorMsg =
+          error.message || 'Login failed. Please check your credentials.';
+        this.updateAuthState({ isLoading: false, error: errorMsg });
+        this.notificationService.error(errorMsg);
+        return throwError(() => new Error(errorMsg));
+      }),
+      finalize(() => {
+        this.updateAuthState({ isLoading: false });
+      })
+    );
   }
 
   register(data: RegisterData): Observable<User> {
     this.updateAuthState({ isLoading: true, error: null });
 
-    return this.apiService.post<User>(this.ENDPOINT, data).pipe(
+    return this.post<User>(this.ENDPOINT, data).pipe(
       map((user) => {
         this.notificationService.success(
           'Registration successful! Please log in.'
@@ -114,22 +111,22 @@ export class AuthService {
     userId: string,
     technologies: string[]
   ): Observable<User> {
-    return this.apiService
-      .put<User>(`${this.ENDPOINT}/${userId}/tech-interests`, { technologies })
-      .pipe(
-        map((user) => {
-          // Mettre à jour l'utilisateur dans le state
-          this.updateAuthState({ user });
-          this.notificationService.success(
-            'Tech interests updated successfully!'
-          );
-          return user;
-        }),
-        catchError((error) => {
-          this.notificationService.error('Failed to update tech interests');
-          return throwError(() => error);
-        })
-      );
+    return this.put<User>(`${this.ENDPOINT}/${userId}/tech-interests`, {
+      technologies,
+    }).pipe(
+      map((user) => {
+        // Mettre à jour l'utilisateur dans le state
+        this.updateAuthState({ user });
+        this.notificationService.success(
+          'Tech interests updated successfully!'
+        );
+        return user;
+      }),
+      catchError((error) => {
+        this.notificationService.error('Failed to update tech interests');
+        return throwError(() => error);
+      })
+    );
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {
@@ -140,67 +137,48 @@ export class AuthService {
     return of({ message });
   }
 
-  refreshToken(): Observable<AuthResponse> {
-    const refreshToken = this.storageService.getRefreshToken();
+  // TODO: Backend endpoint not ready yet
+  // refreshToken(): Observable<AuthResponseData> {
+  //   const refreshToken = this.storageService.getRefreshToken();
+  //   if (!refreshToken) {
+  //     return throwError(() => new Error('No refresh token available'));
+  //   }
+  //   return this.post<AuthResponseData>(`${this.ENDPOINT}/refresh-token`, { refreshToken })
+  //     .pipe(
+  //       map((data) => {
+  //         this.handleAuthResponse(data);
+  //         return data;
+  //       }),
+  //       catchError((error) => {
+  //         this.logout();
+  //         return throwError(() => error);
+  //       })
+  //     );
+  // }
 
-    if (!refreshToken) {
-      return throwError(() => new Error('No refresh token available'));
-    }
-
-    return this.apiService
-      .post<AuthResponse>(`${this.ENDPOINT}/refresh-token`, { refreshToken })
-      .pipe(
-        map((response) => {
-          this.handleAuthResponse(response);
-          return response; // Retourner l'AuthResponse complète, pas seulement l'utilisateur
-        }),
-        catchError((error) => {
-          this.logout();
-          return throwError(() => error);
-        })
-      );
-  }
-
-  logout(): Observable<void> {
-    // Only attempt to revoke if we have a token
-    const hasToken = !!this.storageService.getAccessToken();
-
-    if (hasToken) {
-      return this.apiService
-        .post<void>(`${this.ENDPOINT}/revoke-tokens`, {})
-        .pipe(
-          catchError((error) => {
-            console.error('Error during logout:', error);
-            return of(void 0); // Continue with logout even if API call fails
-          }),
-          finalize(() => {
-            this.completeLogout();
-          })
-        );
-    } else {
-      this.completeLogout();
-      return of(void 0);
-    }
+  logout(): void {
+    // TODO: Backend endpoint /revoke-tokens not ready yet
+    // Just clear local storage and redirect
+    this.completeLogout();
   }
 
   hasRole(role: string): boolean {
     return this.user()?.role === role;
   }
 
-  verifyToken(): Observable<boolean> {
-    if (!this.storageService.getAccessToken()) {
-      return of(false);
-    }
+  // TODO: Backend endpoint not ready yet
+  // verifyToken(): Observable<boolean> {
+  //   if (!this.storageService.getAccessToken()) {
+  //     return of(false);
+  //   }
+  //   return this.get<{ valid: boolean }>(`${this.ENDPOINT}/verify-token`)
+  //     .pipe(
+  //       map((response) => response.valid),
+  //       catchError(() => of(false))
+  //     );
+  // }
 
-    return this.apiService
-      .get<{ valid: boolean }>(`${this.ENDPOINT}/verify-token`)
-      .pipe(
-        map((response) => response.valid),
-        catchError(() => of(false))
-      );
-  }
-
-  private handleAuthResponse(response: AuthResponse): User {
+  private handleAuthResponse(response: AuthResponseData): User {
     this.storageService.saveAccessToken(response.accessToken);
     this.storageService.saveRefreshToken(response.refreshToken);
     this.storageService.saveUser(response.user);
@@ -236,20 +214,21 @@ export class AuthService {
         user,
       });
 
-      this.verifyToken()
-        .pipe(
-          switchMap((isValid) => {
-            if (!isValid) {
-              return this.refreshToken();
-            }
-            return of(null);
-          }),
-          catchError(() => {
-            this.logout();
-            return of(null);
-          })
-        )
-        .subscribe();
+      // TODO: Token verification will be added when backend endpoint is ready
+      // this.verifyToken()
+      //   .pipe(
+      //     switchMap((isValid) => {
+      //       if (!isValid) {
+      //         return this.refreshToken();
+      //       }
+      //       return of(null);
+      //     }),
+      //     catchError(() => {
+      //       this.logout();
+      //       return of(null);
+      //     })
+      //   )
+      //   .subscribe();
     }
   }
 

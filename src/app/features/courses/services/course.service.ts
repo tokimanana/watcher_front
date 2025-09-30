@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed, effect } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { Observable, tap, catchError, finalize, map, of } from 'rxjs';
 import {
   BaseApiService,
@@ -8,7 +8,6 @@ import { NotificationService } from '../../../core/services/notification.service
 import {
   Course,
   CourseFilters,
-  CourseListResponse,
   UdemyCourseRaw,
   CourseAdapter,
 } from '../../../core/models/course.model';
@@ -74,13 +73,14 @@ export class CourseService extends BaseApiService implements MetaHandler {
     this.loadingSignal.set(true);
     this.filtersSignal.set(filters || {});
 
-    return this.get<CourseListResponse>(
+    // Backend returns data as an array directly, not wrapped in { courses: [...] }
+    return this.get<UdemyCourseRaw[]>(
       'course',
       this.buildFilterParams(filters)
     ).pipe(
-      map((response) => {
+      map((rawCourses) => {
         // Transform raw Udemy data to frontend format
-        const adaptedCourses = response.courses.map((raw) =>
+        const adaptedCourses = rawCourses.map((raw) =>
           CourseAdapter.toFrontend(raw)
         );
         this.coursesSignal.set(adaptedCourses);
@@ -126,17 +126,22 @@ export class CourseService extends BaseApiService implements MetaHandler {
   }
 
   trackCourseClick(courseId: string): Observable<void> {
-    return this.post<void>(`course/${courseId}/click`, {}).pipe(
-      catchError((error) => {
-        console.warn('Failed to track course click', error);
-        return of(void 0);
-      })
-    );
+    // TODO: Backend endpoint not ready yet - returning empty observable for now
+    console.log('Track course click called for:', courseId);
+    return of(void 0);
+
+    // Uncomment when backend implements the endpoint:
+    // return this.post<void>(`course/${courseId}/click`, {}).pipe(
+    //   catchError((error) => {
+    //     console.warn('Failed to track course click', error);
+    //     return of(void 0);
+    //   })
+    // );
   }
 
   updateFilters(filters: Partial<CourseFilters>): void {
     this.filtersSignal.update((current) => ({ ...current, ...filters }));
-    this.fetchCourses(this.filtersSignal());
+    this.fetchCourses(this.filtersSignal()).subscribe();
   }
 
   clearFilters(): void {
@@ -176,9 +181,6 @@ export class CourseService extends BaseApiService implements MetaHandler {
 
     if (filters.minPrice !== undefined) params['minPrice'] = filters.minPrice;
     if (filters.maxPrice !== undefined) params['maxPrice'] = filters.maxPrice;
-    // if (filters.minDuration !== undefined) params['minDuration'] = filters.minDuration;
-    // if (filters.maxDuration !== undefined) params['maxDuration'] = filters.maxDuration;
-    // if (filters.minSubscribers !== undefined) params['minSubscribers'] = filters.minSubscribers;
 
     return params;
   }
