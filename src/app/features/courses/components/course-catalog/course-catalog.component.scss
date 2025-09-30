@@ -96,6 +96,7 @@
     font-weight: var(--font-weight-medium);
     cursor: pointer;
     transition: all var(--transition-fast);
+    color: var(--color-text-primary);
 
     &:hover {
       border-color: var(--color-primary);
@@ -127,6 +128,7 @@
     cursor: pointer;
     transition: all var(--transition-fast);
     font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
 
     &:hover {
       background: var(--color-surface-variant);
@@ -152,6 +154,7 @@
   align-items: center;
   gap: var(--spacing-xs);
   transition: all var(--transition-fast);
+  color: var(--color-text-primary);
 
   &:hover {
     border-color: var(--color-primary);
@@ -162,9 +165,10 @@
 .advanced-filters {
   margin-top: var(--spacing-md);
   padding: var(--spacing-md);
-  background: var(--color-surface-variant);
+  /* background: var(--color-surface-variant); */
   border-radius: var(--radius-lg);
   animation: slideDown 0.3s ease-out;
+
 
   .filter-row {
     display: flex;

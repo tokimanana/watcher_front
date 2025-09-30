@@ -1,15 +1,21 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { Observable, tap, catchError, finalize, map, of } from 'rxjs';
-import { BaseApiService, MetaHandler } from '../../../core/services/base-api.service';
+import {
+  BaseApiService,
+  MetaHandler,
+} from '../../../core/services/base-api.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import {
   Course,
   CourseFilters,
   CourseListResponse,
   UdemyCourseRaw,
-  CourseAdapter
+  CourseAdapter,
 } from '../../../core/models/course.model';
-import { PaginationMeta, isPaginationMeta } from '../../../core/models/api-response.model';
+import {
+  PaginationMeta,
+  isPaginationMeta,
+} from '../../../core/models/api-response.model';
 
 @Injectable({
   providedIn: 'root',
@@ -22,38 +28,43 @@ export class CourseService extends BaseApiService implements MetaHandler {
   private selectedCourseSignal = signal<Course | null>(null);
   private loadingSignal = signal<boolean>(false);
   private paginationSignal = signal<PaginationMeta | null>(null);
-  private filtersSignal = signal<CourseFilters>({});
+  private filtersSignal = signal<CourseFilters>({
+    sortBy: 'numSubscribers',
+    sortOrder: 'desc',
+    page: 1,
+  });
 
   constructor() {
     super();
     this.metaHandler = this;
+
+    effect(() => {
+      const currentFilters = this.filtersSignal();
+      this.fetchCourses(currentFilters);
+    });
   }
 
-  // Public readonly signals
   readonly courses = this.coursesSignal.asReadonly();
   readonly selectedCourse = this.selectedCourseSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly pagination = this.paginationSignal.asReadonly();
   readonly activeFilters = this.filtersSignal.asReadonly();
 
-  // Computed properties
   readonly hasFilters = computed(() => {
     const filters = this.filtersSignal();
-    return Object.keys(filters).some(key =>
-      filters[key as keyof CourseFilters] !== undefined
+    return Object.keys(filters).some(
+      (key) => filters[key as keyof CourseFilters] !== undefined
     );
   });
 
-  readonly totalCourses = computed(() =>
-    this.paginationSignal()?.total ?? this.coursesSignal().length
+  readonly totalCourses = computed(
+    () => this.paginationSignal()?.total ?? this.coursesSignal().length
   );
 
-  readonly currentPage = computed(() =>
-    this.paginationSignal()?.page ?? 1
-  );
+  readonly currentPage = computed(() => this.paginationSignal()?.page ?? 1);
 
-  readonly totalPages = computed(() =>
-    this.paginationSignal()?.totalPages ?? 1
+  readonly totalPages = computed(
+    () => this.paginationSignal()?.totalPages ?? 1
   );
 
   handleMeta(meta: Record<string, any> | undefined): void {
@@ -64,19 +75,26 @@ export class CourseService extends BaseApiService implements MetaHandler {
     }
   }
 
-  getAllCourses(filters?: CourseFilters): Observable<Course[]> {
+  fetchCourses(filters?: CourseFilters): Observable<Course[]> {
     this.loadingSignal.set(true);
     this.filtersSignal.set(filters || {});
 
-    return this.get<CourseListResponse>('courses', this.buildFilterParams(filters)).pipe(
+    return this.get<CourseListResponse>(
+      'courses',
+      this.buildFilterParams(filters)
+    ).pipe(
       map((response) => {
         // Transform raw Udemy data to frontend format
-        const adaptedCourses = response.courses.map(raw => CourseAdapter.toFrontend(raw));
+        const adaptedCourses = response.courses.map((raw) =>
+          CourseAdapter.toFrontend(raw)
+        );
         this.coursesSignal.set(adaptedCourses);
         return adaptedCourses;
       }),
       catchError((error) => {
-        this.notificationService.error('Failed to load courses. Please try again.');
+        this.notificationService.error(
+          'Failed to load courses. Please try again.'
+        );
         this.coursesSignal.set([]);
         return of([]);
       }),
@@ -101,12 +119,15 @@ export class CourseService extends BaseApiService implements MetaHandler {
     );
   }
 
-  searchCourses(searchTerm: string, additionalFilters?: CourseFilters): Observable<Course[]> {
+  searchCourses(
+    searchTerm: string,
+    additionalFilters?: CourseFilters
+  ): Observable<Course[]> {
     const filters: CourseFilters = {
       ...additionalFilters,
       search: searchTerm,
     };
-    return this.getAllCourses(filters);
+    return this.fetchCourses(filters);
   }
 
   trackCourseClick(courseId: string): Observable<void> {
@@ -119,17 +140,20 @@ export class CourseService extends BaseApiService implements MetaHandler {
   }
 
   updateFilters(filters: CourseFilters): void {
-    this.getAllCourses(filters).subscribe();
+    this.filtersSignal.update(current => ({ ...current, ...filters }));
   }
 
   clearFilters(): void {
-    this.filtersSignal.set({});
-    this.getAllCourses().subscribe();
+    this.filtersSignal.set({
+      sortBy: 'numSubscribers',
+      sortOrder: 'desc',
+      page: 1,
+    });
   }
 
   goToPage(page: number): void {
     const currentFilters = this.filtersSignal();
-    this.getAllCourses({ ...currentFilters, page }).subscribe();
+    this.fetchCourses({ ...currentFilters, page }).subscribe();
   }
 
   clearSelectedCourse(): void {

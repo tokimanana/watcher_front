@@ -14,7 +14,7 @@
         class="search-input"
         placeholder="Search courses..."
         [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event); onSearchChange()"
+        (ngModelChange)="updateSearch($event)"
       />
       @if (searchQuery()) {
       <button class="clear-search-btn" (click)="clearSearch()">×</button>
