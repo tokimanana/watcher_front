@@ -2,7 +2,8 @@
   <div class="catalog-header">
     <h1>Course Catalog</h1>
     <p class="catalog-subtitle">
-      Browse our collection of high-quality courses
+      Browse {{ courses().length }} courses @if (pagination()?.total) { of
+      {{ pagination()!.total }} total }
     </p>
   </div>
 
@@ -11,14 +12,12 @@
       <input
         type="text"
         class="search-input"
-        placeholder="Search for courses, instructors, or technologies..."
-        [value]="searchQuery()"
-        (input)="onSearchChange($any($event.target).value)"
+        placeholder="Search courses..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event); onSearchChange()"
       />
       @if (searchQuery()) {
-      <button class="clear-search-btn" (click)="clearSearch()">
-        <span class="icon">×</span>
-      </button>
+      <button class="clear-search-btn" (click)="clearSearch()">×</button>
       }
       <span class="search-icon">🔍</span>
     </div>
@@ -54,19 +53,17 @@
     <div class="advanced-filters">
       <div class="filter-row">
         <div class="custom-select" (click)="$event.stopPropagation()">
-          <button class="select-button" (click)="toggleDifficultyDropdown()">
-            <span>{{
-              getSelectedOptionLabel(difficulties, selectedDifficulty())
-            }}</span>
+          <button class="select-button" (click)="toggleLevelDropdown()">
+            <span>{{ getSelectedOptionLabel(levels, selectedLevel()) }}</span>
             <span class="icon">▼</span>
           </button>
-          @if (difficultyDropdownOpen()) {
+          @if (levelDropdownOpen()) {
           <div class="select-dropdown">
-            @for (option of difficulties; track option.value) {
+            @for (option of levels; track option.value) {
             <div
               class="select-option"
-              [class.selected]="selectedDifficulty() === option.value"
-              (click)="selectDifficulty(option.value)"
+              [class.selected]="selectedLevel() === option.value"
+              (click)="selectLevel(option.value)"
             >
               {{ option.label }}
             </div>
@@ -108,84 +105,82 @@
   </div>
 
   @if (loading()) {
-  <div class="loading-container">
+  <div class="loading-state">
     <div class="spinner"></div>
     <p>Loading courses...</p>
   </div>
-  } @else if (courses().length === 0) {
-  <div class="empty-state">
-    <div class="empty-icon">📚</div>
-    <h2>No courses found</h2>
-    <p>Try adjusting your search or filters to find what you're looking for.</p>
-    <button class="reset-btn" (click)="clearAllFilters()">Reset Filters</button>
-  </div>
-  } @else {
+  }
+
+  @if (!loading()) {
   <div class="course-grid">
     @for (course of courses(); track course.id) {
     <div class="course-card" (click)="navigateToCourse(course.id)">
-      <div class="course-image">
-        <img
-          [src]="course.imageUrl || 'assets/images/course-placeholder.jpg'"
-          alt="{{ course.title }}"
-        />
-        @if (course.isPaid) {
-        <div class="price-tag">${{ course.price.toFixed(2) }}</div>
-        } @else {
-        <div class="price-tag free">Free</div>
-        }
+      <div class="course-img">
+        <img [src]="course.imageUrl" [alt]="course.title" />
       </div>
       <div class="course-content">
+        <div class="course-platform">
+          <app-platform-badge [platform]="course.platform"></app-platform-badge>
+        </div>
         <h3 class="course-title">{{ course.title }}</h3>
         <div class="course-meta">
-          <span class="course-platform">{{ course.platform }}</span>
-          @if (course.level) {
-          <span class="course-level" [attr.data-level]="course.level">
-            {{ course.level }}
-          </span>
-          }
+          <div class="meta-item">
+            <span class="meta-label">Duration:</span>
+            <span class="meta-value">{{
+              formatDuration(course.contentDuration)
+            }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Level:</span>
+            <app-difficulty-badge
+              [level]="getLevelBadgeClass(course.level)"
+            ></app-difficulty-badge>
+          </div>
         </div>
         <div class="course-footer">
-          <div class="stats">
-            @if (course.numSubscribers) {
-            <span class="enrollment">{{ course.numSubscribers }} students</span>
-            }
+          <div class="course-price">
+            {{ formatPrice(course.price, course.isPaid) }}
+          </div>
+          <div class="course-stats">
+            <span class="stat"
+              >👥 {{ course.numSubscribers.toLocaleString() }}</span
+            >
+            <span class="stat">⭐ {{ course.numReviews }}</span>
           </div>
         </div>
       </div>
     </div>
     }
+
+    @if (courses().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No courses found</h3>
+      <p>Try adjusting your search or filters.</p>
+      <button class="reset-btn" (click)="clearAllFilters()">
+        Reset Filters
+      </button>
+    </div>
+    }
   </div>
   }
 
-  @if (courses().length > 0 && !loading()) {
+  @if (pagination() && pagination()!.totalPages > 1) {
   <div class="pagination">
     <button
       class="pagination-btn"
-      [class.disabled]="pagination().currentPage === 1"
-      (click)="
-        pagination().currentPage > 1 && loadPage(pagination().currentPage - 1)
-      "
+      [disabled]="pagination()!.page === 1"
+      (click)="courseService.goToPage(pagination()!.page - 1)"
     >
       Previous
     </button>
-
-    @for (page of getPaginationArray(); track page) {
-    <button
-      class="page-number"
-      [class.active]="page === pagination().currentPage"
-      (click)="loadPage(page)"
-    >
-      {{ page }}
-    </button>
-    }
-
+    <span class="pagination-info">
+      Page {{ pagination()!.page }} of {{ pagination()!.totalPages }}
+    </span>
     <button
       class="pagination-btn"
-      [class.disabled]="pagination().currentPage === pagination().totalPages"
-      (click)="
-        pagination().currentPage < pagination().totalPages &&
-          loadPage(pagination().currentPage + 1)
-      "
+      [disabled]="pagination()!.page === pagination()!.totalPages"
+      (click)="courseService.goToPage(pagination()!.page + 1)"
     >
       Next
     </button>
