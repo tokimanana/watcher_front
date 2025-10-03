@@ -75,7 +75,7 @@ export class CourseService extends BaseApiService implements MetaHandler {
 
     // Backend returns data as an array directly, not wrapped in { courses: [...] }
     return this.get<UdemyCourseRaw[]>(
-      'course',
+      `course`,
       this.buildFilterParams(filters)
     ).pipe(
       map((rawCourses) => {

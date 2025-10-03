@@ -1,31 +1,37 @@
 <div class="catalog-container">
+  <!-- Header -->
   <div class="catalog-header">
     <h1>Course Catalog</h1>
     <p class="catalog-subtitle">
-      Browse {{ courses().length }} courses @if (pagination()?.total) { of
-      {{ pagination()!.total }} total }
+      Showing {{ paginatedCourses().length }} of {{ totalCourses() }} courses
     </p>
   </div>
 
+  <!-- Search & Filters -->
   <div class="search-filters">
+    <!-- Search Bar -->
     <div class="search-container">
       <input
         type="text"
         class="search-input"
         placeholder="Search courses..."
-        [ngModel]="searchQuery()"
-        (ngModelChange)="updateSearch($event)"
+        [ngModel]="localSearchQuery()"
+        (ngModelChange)="localSearchQuery.set($event); onSearchChange()"
       />
-      @if (searchQuery()) {
+      @if (localSearchQuery()) {
       <button class="clear-search-btn" (click)="clearSearch()">×</button>
       }
       <span class="search-icon">🔍</span>
     </div>
 
+    <!-- Filter Controls -->
     <div class="filter-controls">
+      <!-- Sort Dropdown -->
       <div class="custom-select" (click)="$event.stopPropagation()">
         <button class="select-button" (click)="toggleSortDropdown()">
-          <span>{{ getSelectedOptionLabel(sortOptions, sortBy()) }}</span>
+          <span>{{
+            getSelectedOptionLabel(sortOptions, getCurrentSortValue())
+          }}</span>
           <span class="icon">▼</span>
         </button>
         @if (sortDropdownOpen()) {
@@ -33,7 +39,7 @@
           @for (option of sortOptions; track option.value) {
           <div
             class="select-option"
-            [class.selected]="sortBy() === option.value"
+            [class.selected]="getCurrentSortValue() === option.value"
             (click)="selectSortOption(option.value)"
           >
             {{ option.label }}
@@ -43,18 +49,23 @@
         }
       </div>
 
+      <!-- Advanced Filters Toggle -->
       <button class="filter-toggle" (click)="toggleFilters()">
         <span class="icon">{{ filtersExpanded() ? "−" : "+" }}</span>
         <span>{{ filtersExpanded() ? "Less Filters" : "More Filters" }}</span>
       </button>
     </div>
 
+    <!-- Advanced Filters -->
     @if (filtersExpanded()) {
     <div class="advanced-filters">
       <div class="filter-row">
+        <!-- Level Dropdown -->
         <div class="custom-select" (click)="$event.stopPropagation()">
           <button class="select-button" (click)="toggleLevelDropdown()">
-            <span>{{ getSelectedOptionLabel(levels, selectedLevel()) }}</span>
+            <span>{{
+              getSelectedOptionLabel(levels, getCurrentLevelValue())
+            }}</span>
             <span class="icon">▼</span>
           </button>
           @if (levelDropdownOpen()) {
@@ -62,7 +73,7 @@
             @for (option of levels; track option.value) {
             <div
               class="select-option"
-              [class.selected]="selectedLevel() === option.value"
+              [class.selected]="getCurrentLevelValue() === option.value"
               (click)="selectLevel(option.value)"
             >
               {{ option.label }}
@@ -72,10 +83,11 @@
           }
         </div>
 
+        <!-- Price Range Dropdown -->
         <div class="custom-select" (click)="$event.stopPropagation()">
           <button class="select-button" (click)="togglePriceDropdown()">
             <span>{{
-              getSelectedOptionLabel(priceRanges, selectedPrice())
+              getSelectedOptionLabel(priceRanges, getCurrentPriceValue())
             }}</span>
             <span class="icon">▼</span>
           </button>
@@ -84,7 +96,7 @@
             @for (option of priceRanges; track option.value) {
             <div
               class="select-option"
-              [class.selected]="selectedPrice() === option.value"
+              [class.selected]="getCurrentPriceValue() === option.value"
               (click)="selectPrice(option.value)"
             >
               {{ option.label }}
@@ -94,6 +106,7 @@
           }
         </div>
 
+        <!-- Clear Filters -->
         @if (hasActiveFilters()) {
         <button class="clear-filters-btn" (click)="clearAllFilters()">
           Clear All
@@ -104,14 +117,18 @@
     }
   </div>
 
+  <!-- Loading State -->
   @if (loading()) {
   <div class="loading-state">
     <div class="spinner"></div>
     <p>Loading courses...</p>
   </div>
-  } @if (!loading()) {
+  }
+
+  <!-- Course Grid -->
+  @if (!loading()) {
   <div class="course-grid">
-    @for (course of courses(); track course.id) {
+    @for (course of paginatedCourses(); track course.id) {
     <div class="course-card" (click)="navigateToCourse(course.id)">
       <div class="course-img">
         <img [src]="course.imageUrl" [alt]="course.title" />
@@ -148,7 +165,10 @@
         </div>
       </div>
     </div>
-    } @if (courses().length === 0) {
+    }
+
+    <!-- Empty State -->
+    @if (paginatedCourses().length === 0) {
     <div class="empty-state">
       <div class="empty-icon">🔍</div>
       <h3>No courses found</h3>
@@ -159,24 +179,41 @@
     </div>
     }
   </div>
-  } @if (pagination() && pagination()!.totalPages > 1) {
+  }
+
+  <!-- Frontend Pagination -->
+  @if (totalPagesComputed() > 1) {
   <div class="pagination">
     <button
       class="pagination-btn"
-      [disabled]="pagination()!.page === 1"
-      (click)="goToPreviousPage()"
+      [disabled]="currentPageIndex() === 0"
+      (click)="previousPage()"
     >
-      Previous
+      ← Previous
     </button>
+
+    <div class="pagination-pages">
+      @for (page of [].constructor(totalPagesComputed()); track $index) {
+      <button
+        class="pagination-page"
+        [class.active]="currentPageIndex() === $index"
+        (click)="goToPage($index)"
+      >
+        {{ $index + 1 }}
+      </button>
+      }
+    </div>
+
     <span class="pagination-info">
-      Page {{ pagination()!.page }} of {{ pagination()!.totalPages }}
+      Page {{ currentPageIndex() + 1 }} of {{ totalPagesComputed() }}
     </span>
+
     <button
       class="pagination-btn"
-      [disabled]="pagination()!.page === pagination()!.totalPages"
-      (click)="goToNextPage()"
+      [disabled]="currentPageIndex() === totalPagesComputed() - 1"
+      (click)="nextPage()"
     >
-      Next
+      Next →
     </button>
   </div>
   }

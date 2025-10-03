@@ -1,3 +1,6 @@
+// Course Catalog - Styles complémentaires
+// Note: La majorité des styles viennent de styles.scss global
+
 .catalog-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -165,10 +168,9 @@
 .advanced-filters {
   margin-top: var(--spacing-md);
   padding: var(--spacing-md);
-  /* background: var(--color-surface-variant); */
+  background: var(--color-surface-variant);
   border-radius: var(--radius-lg);
   animation: slideDown 0.3s ease-out;
-
 
   .filter-row {
     display: flex;
@@ -368,6 +370,7 @@
   align-items: center;
   gap: var(--spacing-md);
   margin-top: var(--spacing-xl);
+  flex-wrap: wrap;
 
   .pagination-btn {
     padding: var(--spacing-sm) var(--spacing-lg);
@@ -378,6 +381,7 @@
     font-weight: var(--font-weight-medium);
     cursor: pointer;
     transition: all var(--transition-fast);
+    font-size: var(--font-size-sm);
 
     &:hover:not(:disabled) {
       background: var(--color-primary-dark);
@@ -392,9 +396,41 @@
     }
   }
 
+  .pagination-pages {
+    display: flex;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+    max-width: 400px;
+
+    .pagination-page {
+      min-width: 40px;
+      height: 40px;
+      padding: var(--spacing-xs);
+      background: var(--color-surface);
+      border: 2px solid rgba(139, 69, 19, 0.2);
+      border-radius: var(--radius-md);
+      font-weight: var(--font-weight-medium);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-size: var(--font-size-sm);
+
+      &:hover {
+        border-color: var(--color-primary);
+        background: var(--color-surface-variant);
+      }
+
+      &.active {
+        background: var(--color-primary);
+        color: var(--color-text-inverse);
+        border-color: var(--color-primary);
+      }
+    }
+  }
+
   .pagination-info {
     font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
+    white-space: nowrap;
   }
 }
 
@@ -437,6 +473,26 @@
     .custom-select,
     .clear-filters-btn {
       width: 100%;
+    }
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+
+    .pagination-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .pagination-pages {
+      width: 100%;
+      justify-content: center;
+      max-width: 100%;
+    }
+
+    .pagination-info {
+      order: -1;
     }
   }
 }
