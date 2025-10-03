@@ -9,7 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { CourseHelpers } from '../../../../core/models/course.model';
 import { CourseService } from '../../services/course.service';
 import { PlatformBadgeComponent } from '../platform-badge/platform-badge.component';
@@ -36,26 +36,27 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
   private readonly courseService = inject(CourseService);
   private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
+  private readonly searchSubject$ = new Subject<string>();
+  private clickListener?: (event: Event) => void;
 
-  // Local UI state
-  localSearchQuery = signal('');
-  filtersExpanded = signal(false);
-  currentPageIndex = signal(0);
-  itemsPerPage = signal(12);
+  // UI State
+  readonly localSearchQuery = signal('');
+  readonly filtersExpanded = signal(false);
+  readonly currentPageIndex = signal(0);
+  readonly itemsPerPage = signal(12);
 
-  // Dropdown states
-  sortDropdownOpen = signal(false);
-  levelDropdownOpen = signal(false);
-  priceDropdownOpen = signal(false);
+  // Dropdown States
+  readonly sortDropdownOpen = signal(false);
+  readonly levelDropdownOpen = signal(false);
+  readonly priceDropdownOpen = signal(false);
 
-  // Service state
-  courses = this.courseService.courses;
-  loading = this.courseService.loading;
-  pagination = this.courseService.pagination;
-  activeFilters = this.courseService.activeFilters;
+  // Service State (readonly references)
+  readonly courses = this.courseService.courses;
+  readonly loading = this.courseService.loading;
+  readonly activeFilters = this.courseService.activeFilters;
 
-  // Filter options
-  sortOptions: FilterOption[] = [
+  // Filter Options
+  readonly sortOptions: FilterOption[] = [
     { value: 'numSubscribers', label: 'Most Popular' },
     { value: 'numReviews', label: 'Most Reviewed' },
     { value: 'publishedTimestamp', label: 'Recently Added' },
@@ -63,15 +64,14 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
     { value: 'contentDuration', label: 'Duration: Short to Long' },
   ];
 
-  levels: FilterOption[] = [
-    { value: 'all', label: 'All Levels' },
+  readonly levels: FilterOption[] = [
     { value: 'Beginner', label: 'Beginner' },
     { value: 'Intermediate', label: 'Intermediate' },
     { value: 'Advanced', label: 'Advanced' },
-    { value: 'All Levels', label: 'All Levels (Udemy)' },
+    { value: 'All Levels', label: 'All Levels' },
   ];
 
-  priceRanges: FilterOption[] = [
+  readonly priceRanges: FilterOption[] = [
     { value: 'any', label: 'Any Price' },
     { value: 'free', label: 'Free Only' },
     { value: 'paid', label: 'Paid Only' },
@@ -79,43 +79,62 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
     { value: 'under100', label: 'Under $100' },
   ];
 
-  // Computed
-  totalCourses = computed(
-    () => this.pagination()?.total ?? this.courses().length
-  );
+  // Computed Values
+  readonly totalCourses = computed(() => this.courses().length);
 
-  paginatedCourses = computed(() => {
+  readonly paginatedCourses = computed(() => {
     const allCourses = this.courses();
     const page = this.currentPageIndex();
     const perPage = this.itemsPerPage();
     const start = page * perPage;
-    const end = start + perPage;
-    return allCourses.slice(start, end);
+    return allCourses.slice(start, start + perPage);
   });
 
-  totalPagesComputed = computed(() =>
+  readonly totalPages = computed(() =>
     Math.ceil(this.courses().length / this.itemsPerPage())
   );
 
-  hasActiveFilters = computed(() => {
-    const filters = this.activeFilters();
+  readonly visiblePages = computed(() => {
+    const current = this.currentPageIndex();
+    const total = this.totalPages();
+    const pages: (number | string)[] = [];
+
+    if (total <= 7) {
+      for (let i = 0; i < total; i++) pages.push(i);
+      return pages;
+    }
+
+    pages.push(0);
+    if (current > 2) pages.push('...');
+
+    const start = Math.max(1, current - 1);
+    const end = Math.min(total - 2, current + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+
+    if (current < total - 3) pages.push('...');
+    if (total > 1) pages.push(total - 1);
+
+    return pages;
+  });
+
+  readonly hasActiveFilters = computed(() => {
+    const f = this.activeFilters();
     return !!(
-      filters.search ||
-      filters.level ||
-      filters.isPaid !== undefined ||
-      filters.minPrice ||
-      filters.maxPrice
+      f.search ||
+      f.level ||
+      f.isPaid !== undefined ||
+      f.minPrice ||
+      f.maxPrice
     );
   });
 
-  private clickListener?: (event: Event) => void;
-
-  ngOnInit() {
-    this.setupGlobalClickListener();
-    this.loadInitialCourses();
+  ngOnInit(): void {
+    this.setupClickListener();
+    this.setupSearchDebounce();
+    this.loadCourses();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     if (this.clickListener) {
       document.removeEventListener('click', this.clickListener);
     }
@@ -123,175 +142,186 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadInitialCourses(): void {
-    this.courseService
-      .fetchCourses()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (courses) => {
-          console.log('Courses loaded successfully:', courses.length);
-        },
-        error: (error) => {
-          console.error('Error loading courses:', error);
-        },
-      });
-  }
-
-  setupGlobalClickListener() {
-    this.clickListener = (event: Event) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.custom-select')) {
+  // Initialization
+  private setupClickListener(): void {
+    this.clickListener = (e: Event) => {
+      if (!(e.target as HTMLElement).closest('.custom-select')) {
         this.closeAllDropdowns();
       }
     };
     document.addEventListener('click', this.clickListener);
   }
 
-  // Search
-  onSearchChange() {
-    this.courseService.updateFilters({ search: this.localSearchQuery() });
-    this.currentPageIndex.set(0);
+  private setupSearchDebounce(): void {
+    this.searchSubject$
+      .pipe(debounceTime(400), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((term) => {
+        this.updateFilter({ search: term || undefined });
+        this.currentPageIndex.set(0);
+      });
   }
 
-  clearSearch() {
-    this.localSearchQuery.set('');
-    this.courseService.updateFilters({ search: undefined });
-    this.currentPageIndex.set(0);
-  }
-
-  // Dropdowns
-  toggleSortDropdown() {
-    this.sortDropdownOpen.update((open) => !open);
-    if (this.sortDropdownOpen()) {
-      this.levelDropdownOpen.set(false);
-      this.priceDropdownOpen.set(false);
-    }
-  }
-
-  toggleLevelDropdown() {
-    this.levelDropdownOpen.update((open) => !open);
-    if (this.levelDropdownOpen()) {
-      this.sortDropdownOpen.set(false);
-      this.priceDropdownOpen.set(false);
-    }
-  }
-
-  togglePriceDropdown() {
-    this.priceDropdownOpen.update((open) => !open);
-    if (this.priceDropdownOpen()) {
-      this.sortDropdownOpen.set(false);
-      this.levelDropdownOpen.set(false);
-    }
-  }
-
-  closeAllDropdowns() {
-    this.sortDropdownOpen.set(false);
-    this.levelDropdownOpen.set(false);
-    this.priceDropdownOpen.set(false);
-  }
-
-  // Selections
-  selectSortOption(option: string) {
-    this.courseService.updateFilters({
-      sortBy: option as any,
-      sortOrder: option === 'price' ? 'asc' : 'desc',
-    });
-    this.sortDropdownOpen.set(false);
-    this.currentPageIndex.set(0);
-  }
-
-  selectLevel(level: string) {
-    this.courseService.updateFilters({
-      level: level === 'all' ? undefined : level,
-    });
-    this.levelDropdownOpen.set(false);
-    this.currentPageIndex.set(0);
-  }
-
-  selectPrice(price: string) {
-    const updates: any = {
-      minPrice: undefined,
-      maxPrice: undefined,
-      isPaid: undefined,
-    };
-
-    if (price === 'free') {
-      updates.isPaid = false;
-    } else if (price === 'paid') {
-      updates.isPaid = true;
-    } else if (price === 'under50') {
-      updates.maxPrice = 50;
-    } else if (price === 'under100') {
-      updates.maxPrice = 100;
-    }
-
-    this.courseService.updateFilters(updates);
-    this.priceDropdownOpen.set(false);
-    this.currentPageIndex.set(0);
-  }
-
-  toggleFilters() {
-    this.filtersExpanded.update((expanded) => !expanded);
-  }
-
-  navigateToCourse(courseId: string) {
-    this.router.navigate(['/courses', courseId]);
-  }
-
-  clearAllFilters() {
-    this.localSearchQuery.set('');
-    this.currentPageIndex.set(0);
-    this.courseService.clearFilters();
-    // Explicitly reload courses after clearing filters
+  private loadCourses(): void {
     this.courseService
       .fetchCourses()
       .pipe(takeUntil(this.destroy$))
       .subscribe();
   }
 
-  // Pagination
-  goToPage(page: number) {
-    this.currentPageIndex.set(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Helper to update filters
+  private updateFilter(filter: any): void {
+    this.courseService
+      .updateFilters(filter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
   }
 
-  nextPage() {
-    if (this.currentPageIndex() < this.totalPagesComputed() - 1) {
+  // Search
+  onSearchChange(): void {
+    this.searchSubject$.next(this.localSearchQuery().trim());
+  }
+
+  clearSearch(): void {
+    this.localSearchQuery.set('');
+    this.searchSubject$.next('');
+  }
+
+  // Dropdown Controls
+  toggleSortDropdown(): void {
+    this.sortDropdownOpen.update((v) => !v);
+    if (this.sortDropdownOpen()) {
+      this.levelDropdownOpen.set(false);
+      this.priceDropdownOpen.set(false);
+    }
+  }
+
+  toggleLevelDropdown(): void {
+    this.levelDropdownOpen.update((v) => !v);
+    if (this.levelDropdownOpen()) {
+      this.sortDropdownOpen.set(false);
+      this.priceDropdownOpen.set(false);
+    }
+  }
+
+  togglePriceDropdown(): void {
+    this.priceDropdownOpen.update((v) => !v);
+    if (this.priceDropdownOpen()) {
+      this.sortDropdownOpen.set(false);
+      this.levelDropdownOpen.set(false);
+    }
+  }
+
+  closeAllDropdowns(): void {
+    this.sortDropdownOpen.set(false);
+    this.levelDropdownOpen.set(false);
+    this.priceDropdownOpen.set(false);
+  }
+
+  toggleFilters(): void {
+    this.filtersExpanded.update((v) => !v);
+  }
+
+  // Filter Selections
+  selectSortOption(option: string): void {
+    this.updateFilter({
+      sortBy: option,
+      sortOrder: option === 'price' ? 'asc' : 'desc',
+    });
+    this.sortDropdownOpen.set(false);
+    this.currentPageIndex.set(0);
+  }
+
+  selectLevel(level: string): void {
+    const current = this.getCurrentLevelValue();
+    this.updateFilter({ level: current === level ? undefined : level });
+    this.levelDropdownOpen.set(false);
+    this.currentPageIndex.set(0);
+  }
+
+  selectPrice(price: string): void {
+    const updates: any = {
+      minPrice: undefined,
+      maxPrice: undefined,
+      isPaid: undefined,
+    };
+
+    switch (price) {
+      case 'free':
+        updates.isPaid = false;
+        break;
+      case 'paid':
+        updates.isPaid = true;
+        break;
+      case 'under50':
+        updates.maxPrice = 50;
+        break;
+      case 'under100':
+        updates.maxPrice = 100;
+        break;
+    }
+
+    this.updateFilter(updates);
+    this.priceDropdownOpen.set(false);
+    this.currentPageIndex.set(0);
+  }
+
+  clearAllFilters(): void {
+    this.localSearchQuery.set('');
+    this.currentPageIndex.set(0);
+    this.courseService.clearFilters();
+    this.loadCourses();
+  }
+
+  // Navigation
+  navigateToCourse(courseId: string): void {
+    this.courseService.trackCourseClick(courseId).subscribe();
+    this.router.navigate(['/courses', courseId]);
+  }
+
+  // Pagination
+  goToPage(page: number | string): void {
+    if (typeof page === 'number') {
+      this.currentPageIndex.set(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPageIndex() < this.totalPages() - 1) {
       this.goToPage(this.currentPageIndex() + 1);
     }
   }
 
-  previousPage() {
+  previousPage(): void {
     if (this.currentPageIndex() > 0) {
       this.goToPage(this.currentPageIndex() - 1);
     }
   }
 
+  isPageNumber(page: number | string): page is number {
+    return typeof page === 'number';
+  }
+
   // Helpers
-  getSelectedOptionLabel(
-    options: FilterOption[],
-    selectedValue: string
-  ): string {
-    const option = options.find((opt) => opt.value === selectedValue);
-    return option ? option.label : '';
+  getSelectedOptionLabel(options: FilterOption[], value: string): string {
+    return options.find((opt) => opt.value === value)?.label || '';
   }
 
   getCurrentSortValue(): string {
     return this.activeFilters().sortBy || 'numSubscribers';
   }
 
-  getCurrentLevelValue(): string {
+  getCurrentLevelValue(): string | undefined {
     const level = this.activeFilters().level;
-    if (!level) return 'all';
-    return Array.isArray(level) ? level[0] : level;
+    return level ? (Array.isArray(level) ? level[0] : level) : undefined;
   }
 
   getCurrentPriceValue(): string {
-    const filters = this.activeFilters();
-    if (filters.isPaid === false) return 'free';
-    if (filters.isPaid === true) return 'paid';
-    if (filters.maxPrice === 50) return 'under50';
-    if (filters.maxPrice === 100) return 'under100';
+    const f = this.activeFilters();
+    if (f.isPaid === false) return 'free';
+    if (f.isPaid === true) return 'paid';
+    if (f.maxPrice === 50) return 'under50';
+    if (f.maxPrice === 100) return 'under100';
     return 'any';
   }
 

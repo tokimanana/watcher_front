@@ -46,9 +46,14 @@ export class CourseService extends BaseApiService implements MetaHandler {
 
   readonly hasFilters = computed(() => {
     const filters = this.filtersSignal();
-    return Object.keys(filters).some(
-      (key) => filters[key as keyof CourseFilters] !== undefined
-    );
+    return Object.keys(filters).some((key) => {
+      const value = filters[key as keyof CourseFilters];
+      // Ignore default sorting values
+      if (key === 'sortBy' && value === 'numSubscribers') return false;
+      if (key === 'sortOrder' && value === 'desc') return false;
+      if (key === 'page' && value === 1) return false;
+      return value !== undefined;
+    });
   });
 
   readonly totalCourses = computed(
@@ -71,22 +76,38 @@ export class CourseService extends BaseApiService implements MetaHandler {
 
   fetchCourses(filters?: CourseFilters): Observable<Course[]> {
     this.loadingSignal.set(true);
-    this.filtersSignal.set(filters || {});
+
+    // Update filters if provided
+    if (filters) {
+      this.filtersSignal.set(filters);
+    }
+
+    const currentFilters = this.filtersSignal();
+    const params = this.buildFilterParams(currentFilters);
+
+    console.log('🔍 Fetching courses with params:', params);
 
     // Backend returns data as an array directly, not wrapped in { courses: [...] }
-    return this.get<UdemyCourseRaw[]>(
-      `course`,
-      this.buildFilterParams(filters)
-    ).pipe(
+    return this.get<UdemyCourseRaw[]>('course', params).pipe(
       map((rawCourses) => {
+        console.log('✅ Received courses:', rawCourses.length);
+
         // Transform raw Udemy data to frontend format
         const adaptedCourses = rawCourses.map((raw) =>
           CourseAdapter.toFrontend(raw)
         );
-        this.coursesSignal.set(adaptedCourses);
-        return adaptedCourses;
+
+        // Apply frontend filtering if needed
+        const filteredCourses = this.applyFrontendFilters(
+          adaptedCourses,
+          currentFilters
+        );
+
+        this.coursesSignal.set(filteredCourses);
+        return filteredCourses;
       }),
       catchError((error) => {
+        console.error('❌ Error fetching courses:', error);
         this.notificationService.error(
           'Failed to load courses. Please try again.'
         );
@@ -127,7 +148,7 @@ export class CourseService extends BaseApiService implements MetaHandler {
 
   trackCourseClick(courseId: string): Observable<void> {
     // TODO: Backend endpoint not ready yet - returning empty observable for now
-    console.log('Track course click called for:', courseId);
+    console.log('📊 Track course click:', courseId);
     return of(void 0);
 
     // Uncomment when backend implements the endpoint:
@@ -139,12 +160,18 @@ export class CourseService extends BaseApiService implements MetaHandler {
     // );
   }
 
-  updateFilters(filters: Partial<CourseFilters>): void {
-    this.filtersSignal.update((current) => ({ ...current, ...filters }));
-    this.fetchCourses(this.filtersSignal()).subscribe();
+  updateFilters(filters: Partial<CourseFilters>): Observable<Course[]> {
+    const currentFilters = this.filtersSignal();
+    const newFilters = { ...currentFilters, ...filters };
+
+    console.log('🔄 Updating filters:', filters);
+    console.log('📝 New filters state:', newFilters);
+
+    return this.fetchCourses(newFilters);
   }
 
   clearFilters(): void {
+    console.log('🧹 Clearing filters');
     this.filtersSignal.set({
       sortBy: 'numSubscribers',
       sortOrder: 'desc',
@@ -161,10 +188,81 @@ export class CourseService extends BaseApiService implements MetaHandler {
     this.selectedCourseSignal.set(null);
   }
 
+  /**
+   * Apply additional frontend filters that backend might not support
+   */
+  private applyFrontendFilters(
+    courses: Course[],
+    filters: CourseFilters
+  ): Course[] {
+    let filtered = [...courses];
+
+    // Frontend search if backend doesn't handle it
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter((course) =>
+        course.title.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Frontend level filter if backend doesn't handle it
+    if (filters.level) {
+      const levelFilter = Array.isArray(filters.level)
+        ? filters.level
+        : [filters.level];
+      filtered = filtered.filter((course) =>
+        levelFilter.some(
+          (level) => course.level.toLowerCase() === level.toLowerCase()
+        )
+      );
+    }
+
+    // Frontend price filters if backend doesn't handle them
+    if (filters.isPaid !== undefined) {
+      filtered = filtered.filter((course) => course.isPaid === filters.isPaid);
+    }
+
+    if (filters.minPrice !== undefined) {
+      filtered = filtered.filter((course) => course.price >= filters.minPrice!);
+    }
+
+    if (filters.maxPrice !== undefined) {
+      filtered = filtered.filter((course) => course.price <= filters.maxPrice!);
+    }
+
+    // Frontend sorting
+    if (filters.sortBy) {
+      const sortKey = filters.sortBy;
+      const sortOrder = filters.sortOrder || 'desc';
+
+      filtered.sort((a, b) => {
+        let aVal = a[sortKey as keyof Course];
+        let bVal = b[sortKey as keyof Course];
+
+        // Handle string comparisons
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+          aVal = aVal.toLowerCase();
+          bVal = bVal.toLowerCase();
+        }
+
+        if (sortOrder === 'asc') {
+          return aVal > bVal ? 1 : -1;
+        } else {
+          return aVal < bVal ? 1 : -1;
+        }
+      });
+    }
+
+    return filtered;
+  }
+
   private buildFilterParams(filters?: CourseFilters): Record<string, any> {
     if (!filters) return {};
 
     const params: Record<string, any> = {};
+
+    // Only send params that the backend can handle
+    // Comment out params that should be handled frontend-only
 
     if (filters.search) params['search'] = filters.search;
     if (filters.isPaid !== undefined) params['isPaid'] = filters.isPaid;

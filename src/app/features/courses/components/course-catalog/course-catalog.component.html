@@ -3,7 +3,8 @@
   <div class="catalog-header">
     <h1>Course Catalog</h1>
     <p class="catalog-subtitle">
-      Showing {{ paginatedCourses().length }} of {{ totalCourses() }} courses
+      @if (loading()) { Loading courses... } @else { Showing
+      {{ paginatedCourses().length }} of {{ totalCourses() }} courses }
     </p>
   </div>
 
@@ -63,9 +64,11 @@
         <!-- Level Dropdown -->
         <div class="custom-select" (click)="$event.stopPropagation()">
           <button class="select-button" (click)="toggleLevelDropdown()">
-            <span>{{
-              getSelectedOptionLabel(levels, getCurrentLevelValue())
-            }}</span>
+            <span>
+              @if (getCurrentLevelValue()) {
+              {{ getCurrentLevelValue() }}
+              } @else { All Levels }
+            </span>
             <span class="icon">▼</span>
           </button>
           @if (levelDropdownOpen()) {
@@ -181,37 +184,38 @@
   </div>
   }
 
-  <!-- Frontend Pagination -->
-  @if (totalPagesComputed() > 1) {
+  <!-- Professional Pagination -->
+  @if (!loading() && totalPages() > 1) {
   <div class="pagination">
     <button
       class="pagination-btn"
       [disabled]="currentPageIndex() === 0"
       (click)="previousPage()"
+      aria-label="Previous page"
     >
       ← Previous
     </button>
 
     <div class="pagination-pages">
-      @for (page of [].constructor(totalPagesComputed()); track $index) {
+      @for (page of visiblePages(); track $index) { @if (isPageNumber(page)) {
       <button
         class="pagination-page"
-        [class.active]="currentPageIndex() === $index"
-        (click)="goToPage($index)"
+        [class.active]="currentPageIndex() === page"
+        (click)="goToPage(page)"
+        [attr.aria-label]="'Go to page ' + (page + 1)"
       >
-        {{ $index + 1 }}
+        {{ page + 1 }}
       </button>
-      }
+      } @else {
+      <span class="pagination-ellipsis">{{ page }}</span>
+      } }
     </div>
-
-    <span class="pagination-info">
-      Page {{ currentPageIndex() + 1 }} of {{ totalPagesComputed() }}
-    </span>
 
     <button
       class="pagination-btn"
-      [disabled]="currentPageIndex() === totalPagesComputed() - 1"
+      [disabled]="currentPageIndex() === totalPages() - 1"
       (click)="nextPage()"
+      aria-label="Next page"
     >
       Next →
     </button>
