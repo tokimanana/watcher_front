@@ -28,7 +28,7 @@ export class CourseService extends BaseApiService implements MetaHandler {
   private loadingSignal = signal<boolean>(false);
   private paginationSignal = signal<PaginationMeta | null>(null);
   private filtersSignal = signal<CourseFilters>({
-    sortBy: 'numSubscribers',
+    sortBy: 'publishedTimestamp',
     sortOrder: 'desc',
     page: 1,
   });
@@ -49,7 +49,7 @@ export class CourseService extends BaseApiService implements MetaHandler {
     return Object.keys(filters).some((key) => {
       const value = filters[key as keyof CourseFilters];
       // Ignore default sorting values
-      if (key === 'sortBy' && value === 'numSubscribers') return false;
+      if (key === 'sortBy' && value === 'publishedTimestamp') return false;
       if (key === 'sortOrder' && value === 'desc') return false;
       if (key === 'page' && value === 1) return false;
       return value !== undefined;
@@ -92,7 +92,6 @@ export class CourseService extends BaseApiService implements MetaHandler {
       map((rawCourses) => {
         console.log('✅ Received courses:', rawCourses.length);
 
-        // Transform raw Udemy data to frontend format
         const adaptedCourses = rawCourses.map((raw) =>
           CourseAdapter.toFrontend(raw)
         );
@@ -165,7 +164,7 @@ export class CourseService extends BaseApiService implements MetaHandler {
     const newFilters = { ...currentFilters, ...filters };
 
     console.log('🔄 Updating filters:', filters);
-    console.log('📝 New filters state:', newFilters);
+    console.log('📋 New filters state:', newFilters);
 
     return this.fetchCourses(newFilters);
   }
@@ -173,7 +172,7 @@ export class CourseService extends BaseApiService implements MetaHandler {
   clearFilters(): void {
     console.log('🧹 Clearing filters');
     this.filtersSignal.set({
-      sortBy: 'numSubscribers',
+      sortBy: 'publishedTimestamp',
       sortOrder: 'desc',
       page: 1,
     });
@@ -188,16 +187,12 @@ export class CourseService extends BaseApiService implements MetaHandler {
     this.selectedCourseSignal.set(null);
   }
 
-  /**
-   * Apply additional frontend filters that backend might not support
-   */
   private applyFrontendFilters(
     courses: Course[],
     filters: CourseFilters
   ): Course[] {
     let filtered = [...courses];
 
-    // Frontend search if backend doesn't handle it
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter((course) =>
@@ -205,32 +200,38 @@ export class CourseService extends BaseApiService implements MetaHandler {
       );
     }
 
-    // Frontend level filter if backend doesn't handle it
     if (filters.level) {
       const levelFilter = Array.isArray(filters.level)
         ? filters.level
         : [filters.level];
-      filtered = filtered.filter((course) =>
-        levelFilter.some(
-          (level) => course.level.toLowerCase() === level.toLowerCase()
-        )
-      );
+
+      const hasAllLevels = levelFilter.some((level) => level === 'All Levels');
+
+      if (!hasAllLevels) {
+        filtered = filtered.filter((course) => {
+          return levelFilter.some((filterLevel) => {
+            return course.level === filterLevel;
+          });
+        });
+      }
     }
 
-    // Frontend price filters if backend doesn't handle them
     if (filters.isPaid !== undefined) {
       filtered = filtered.filter((course) => course.isPaid === filters.isPaid);
     }
 
     if (filters.minPrice !== undefined) {
-      filtered = filtered.filter((course) => course.price >= filters.minPrice!);
+      filtered = filtered.filter(
+        (course) => course.isPaid && course.price >= filters.minPrice!
+      );
     }
 
     if (filters.maxPrice !== undefined) {
-      filtered = filtered.filter((course) => course.price <= filters.maxPrice!);
+      filtered = filtered.filter(
+        (course) => course.isPaid && course.price <= filters.maxPrice!
+      );
     }
 
-    // Frontend sorting
     if (filters.sortBy) {
       const sortKey = filters.sortBy;
       const sortOrder = filters.sortOrder || 'desc';
@@ -239,16 +240,13 @@ export class CourseService extends BaseApiService implements MetaHandler {
         let aVal = a[sortKey as keyof Course];
         let bVal = b[sortKey as keyof Course];
 
-        // Handle string comparisons
-        if (typeof aVal === 'string' && typeof bVal === 'string') {
-          aVal = aVal.toLowerCase();
-          bVal = bVal.toLowerCase();
-        }
+        const aNum = typeof aVal === 'number' ? aVal : 0;
+        const bNum = typeof bVal === 'number' ? bVal : 0;
 
         if (sortOrder === 'asc') {
-          return aVal > bVal ? 1 : -1;
+          return aNum - bNum;
         } else {
-          return aVal < bVal ? 1 : -1;
+          return bNum - aNum;
         }
       });
     }

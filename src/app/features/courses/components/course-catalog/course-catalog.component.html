@@ -64,11 +64,7 @@
         <!-- Level Dropdown -->
         <div class="custom-select" (click)="$event.stopPropagation()">
           <button class="select-button" (click)="toggleLevelDropdown()">
-            <span>
-              @if (getCurrentLevelValue()) {
-              {{ getCurrentLevelValue() }}
-              } @else { All Levels }
-            </span>
+            <span>{{ getCurrentLevelLabel() }}</span>
             <span class="icon">▼</span>
           </button>
           @if (levelDropdownOpen()) {
@@ -160,9 +156,7 @@
             {{ formatPrice(course.price, course.isPaid) }}
           </div>
           <div class="course-stats">
-            <span class="stat"
-              >👥 {{ course.numSubscribers.toLocaleString() }}</span
-            >
+            <span class="stat">📚 {{ course.numLectures }} lectures</span>
             <span class="stat">⭐ {{ course.numReviews }}</span>
           </div>
         </div>

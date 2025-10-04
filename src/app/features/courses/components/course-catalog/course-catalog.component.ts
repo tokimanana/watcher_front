@@ -57,19 +57,18 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
 
   // Filter Options
   readonly sortOptions: FilterOption[] = [
-    { value: 'numSubscribers', label: 'Most Popular' },
-    { value: 'numReviews', label: 'Most Reviewed' },
     { value: 'publishedTimestamp', label: 'Recently Added' },
     { value: 'price', label: 'Price: Low to High' },
     { value: 'contentDuration', label: 'Duration: Short to Long' },
   ];
 
   readonly levels: FilterOption[] = [
-    { value: 'Beginner', label: 'Beginner' },
-    { value: 'Intermediate', label: 'Intermediate' },
-    { value: 'Advanced', label: 'Advanced' },
-    { value: 'All Levels', label: 'All Levels' },
-  ];
+  { value: 'All Levels', label: 'All Levels' },
+  { value: 'Beginner Level', label: 'Beginner' },
+  { value: 'Intermediate Level', label: 'Intermediate' },
+  { value: 'Expert Level', label: 'Expert' },
+  { value: 'Advanced', label: 'Advanced' },
+];
 
   readonly priceRanges: FilterOption[] = [
     { value: 'any', label: 'Any Price' },
@@ -77,6 +76,7 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
     { value: 'paid', label: 'Paid Only' },
     { value: 'under50', label: 'Under $50' },
     { value: 'under100', label: 'Under $100' },
+    { value: 'over100', label: 'Over $100' },
   ];
 
   // Computed Values
@@ -131,6 +131,7 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.setupClickListener();
     this.setupSearchDebounce();
+    this.syncSearchQuery(); // Sync search query from service
     this.loadCourses();
   }
 
@@ -166,6 +167,14 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
       .fetchCourses()
       .pipe(takeUntil(this.destroy$))
       .subscribe();
+  }
+
+  // Sync local search with service filters on init
+  private syncSearchQuery(): void {
+    const currentSearch = this.activeFilters().search;
+    if (currentSearch && currentSearch !== this.localSearchQuery()) {
+      this.localSearchQuery.set(currentSearch);
+    }
   }
 
   // Helper to update filters
@@ -221,19 +230,24 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
     this.filtersExpanded.update((v) => !v);
   }
 
-  // Filter Selections
   selectSortOption(option: string): void {
+    const sortOrder =
+      option === 'price' || option === 'contentDuration' ? 'asc' : 'desc';
+
     this.updateFilter({
       sortBy: option,
-      sortOrder: option === 'price' ? 'asc' : 'desc',
+      sortOrder: sortOrder,
     });
     this.sortDropdownOpen.set(false);
     this.currentPageIndex.set(0);
   }
 
   selectLevel(level: string): void {
-    const current = this.getCurrentLevelValue();
-    this.updateFilter({ level: current === level ? undefined : level });
+    if (level === 'All Levels') {
+      this.updateFilter({ level: undefined });
+    } else {
+      this.updateFilter({ level: level });
+    }
     this.levelDropdownOpen.set(false);
     this.currentPageIndex.set(0);
   }
@@ -253,10 +267,15 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
         updates.isPaid = true;
         break;
       case 'under50':
+        updates.isPaid = true;
         updates.maxPrice = 50;
         break;
       case 'under100':
+        updates.isPaid = true;
         updates.maxPrice = 100;
+        break;
+      case 'over100':
+        updates.minPrice = 100;
         break;
     }
 
@@ -308,7 +327,8 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
   }
 
   getCurrentSortValue(): string {
-    return this.activeFilters().sortBy || 'numSubscribers';
+    const sortBy = this.activeFilters().sortBy;
+    return sortBy || 'publishedTimestamp';
   }
 
   getCurrentLevelValue(): string | undefined {
@@ -316,12 +336,20 @@ export class CourseCatalogComponent implements OnInit, OnDestroy {
     return level ? (Array.isArray(level) ? level[0] : level) : undefined;
   }
 
+  getCurrentLevelLabel(): string {
+    const value = this.getCurrentLevelValue();
+    if (!value) return 'All Levels';
+    const option = this.levels.find((l) => l.value === value);
+    return option?.label || value;
+  }
+
   getCurrentPriceValue(): string {
     const f = this.activeFilters();
     if (f.isPaid === false) return 'free';
-    if (f.isPaid === true) return 'paid';
+    if (f.isPaid === true && !f.maxPrice && !f.minPrice) return 'paid';
     if (f.maxPrice === 50) return 'under50';
     if (f.maxPrice === 100) return 'under100';
+    if (f.minPrice === 100) return 'over100';
     return 'any';
   }
 
