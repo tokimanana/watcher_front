@@ -1,4 +1,3 @@
-@import "../../../../../assets/styles/variables";
 @import "../../../../../assets/styles/mixins";
 
 .difficulty-badge {
@@ -24,11 +23,7 @@
   }
 
   &.beginner {
-    background: linear-gradient(
-      145deg,
-      var(--color-success-light),
-      var(--color-success)
-    );
+    background: linear-gradient(145deg, var(--color-success-light), var(--color-success));
     color: var(--color-text-inverse);
     border-color: var(--color-success);
     box-shadow: 0 2px 4px rgba(143, 188, 143, 0.25);
@@ -40,11 +35,7 @@
   }
 
   &.intermediate {
-    background: linear-gradient(
-      145deg,
-      var(--color-warning-light),
-      var(--color-warning)
-    );
+    background: linear-gradient(145deg, var(--color-warning-light), var(--color-warning));
     color: var(--color-text-inverse);
     border-color: var(--color-warning);
     box-shadow: 0 2px 4px rgba(210, 105, 30, 0.25);
@@ -55,12 +46,9 @@
     }
   }
 
-  &.advanced {
-    background: linear-gradient(
-      145deg,
-      var(--color-primary),
-      var(--color-primary-dark)
-    );
+  &.advanced,
+  &.all-levels {
+    background: linear-gradient(145deg, var(--color-primary), var(--color-primary-dark));
     color: var(--color-text-inverse);
     border-color: var(--color-primary-dark);
     box-shadow: 0 2px 4px rgba(139, 69, 19, 0.25);
@@ -72,11 +60,7 @@
   }
 
   &.expert {
-    background: linear-gradient(
-      145deg,
-      var(--color-error),
-      var(--color-error-dark)
-    );
+    background: linear-gradient(145deg, var(--color-error), var(--color-error-dark));
     color: var(--color-text-inverse);
     border-color: var(--color-error-dark);
     box-shadow: 0 2px 4px rgba(205, 92, 92, 0.25);

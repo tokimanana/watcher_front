@@ -1,12 +1,19 @@
-import { Component, signal, OnInit, computed, OnDestroy } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  OnInit,
+  OnDestroy,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Course } from '../../../../core/models/course.model';
 import { Router } from '@angular/router';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { CourseHelpers } from '../../../../core/models/course.model';
+import { CourseService } from '../../services/course.service';
 import { PlatformBadgeComponent } from '../platform-badge/platform-badge.component';
-import { MockDataService } from '../../../../core/services/mock-data.service';
 import { DifficultyBadgeComponent } from '../difficulty-badge/difficulty-badge.component';
-
 
 interface FilterOption {
   value: string;
@@ -14,272 +21,347 @@ interface FilterOption {
 }
 
 @Component({
-  selector: 'app-catalog',
+  selector: 'app-course-catalog',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
     PlatformBadgeComponent,
-    DifficultyBadgeComponent
+    DifficultyBadgeComponent,
   ],
   templateUrl: './course-catalog.component.html',
-  styleUrl: './course-catalog.component.scss'
+  styleUrl: './course-catalog.component.scss',
 })
 export class CourseCatalogComponent implements OnInit, OnDestroy {
-  searchQuery = signal('');
-  sortBy = signal('mostPopular');
-  selectedPlatform = signal('all');
-  selectedDifficulty = signal('all');
-  selectedPrice = signal('any');
-  filtersExpanded = signal(false);
+  private readonly courseService = inject(CourseService);
+  private readonly router = inject(Router);
+  private readonly destroy$ = new Subject<void>();
+  private readonly searchSubject$ = new Subject<string>();
+  private clickListener?: (event: Event) => void;
 
-  sortDropdownOpen = signal(false);
-  platformDropdownOpen = signal(false);
-  difficultyDropdownOpen = signal(false);
-  priceDropdownOpen = signal(false);
+  // UI State
+  readonly localSearchQuery = signal('');
+  readonly filtersExpanded = signal(false);
+  readonly currentPageIndex = signal(0);
+  readonly itemsPerPage = signal(12);
 
-  courses = signal<Course[]>([]);
-  loading = signal(false);
+  // Dropdown States
+  readonly sortDropdownOpen = signal(false);
+  readonly levelDropdownOpen = signal(false);
+  readonly priceDropdownOpen = signal(false);
 
-  sortOptions: FilterOption[] = [
-    { value: 'mostPopular', label: 'Most Popular' },
-    { value: 'highestRated', label: 'Highest Rated' },
-    { value: 'recentlyUpdated', label: 'Recently Updated' },
-    { value: 'priceLowToHigh', label: 'Price: Low to High' },
-    { value: 'priceHighToLow', label: 'Price: High to Low' }
+  // Service State (readonly references)
+  readonly courses = this.courseService.courses;
+  readonly loading = this.courseService.loading;
+  readonly activeFilters = this.courseService.activeFilters;
+
+  // Filter Options
+  readonly sortOptions: FilterOption[] = [
+    { value: 'publishedTimestamp', label: 'Recently Added' },
+    { value: 'price', label: 'Price: Low to High' },
+    { value: 'contentDuration', label: 'Duration: Short to Long' },
   ];
 
-  platforms: FilterOption[] = [
-    { value: 'all', label: 'All Platforms' },
-    { value: 'udemy', label: 'Udemy' },
-    { value: 'coursera', label: 'Coursera' },
-    { value: 'youtube', label: 'YouTube' },
-    { value: 'freecodecamp', label: 'freeCodeCamp' }
-  ];
+  readonly levels: FilterOption[] = [
+  { value: 'All Levels', label: 'All Levels' },
+  { value: 'Beginner Level', label: 'Beginner' },
+  { value: 'Intermediate Level', label: 'Intermediate' },
+  { value: 'Expert Level', label: 'Expert' },
+  { value: 'Advanced', label: 'Advanced' },
+];
 
-  difficulties: FilterOption[] = [
-    { value: 'all', label: 'All Levels' },
-    { value: 'beginner', label: 'Beginner' },
-    { value: 'intermediate', label: 'Intermediate' },
-    { value: 'advanced', label: 'Advanced' }
-  ];
-
-  priceRanges: FilterOption[] = [
+  readonly priceRanges: FilterOption[] = [
     { value: 'any', label: 'Any Price' },
     { value: 'free', label: 'Free Only' },
     { value: 'paid', label: 'Paid Only' },
     { value: 'under50', label: 'Under $50' },
-    { value: 'under100', label: 'Under $100' }
+    { value: 'under100', label: 'Under $100' },
+    { value: 'over100', label: 'Over $100' },
   ];
 
-  // Computed values
-  totalCourses = computed(() => this.courses().length);
-  hasOpenDropdown = computed(() =>
-    this.sortDropdownOpen() ||
-    this.platformDropdownOpen() ||
-    this.difficultyDropdownOpen() ||
-    this.priceDropdownOpen()
-  );
+  // Computed Values
+  readonly totalCourses = computed(() => this.courses().length);
 
-  filteredCourses = computed(() => {
-    let filtered = [...this.courses()];
-    const query = this.searchQuery().toLowerCase();
-
-    // Apply search filter
-    if (query) {
-      filtered = filtered.filter(course =>
-        course.title.toLowerCase().includes(query) ||
-        course.instructor.toLowerCase().includes(query) ||
-        course.description.toLowerCase().includes(query) ||
-        course.technologies.some(tech => tech.toLowerCase().includes(query))
-      );
-    }
-
-    // Apply platform filter
-    if (this.selectedPlatform() !== 'all') {
-      filtered = filtered.filter(course =>
-        course.platform.toLowerCase() === this.selectedPlatform()
-      );
-    }
-
-    // Apply difficulty filter
-    if (this.selectedDifficulty() !== 'all') {
-      filtered = filtered.filter(course =>
-        course.difficulty.toLowerCase() === this.selectedDifficulty()
-      );
-    }
-
-    // Apply price filter
-    const priceFilter = this.selectedPrice();
-    if (priceFilter !== 'any') {
-      filtered = filtered.filter(course => {
-        switch (priceFilter) {
-          case 'free': return course.price === 0;
-          case 'paid': return course.price > 0;
-          case 'under50': return course.price < 50;
-          case 'under100': return course.price < 100;
-          default: return true;
-        }
-      });
-    }
-
-    // Apply sorting
-    const sortBy = this.sortBy();
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'highestRated':
-          return b.rating - a.rating;
-        case 'recentlyUpdated':
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        case 'priceLowToHigh':
-          return a.price - b.price;
-        case 'priceHighToLow':
-          return b.price - a.price;
-        case 'mostPopular':
-        default:
-          return b.reviewCount - a.reviewCount;
-      }
-    });
-
-    return filtered;
+  readonly paginatedCourses = computed(() => {
+    const allCourses = this.courses();
+    const page = this.currentPageIndex();
+    const perPage = this.itemsPerPage();
+    const start = page * perPage;
+    return allCourses.slice(start, start + perPage);
   });
 
-  private clickListener?: (event: Event) => void;
+  readonly totalPages = computed(() =>
+    Math.ceil(this.courses().length / this.itemsPerPage())
+  );
 
-  constructor(
-    private mockDataService: MockDataService,
-    private router: Router
-  ) {}
+  readonly visiblePages = computed(() => {
+    const current = this.currentPageIndex();
+    const total = this.totalPages();
+    const pages: (number | string)[] = [];
 
-  ngOnInit() {
+    if (total <= 7) {
+      for (let i = 0; i < total; i++) pages.push(i);
+      return pages;
+    }
+
+    pages.push(0);
+    if (current > 2) pages.push('...');
+
+    const start = Math.max(1, current - 1);
+    const end = Math.min(total - 2, current + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+
+    if (current < total - 3) pages.push('...');
+    if (total > 1) pages.push(total - 1);
+
+    return pages;
+  });
+
+  readonly hasActiveFilters = computed(() => {
+    const f = this.activeFilters();
+    return !!(
+      f.search ||
+      f.level ||
+      f.isPaid !== undefined ||
+      f.minPrice ||
+      f.maxPrice
+    );
+  });
+
+  ngOnInit(): void {
+    this.setupClickListener();
+    this.setupSearchDebounce();
+    this.syncSearchQuery(); // Sync search query from service
     this.loadCourses();
-    this.setupGlobalClickListener();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     if (this.clickListener) {
       document.removeEventListener('click', this.clickListener);
     }
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  private setupGlobalClickListener() {
-    this.clickListener = (event: Event) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.custom-select')) {
+  // Initialization
+  private setupClickListener(): void {
+    this.clickListener = (e: Event) => {
+      if (!(e.target as HTMLElement).closest('.custom-select')) {
         this.closeAllDropdowns();
       }
     };
     document.addEventListener('click', this.clickListener);
   }
 
-  private loadCourses() {
-    this.loading.set(true);
-    this.mockDataService.getCourses().subscribe({
-      next: (response) => {
-        this.courses.set(response.courses);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading courses:', error);
-        this.loading.set(false);
-      }
-    });
+  private setupSearchDebounce(): void {
+    this.searchSubject$
+      .pipe(debounceTime(400), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((term) => {
+        this.updateFilter({ search: term || undefined });
+        this.currentPageIndex.set(0);
+      });
   }
 
-  // Search methods
-  onSearchChange() {
-    // Filtering is handled by computed property
+  private loadCourses(): void {
+    this.courseService
+      .fetchCourses()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
   }
 
-  clearSearch() {
-    this.searchQuery.set('');
+  // Sync local search with service filters on init
+  private syncSearchQuery(): void {
+    const currentSearch = this.activeFilters().search;
+    if (currentSearch && currentSearch !== this.localSearchQuery()) {
+      this.localSearchQuery.set(currentSearch);
+    }
   }
 
-  // Dropdown methods
-  toggleSortDropdown() {
-    this.sortDropdownOpen.update(open => !open);
+  // Helper to update filters
+  private updateFilter(filter: any): void {
+    this.courseService
+      .updateFilters(filter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
+  }
+
+  // Search
+  onSearchChange(): void {
+    this.searchSubject$.next(this.localSearchQuery().trim());
+  }
+
+  clearSearch(): void {
+    this.localSearchQuery.set('');
+    this.searchSubject$.next('');
+  }
+
+  // Dropdown Controls
+  toggleSortDropdown(): void {
+    this.sortDropdownOpen.update((v) => !v);
     if (this.sortDropdownOpen()) {
-      this.platformDropdownOpen.set(false);
-      this.difficultyDropdownOpen.set(false);
+      this.levelDropdownOpen.set(false);
       this.priceDropdownOpen.set(false);
     }
   }
 
-  togglePlatformDropdown() {
-    this.platformDropdownOpen.update(open => !open);
-    if (this.platformDropdownOpen()) {
+  toggleLevelDropdown(): void {
+    this.levelDropdownOpen.update((v) => !v);
+    if (this.levelDropdownOpen()) {
       this.sortDropdownOpen.set(false);
-      this.difficultyDropdownOpen.set(false);
       this.priceDropdownOpen.set(false);
     }
   }
 
-  toggleDifficultyDropdown() {
-    this.difficultyDropdownOpen.update(open => !open);
-    if (this.difficultyDropdownOpen()) {
-      this.sortDropdownOpen.set(false);
-      this.platformDropdownOpen.set(false);
-      this.priceDropdownOpen.set(false);
-    }
-  }
-
-  togglePriceDropdown() {
-    this.priceDropdownOpen.update(open => !open);
+  togglePriceDropdown(): void {
+    this.priceDropdownOpen.update((v) => !v);
     if (this.priceDropdownOpen()) {
       this.sortDropdownOpen.set(false);
-      this.platformDropdownOpen.set(false);
-      this.difficultyDropdownOpen.set(false);
+      this.levelDropdownOpen.set(false);
     }
   }
 
-  closeAllDropdowns() {
+  closeAllDropdowns(): void {
     this.sortDropdownOpen.set(false);
-    this.platformDropdownOpen.set(false);
-    this.difficultyDropdownOpen.set(false);
+    this.levelDropdownOpen.set(false);
     this.priceDropdownOpen.set(false);
   }
 
-  // Selection handlers
-  selectSortOption(option: string) {
-    this.sortBy.set(option);
+  toggleFilters(): void {
+    this.filtersExpanded.update((v) => !v);
+  }
+
+  selectSortOption(option: string): void {
+    const sortOrder =
+      option === 'price' || option === 'contentDuration' ? 'asc' : 'desc';
+
+    this.updateFilter({
+      sortBy: option,
+      sortOrder: sortOrder,
+    });
     this.sortDropdownOpen.set(false);
+    this.currentPageIndex.set(0);
   }
 
-  selectPlatform(platform: string) {
-    this.selectedPlatform.set(platform);
-    this.platformDropdownOpen.set(false);
+  selectLevel(level: string): void {
+    if (level === 'All Levels') {
+      this.updateFilter({ level: undefined });
+    } else {
+      this.updateFilter({ level: level });
+    }
+    this.levelDropdownOpen.set(false);
+    this.currentPageIndex.set(0);
   }
 
-  selectDifficulty(difficulty: string) {
-    this.selectedDifficulty.set(difficulty);
-    this.difficultyDropdownOpen.set(false);
-  }
+  selectPrice(price: string): void {
+    const updates: any = {
+      minPrice: undefined,
+      maxPrice: undefined,
+      isPaid: undefined,
+    };
 
-  selectPrice(price: string) {
-    this.selectedPrice.set(price);
+    switch (price) {
+      case 'free':
+        updates.isPaid = false;
+        break;
+      case 'paid':
+        updates.isPaid = true;
+        break;
+      case 'under50':
+        updates.isPaid = true;
+        updates.maxPrice = 50;
+        break;
+      case 'under100':
+        updates.isPaid = true;
+        updates.maxPrice = 100;
+        break;
+      case 'over100':
+        updates.minPrice = 100;
+        break;
+    }
+
+    this.updateFilter(updates);
     this.priceDropdownOpen.set(false);
+    this.currentPageIndex.set(0);
   }
 
-  // Filter toggle methods
-  toggleFilters() {
-    this.filtersExpanded.update(expanded => !expanded);
+  clearAllFilters(): void {
+    this.localSearchQuery.set('');
+    this.currentPageIndex.set(0);
+    this.courseService.clearFilters();
+    this.loadCourses();
   }
 
-  navigateToCourse(courseId: string) {
+  // Navigation
+  navigateToCourse(courseId: string): void {
+    this.courseService.trackCourseClick(courseId).subscribe();
     this.router.navigate(['/courses', courseId]);
   }
 
-  // Clear filter methods
-  clearAllFilters() {
-    this.searchQuery.set('');
-    this.selectedPlatform.set('all');
-    this.selectedDifficulty.set('all');
-    this.selectedPrice.set('any');
-    this.sortBy.set('mostPopular');
+  // Pagination
+  goToPage(page: number | string): void {
+    if (typeof page === 'number') {
+      this.currentPageIndex.set(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
-  getSelectedOptionLabel(options: FilterOption[], selectedValue: string): string {
-    const option = options.find(opt => opt.value === selectedValue);
-    return option ? option.label : '';
+  nextPage(): void {
+    if (this.currentPageIndex() < this.totalPages() - 1) {
+      this.goToPage(this.currentPageIndex() + 1);
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPageIndex() > 0) {
+      this.goToPage(this.currentPageIndex() - 1);
+    }
+  }
+
+  isPageNumber(page: number | string): page is number {
+    return typeof page === 'number';
+  }
+
+  // Helpers
+  getSelectedOptionLabel(options: FilterOption[], value: string): string {
+    return options.find((opt) => opt.value === value)?.label || '';
+  }
+
+  getCurrentSortValue(): string {
+    const sortBy = this.activeFilters().sortBy;
+    return sortBy || 'publishedTimestamp';
+  }
+
+  getCurrentLevelValue(): string | undefined {
+    const level = this.activeFilters().level;
+    return level ? (Array.isArray(level) ? level[0] : level) : undefined;
+  }
+
+  getCurrentLevelLabel(): string {
+    const value = this.getCurrentLevelValue();
+    if (!value) return 'All Levels';
+    const option = this.levels.find((l) => l.value === value);
+    return option?.label || value;
+  }
+
+  getCurrentPriceValue(): string {
+    const f = this.activeFilters();
+    if (f.isPaid === false) return 'free';
+    if (f.isPaid === true && !f.maxPrice && !f.minPrice) return 'paid';
+    if (f.maxPrice === 50) return 'under50';
+    if (f.maxPrice === 100) return 'under100';
+    if (f.minPrice === 100) return 'over100';
+    return 'any';
+  }
+
+  formatDuration(hours: number): string {
+    return CourseHelpers.formatDuration(hours);
+  }
+
+  formatPrice(price: number, isPaid: boolean): string {
+    return CourseHelpers.formatPrice(price, isPaid);
+  }
+
+  getLevelBadgeClass(level: string): string {
+    return CourseHelpers.getLevelBadgeClass(level);
   }
 }

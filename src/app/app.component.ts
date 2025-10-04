@@ -27,6 +27,7 @@ export class AppComponent {
   readonly user = this.authService.user;
 
   logout(): void {
-    this.authService.logout().subscribe();
+    // this.authService.logout().subscribe();
+    this.authService.logout();
   }
 }

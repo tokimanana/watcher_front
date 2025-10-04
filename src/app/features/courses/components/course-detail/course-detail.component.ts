@@ -1,27 +1,15 @@
-import {
-  Component,
-  OnInit,
-  inject,
-  signal,
-  computed,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTabsModule } from '@angular/material/tabs';
-import { switchMap, tap, catchError, map, finalize, of } from 'rxjs';
+import { switchMap, tap, catchError, of } from 'rxjs';
 
-import { Course } from '../../../../core/models/course.model';
-import { Review } from '../../../../core/models/review.model';
+import { Course, CourseHelpers } from '../../../../core/models/course.model';
 import { CourseService } from '../../services/course.service';
-import { MockDataService } from '../../../../core/services/mock-data.service';
-import { StarRatingComponent } from '../../../../shared/components/ui/star-rating/star-rating.component';
-import { DifficultyColorPipe } from '../../../../shared/pipes/difficulty-color.pipe';
-import { PlatformBadgeComponent } from "../platform-badge/platform-badge.component";
+import { AuthService } from '../../../auth/services/auth.service';
+import { PlatformBadgeComponent } from '../platform-badge/platform-badge.component';
+import { DifficultyBadgeComponent } from '../difficulty-badge/difficulty-badge.component';
 
 @Component({
   selector: 'app-course-detail',
@@ -31,32 +19,25 @@ import { PlatformBadgeComponent } from "../platform-badge/platform-badge.compone
     RouterLink,
     MatButtonModule,
     MatIconModule,
-    MatCardModule,
-    MatChipsModule,
-    MatTabsModule,
-    StarRatingComponent,
-    DifficultyColorPipe,
-    PlatformBadgeComponent
-],
+    PlatformBadgeComponent,
+    DifficultyBadgeComponent,
+  ],
   templateUrl: './course-detail.component.html',
   styleUrl: './course-detail.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CourseDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private courseService = inject(CourseService);
-  private mockDataService = inject(MockDataService);
+  private authService = inject(AuthService);
 
+  // State
   course = signal<Course | null>(null);
-  courseReviews = signal<Review[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
-  activeTab = signal(0);
 
-  recommendedCourses = signal<Course[]>([]);
-
-  ratingDistribution = computed(() => this.calculateRatingDistribution());
+  // Computed
+  isAuthenticated = computed(() => this.authService.isAuthenticated());
 
   ngOnInit() {
     this.route.paramMap
@@ -67,7 +48,12 @@ export class CourseDetailComponent implements OnInit {
             throw new Error('Course ID is required');
           }
 
-          this.mockDataService.incrementClickCount(courseId).subscribe();
+          // Track click si authentifié
+          if (this.isAuthenticated()) {
+            this.courseService.trackCourseClick(courseId).subscribe({
+              error: (err) => console.warn('Click tracking failed:', err),
+            });
+          }
 
           return this.courseService.getCourseById(courseId).pipe(
             tap((course) => {
@@ -75,109 +61,53 @@ export class CourseDetailComponent implements OnInit {
                 throw new Error('Course not found');
               }
               this.course.set(course);
+              this.loading.set(false);
             }),
             catchError((err) => {
               console.error('Error loading course:', err);
-              this.error.set(
-                'Course not found or unable to load course details.'
-              );
+              this.error.set('Course not found or unable to load details.');
+              this.loading.set(false);
               return of(null);
-            })
-          );
-        }),
-        switchMap((course) => {
-          if (!course) {
-            return of({ reviews: [], recommendations: [] });
-          }
-
-          return of(null).pipe(
-            switchMap(() => {
-              const reviews$ = this.mockDataService
-                .getReviewsForCourse(course.id)
-                .pipe(catchError(() => of([])));
-
-              const recommendations$ = this.mockDataService
-                .getRecommendedCourses(
-                  'current-user-id', // Replace with actual user ID when auth is implemented
-                  4
-                )
-                .pipe(catchError(() => of([])));
-
-              return of({}).pipe(
-                switchMap(() =>
-                  reviews$.pipe(
-                    map((reviews) => ({
-                      reviews,
-                      recommendations: [] as Course[],
-                    }))
-                  )
-                ),
-                switchMap((data) =>
-                  recommendations$.pipe(
-                    map((recommendations) => ({
-                      reviews: data.reviews,
-                      recommendations,
-                    }))
-                  )
-                )
-              );
             })
           );
         })
       )
-      .subscribe({
-        next: (data) => {
-          this.courseReviews.set(data.reviews);
-          this.recommendedCourses.set(data.recommendations);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          console.error('Subscription error:', err);
-          this.error.set('Failed to load course data. Please try again.');
-          this.loading.set(false);
-        },
-      });
+      .subscribe();
   }
 
   goToCourse() {
-    if (this.course()) {
-      window.open(this.course()!.url, '_blank');
+    const course = this.course();
+    if (course) {
+      window.open(course.url, '_blank');
     }
-  }
-
-  navigateToCourse(courseId: string) {
-    this.router.navigate(['/courses', courseId]);
   }
 
   goBack() {
     this.router.navigate(['/courses']);
   }
 
-  writeReview() {
-    if (this.course()) {
-      this.router.navigate(['/reviews/new'], {
-        queryParams: { courseId: this.course()!.id },
-      });
-    }
+  // Helpers
+  formatDuration(hours: number): string {
+    return CourseHelpers.formatDuration(hours);
   }
 
-  private calculateRatingDistribution(): {
-    rating: number;
-    count: number;
-    percentage: number;
-  }[] {
-    const reviews = this.courseReviews();
-    if (!reviews.length) return [];
+  formatPrice(price: number, isPaid: boolean): string {
+    return CourseHelpers.formatPrice(price, isPaid);
+  }
 
-    return [5, 4, 3, 2, 1].map((rating) => {
-      const count = reviews.filter(
-        (r) => Math.round(r.rating) === rating
-      ).length;
-      return {
-        rating,
-        count,
-        percentage: Math.round((count / reviews.length) * 100),
-      };
+  getLevelBadgeClass(level: string): string {
+    return CourseHelpers.getLevelBadgeClass(level);
+  }
+
+  formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
+  }
+
+  formatNumber(num: number): string {
+    return num.toLocaleString();
   }
 }
