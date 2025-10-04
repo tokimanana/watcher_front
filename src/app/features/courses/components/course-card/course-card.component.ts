@@ -4,8 +4,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
-import { Course } from '../../../../core/models/course.model';
-import { StarRatingComponent } from '../../../../shared/components/ui/star-rating/star-rating.component';
+import { Course, CourseHelpers } from '../../../../core/models/course.model';
 import { DifficultyBadgeComponent } from '../difficulty-badge/difficulty-badge.component';
 import { PlatformBadgeComponent } from '../platform-badge/platform-badge.component';
 
@@ -16,7 +15,6 @@ import { PlatformBadgeComponent } from '../platform-badge/platform-badge.compone
     CommonModule,
     MatIconModule,
     MatButtonModule,
-    StarRatingComponent,
     DifficultyBadgeComponent,
     PlatformBadgeComponent,
   ],
@@ -36,8 +34,22 @@ export class CourseCardComponent {
 
   navigateToExternalCourse(event: Event): void {
     event.stopPropagation();
-    // Track click before navigating to external site
-    console.log('External course click tracked:', this.course().title);
     window.open(this.course().url, '_blank');
+  }
+
+  formatDuration(hours: number): string {
+    return CourseHelpers.formatDuration(hours);
+  }
+
+  formatPrice(price: number, isPaid: boolean): string {
+    return CourseHelpers.formatPrice(price, isPaid);
+  }
+
+  getLevelBadgeClass(level: string): string {
+    return CourseHelpers.getLevelBadgeClass(level);
+  }
+
+  formatNumber(num: number): string {
+    return num.toLocaleString();
   }
 }

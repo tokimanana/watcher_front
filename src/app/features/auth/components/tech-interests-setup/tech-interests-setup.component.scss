@@ -115,6 +115,8 @@
   // Catégories - styles essentiels uniquement
   .tech-categories {
     margin-bottom: var(--spacing-xl);
+    max-height: 70vh;
+    overflow-y: auto;
 
     .category-panel {
       border: 1px solid rgba(139, 69, 19, 0.1);

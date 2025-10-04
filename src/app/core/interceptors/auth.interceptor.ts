@@ -1,99 +1,46 @@
-import {
-  HttpInterceptorFn,
-  HttpRequest,
-  HttpHandlerFn,
-  HttpEvent,
-  HttpErrorResponse,
-} from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import {
-  catchError,
-  filter,
-  take,
-  switchMap,
-  finalize,
-  map,
-} from 'rxjs/operators';
 import { inject } from '@angular/core';
-import { AuthService } from '../../features/auth/services/auth.service';
-import { StorageService } from '../../core/services/storage.service';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { catchError, throwError } from 'rxjs';
+import { StorageService } from '../services/storage.service';
+import { Router } from '@angular/router';
 
-let isRefreshing = false;
-const refreshTokenSubject = new BehaviorSubject<string | null>(null);
-
-export const authInterceptor: HttpInterceptorFn = (
-  req: HttpRequest<unknown>,
-  next: HttpHandlerFn
-) => {
-  const authService = inject(AuthService);
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const storageService = inject(StorageService);
+  const router = inject(Router);
 
-  if (
-    req.url.includes('/auth/login') ||
-    req.url.includes('/auth/register') ||
-    req.url.includes('/public/')
-  ) {
+  // Skip token for public endpoints
+  const isPublicEndpoint =
+    req.url.includes('/authenticate') ||
+    (req.url.includes('/users') && req.method === 'POST'); // Registration
+
+  if (isPublicEndpoint) {
     return next(req);
   }
 
+  // Add token to request if available
   const token = storageService.getAccessToken();
 
   if (token) {
-    req = addTokenToRequest(req, token);
+    req = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 
   return next(req).pipe(
-    catchError((error) => {
-      if (error instanceof HttpErrorResponse && error.status === 401) {
-        return handle401Error(req, next, authService);
+    catchError((error: HttpErrorResponse) => {
+      // Handle 401 errors - token expired or invalid
+      if (error.status === 401) {
+        // TODO: When backend implements /refresh-token, add refresh logic here
+        // For now, just clear storage and redirect to login
+        storageService.clearAll();
+        router.navigate(['/auth/login'], {
+          queryParams: { returnUrl: router.url },
+        });
       }
 
       return throwError(() => error);
     })
   );
 };
-
-function addTokenToRequest(
-  request: HttpRequest<unknown>,
-  token: string
-): HttpRequest<unknown> {
-  return request.clone({
-    setHeaders: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-}
-
-function handle401Error(
-  request: HttpRequest<unknown>,
-  next: HttpHandlerFn,
-  authService: AuthService
-): Observable<HttpEvent<unknown>> {
-  if (!isRefreshing) {
-    isRefreshing = true;
-    refreshTokenSubject.next(null);
-
-    return authService.refreshToken().pipe(
-      map((authResponse) => authResponse.accessToken),
-      switchMap((token) => {
-        refreshTokenSubject.next(token);
-        return next(addTokenToRequest(request, token));
-      }),
-      catchError((error) => {
-        authService.logout();
-        return throwError(() => error);
-      }),
-      finalize(() => {
-        isRefreshing = false;
-      })
-    );
-  } else {
-    return refreshTokenSubject.pipe(
-      filter((token) => token !== null),
-      take(1),
-      switchMap((token) => {
-        return next(addTokenToRequest(request, token!));
-      })
-    );
-  }
-}

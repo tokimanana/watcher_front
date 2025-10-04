@@ -6,9 +6,13 @@ import {
   HttpParams,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map, timeout } from 'rxjs/operators';
+import { catchError, map, timeout, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../models/api-response.model';
+
+export interface MetaHandler {
+  handleMeta(meta: Record<string, any> | undefined): void;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +22,8 @@ export class BaseApiService {
   protected readonly defaultTimeout: number = 30000;
 
   protected readonly http = inject(HttpClient);
+
+  protected metaHandler?: MetaHandler;
 
   constructor() {}
 
@@ -36,6 +42,7 @@ export class BaseApiService {
       .get<ApiResponse<T>>(`${this.apiUrl}/${endpoint}`, options)
       .pipe(
         timeout(timeoutMs || this.defaultTimeout),
+        tap((response) => this.processMeta(response)),
         map((response) => this.extractData<T>(response)),
         catchError((error) => this.handleError(error))
       );
@@ -55,6 +62,7 @@ export class BaseApiService {
       })
       .pipe(
         timeout(timeoutMs || this.defaultTimeout),
+        tap((response) => this.processMeta(response)),
         map((response) => this.extractData<T>(response)),
         catchError((error) => this.handleError(error))
       );
@@ -74,6 +82,7 @@ export class BaseApiService {
       })
       .pipe(
         timeout(timeoutMs || this.defaultTimeout),
+        tap((response) => this.processMeta(response)),
         map((response) => this.extractData<T>(response)),
         catchError((error) => this.handleError(error))
       );
@@ -93,6 +102,7 @@ export class BaseApiService {
       })
       .pipe(
         timeout(timeoutMs || this.defaultTimeout),
+        tap((response) => this.processMeta(response)),
         map((response) => this.extractData<T>(response)),
         catchError((error) => this.handleError(error))
       );
@@ -113,9 +123,16 @@ export class BaseApiService {
       .delete<ApiResponse<T>>(`${this.apiUrl}/${endpoint}`, options)
       .pipe(
         timeout(timeoutMs || this.defaultTimeout),
+        tap((response) => this.processMeta(response)),
         map((response) => this.extractData<T>(response)),
         catchError((error) => this.handleError(error))
       );
+  }
+
+  private processMeta(response: ApiResponse<any> | any): void {
+    if (this.isApiResponse(response) && response.meta && this.metaHandler) {
+      this.metaHandler.handleMeta(response.meta);
+    }
   }
 
   private extractData<T>(response: ApiResponse<T> | T): T {
@@ -126,12 +143,14 @@ export class BaseApiService {
   }
 
   private isApiResponse<T>(response: any): response is ApiResponse<T> {
+    // More flexible check - only require the essential fields
     return (
       response &&
       typeof response === 'object' &&
       'data' in response &&
       'success' in response &&
       'message' in response
+      // Removed 'code' requirement to match old version
     );
   }
 
@@ -144,9 +163,14 @@ export class BaseApiService {
       errorCode = 'CLIENT_ERROR';
     } else {
       errorCode = error.status;
-      // Essayer d'extraire le message d'erreur du format API
+
+      // Try to extract error message from API response format
       if (error.error && this.isApiResponse(error.error)) {
         errorMessage = error.error.message;
+        // Use code from response if available
+        if ('code' in error.error) {
+          errorCode = error.error.code;
+        }
       } else if (error.error && error.error.message) {
         errorMessage = error.error.message;
       } else {
@@ -240,10 +264,6 @@ export class BaseApiService {
     return `${this.apiUrl}/${endpoint}`;
   }
 
-  /**
-   * Crée un chemin d'URL avec des paramètres
-   * Exemple: createUrlWithParams('users', '123', 'courses') => 'users/123/courses'
-   */
   protected createUrlWithParams(...parts: (string | number)[]): string {
     return parts
       .filter((part) => part !== null && part !== undefined && part !== '')

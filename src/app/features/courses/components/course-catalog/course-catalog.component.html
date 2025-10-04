@@ -1,30 +1,27 @@
 <div class="catalog-container">
-  <!-- Header Section -->
+  <!-- Header -->
   <div class="catalog-header">
     <h1>Course Catalog</h1>
     <p class="catalog-subtitle">
-      Browse {{ filteredCourses().length }} of {{ totalCourses() }} courses
+      @if (loading()) { Loading courses... } @else { Showing
+      {{ paginatedCourses().length }} of {{ totalCourses() }} courses }
     </p>
   </div>
 
-  <!-- Search & Filter Section -->
+  <!-- Search & Filters -->
   <div class="search-filters">
     <!-- Search Bar -->
     <div class="search-container">
       <input
         type="text"
         class="search-input"
-        placeholder="Search for courses, instructors, or technologies..."
-        [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event); onSearchChange()"
+        placeholder="Search courses..."
+        [ngModel]="localSearchQuery()"
+        (ngModelChange)="localSearchQuery.set($event); onSearchChange()"
       />
-      <button
-        *ngIf="searchQuery()"
-        class="clear-search-btn"
-        (click)="clearSearch()"
-      >
-        <span class="icon">×</span>
-      </button>
+      @if (localSearchQuery()) {
+      <button class="clear-search-btn" (click)="clearSearch()">×</button>
+      }
       <span class="search-icon">🔍</span>
     </div>
 
@@ -33,39 +30,24 @@
       <!-- Sort Dropdown -->
       <div class="custom-select" (click)="$event.stopPropagation()">
         <button class="select-button" (click)="toggleSortDropdown()">
-          <span>{{ getSelectedOptionLabel(sortOptions, sortBy()) }}</span>
+          <span>{{
+            getSelectedOptionLabel(sortOptions, getCurrentSortValue())
+          }}</span>
           <span class="icon">▼</span>
         </button>
-        <div class="select-dropdown" *ngIf="sortDropdownOpen()">
+        @if (sortDropdownOpen()) {
+        <div class="select-dropdown">
+          @for (option of sortOptions; track option.value) {
           <div
-            *ngFor="let option of sortOptions"
             class="select-option"
-            [class.selected]="sortBy() === option.value"
+            [class.selected]="getCurrentSortValue() === option.value"
             (click)="selectSortOption(option.value)"
           >
             {{ option.label }}
           </div>
+          }
         </div>
-      </div>
-
-      <!-- Platform Dropdown -->
-      <div class="custom-select" (click)="$event.stopPropagation()">
-        <button class="select-button" (click)="togglePlatformDropdown()">
-          <span>{{
-            getSelectedOptionLabel(platforms, selectedPlatform())
-          }}</span>
-          <span class="icon">▼</span>
-        </button>
-        <div class="select-dropdown" *ngIf="platformDropdownOpen()">
-          <div
-            *ngFor="let option of platforms"
-            class="select-option"
-            [class.selected]="selectedPlatform() === option.value"
-            (click)="selectPlatform(option.value)"
-          >
-            {{ option.label }}
-          </div>
-        </div>
+        }
       </div>
 
       <!-- Advanced Filters Toggle -->
@@ -75,111 +57,162 @@
       </button>
     </div>
 
-    <!-- Advanced Filters (expandable) -->
-    <div class="advanced-filters" *ngIf="filtersExpanded()">
+    <!-- Advanced Filters -->
+    @if (filtersExpanded()) {
+    <div class="advanced-filters">
       <div class="filter-row">
-        <!-- Difficulty Dropdown -->
+        <!-- Level Dropdown -->
         <div class="custom-select" (click)="$event.stopPropagation()">
-          <button class="select-button" (click)="toggleDifficultyDropdown()">
-            <span>{{
-              getSelectedOptionLabel(difficulties, selectedDifficulty())
-            }}</span>
+          <button class="select-button" (click)="toggleLevelDropdown()">
+            <span>{{ getCurrentLevelLabel() }}</span>
             <span class="icon">▼</span>
           </button>
-          <div class="select-dropdown" *ngIf="difficultyDropdownOpen()">
+          @if (levelDropdownOpen()) {
+          <div class="select-dropdown">
+            @for (option of levels; track option.value) {
             <div
-              *ngFor="let option of difficulties"
               class="select-option"
-              [class.selected]="selectedDifficulty() === option.value"
-              (click)="selectDifficulty(option.value)"
+              [class.selected]="getCurrentLevelValue() === option.value"
+              (click)="selectLevel(option.value)"
             >
               {{ option.label }}
             </div>
+            }
           </div>
+          }
         </div>
 
         <!-- Price Range Dropdown -->
         <div class="custom-select" (click)="$event.stopPropagation()">
           <button class="select-button" (click)="togglePriceDropdown()">
             <span>{{
-              getSelectedOptionLabel(priceRanges, selectedPrice())
+              getSelectedOptionLabel(priceRanges, getCurrentPriceValue())
             }}</span>
             <span class="icon">▼</span>
           </button>
-          <div class="select-dropdown" *ngIf="priceDropdownOpen()">
+          @if (priceDropdownOpen()) {
+          <div class="select-dropdown">
+            @for (option of priceRanges; track option.value) {
             <div
-              *ngFor="let option of priceRanges"
               class="select-option"
-              [class.selected]="selectedPrice() === option.value"
+              [class.selected]="getCurrentPriceValue() === option.value"
               (click)="selectPrice(option.value)"
             >
               {{ option.label }}
             </div>
+            }
           </div>
+          }
         </div>
 
         <!-- Clear Filters -->
-        <button
-          class="clear-filters-btn"
-          *ngIf="
-            searchQuery() ||
-            selectedPlatform() !== 'all' ||
-            selectedDifficulty() !== 'all' ||
-            selectedPrice() !== 'any'
-          "
-          (click)="clearAllFilters()"
-        >
+        @if (hasActiveFilters()) {
+        <button class="clear-filters-btn" (click)="clearAllFilters()">
           Clear All
         </button>
+        }
       </div>
     </div>
+    }
   </div>
 
   <!-- Loading State -->
-  <div class="loading-state" *ngIf="loading()">
+  @if (loading()) {
+  <div class="loading-state">
     <div class="spinner"></div>
     <p>Loading courses...</p>
   </div>
+  }
 
   <!-- Course Grid -->
-  <div class="course-grid" *ngIf="!loading()">
-    <div
-      *ngFor="let course of filteredCourses()"
-      class="course-card"
-      (click)="navigateToCourse(course.id)"
-    >
+  @if (!loading()) {
+  <div class="course-grid">
+    @for (course of paginatedCourses(); track course.id) {
+    <div class="course-card" (click)="navigateToCourse(course.id)">
       <div class="course-img">
-        <img
-          [src]="course.imageUrl || 'assets/images/course-placeholder.jpg'"
-          [alt]="course.title"
-        />
+        <img [src]="course.imageUrl" [alt]="course.title" />
       </div>
       <div class="course-content">
         <div class="course-platform">
           <app-platform-badge [platform]="course.platform"></app-platform-badge>
         </div>
         <h3 class="course-title">{{ course.title }}</h3>
-        <div class="course-instructor">{{ course.instructor }}</div>
         <div class="course-meta">
-          <div class="rating">★ {{ course.rating.toFixed(1) }}</div>
-          <app-difficulty-badge [level]="course.difficulty"></app-difficulty-badge>
+          <div class="meta-item">
+            <span class="meta-label">Duration:</span>
+            <span class="meta-value">{{
+              formatDuration(course.contentDuration)
+            }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Level:</span>
+            <app-difficulty-badge
+              [level]="getLevelBadgeClass(course.level)"
+            ></app-difficulty-badge>
+          </div>
         </div>
-        <div class="course-price">
-          {{ course.price === 0 ? "Free" : "$" + course.price.toFixed(2) }}
+        <div class="course-footer">
+          <div class="course-price">
+            {{ formatPrice(course.price, course.isPaid) }}
+          </div>
+          <div class="course-stats">
+            <span class="stat">📚 {{ course.numLectures }} lectures</span>
+            <span class="stat">⭐ {{ course.numReviews }}</span>
+          </div>
         </div>
       </div>
     </div>
+    }
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="filteredCourses().length === 0">
+    @if (paginatedCourses().length === 0) {
+    <div class="empty-state">
       <div class="empty-icon">🔍</div>
       <h3>No courses found</h3>
-      <p>
-        Try adjusting your search or filters to find what you're looking for.
-      </p>
+      <p>Try adjusting your search or filters.</p>
       <button class="reset-btn" (click)="clearAllFilters()">
         Reset Filters
       </button>
     </div>
+    }
   </div>
+  }
+
+  <!-- Professional Pagination -->
+  @if (!loading() && totalPages() > 1) {
+  <div class="pagination">
+    <button
+      class="pagination-btn"
+      [disabled]="currentPageIndex() === 0"
+      (click)="previousPage()"
+      aria-label="Previous page"
+    >
+      ← Previous
+    </button>
+
+    <div class="pagination-pages">
+      @for (page of visiblePages(); track $index) { @if (isPageNumber(page)) {
+      <button
+        class="pagination-page"
+        [class.active]="currentPageIndex() === page"
+        (click)="goToPage(page)"
+        [attr.aria-label]="'Go to page ' + (page + 1)"
+      >
+        {{ page + 1 }}
+      </button>
+      } @else {
+      <span class="pagination-ellipsis">{{ page }}</span>
+      } }
+    </div>
+
+    <button
+      class="pagination-btn"
+      [disabled]="currentPageIndex() === totalPages() - 1"
+      (click)="nextPage()"
+      aria-label="Next page"
+    >
+      Next →
+    </button>
+  </div>
+  }
 </div>

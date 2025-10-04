@@ -184,8 +184,8 @@ course-review-frontend/
     │       ├── _components.scss    # Component-specific styles
     │       └── _utilities.scss     # Utility classes (spacing, colors, layout)
     ├── environments/
-    │   ├── environment.ts          # Development config (useMockData: true)
-    │   └── environment.prod.ts     # Production config (useMockData: false)
+    │   ├── environment.ts          
+    │   └── environment.prod.ts     
     └── app/
         ├── app.component.html      # Root component template
         ├── app.component.scss      # Root component styles
@@ -516,7 +516,7 @@ course-review-frontend/
             │       ├── recommendation.service.ts
             │       └── tracking.service.ts
             │
-            └── theme/              # Theme system (Ticket-9)
+            └── theme/              # Theme system
                 ├── theme.routes.ts # Optional: for showcase page
                 ├── components/
                 │   ├── theme-toggle/
@@ -546,7 +546,7 @@ course-review-frontend/
 
 ### 3. **Created New Feature Modules**
 - `recommendations/` for recommendation engine logic
-- `theme/` for your Ticket-9 theme system
+- `theme/` 
 
 ### 4. **Simplified Service Distribution**
 - Core services (API, storage, notifications) in `core/`
@@ -558,7 +558,6 @@ course-review-frontend/
 - `shared/` for reusable UI components and utilities  
 - `features/` for business domain logic
 
-This structure scales well as your platform grows and makes it easier for teams to work on specific domains without conflicts.
 ```
 
 ---
@@ -581,7 +580,7 @@ We welcome contributions! Please follow these steps:
 
 1. **Fork the repository**
 2. **Create a feature branch** from dev (`git checkout -b feature/amazing-feature`)
-3. **Commit your changes** (`git commit -m 'Add amazing feature'`)
+3. **Commit changes** (`git commit -m 'Add amazing feature'`)
 4. **Push to the branch** (`git push origin feature/amazing-feature`)
 5. **Open a Pull Request** to dev branch
 
